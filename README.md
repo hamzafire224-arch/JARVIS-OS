@@ -35,8 +35,8 @@
 ### Step 1: Install
 
 ```bash
-git clone https://github.com/yourusername/JARVIS.git
-cd JARVIS
+git clone https://github.com/hamzafire224-arch/JARVIS-OS.git
+cd JARVIS-OS
 npm install
 ```
 
@@ -53,7 +53,7 @@ Edit `.env` and add your API key:
 GEMINI_API_KEY=your_key_here
 
 # Choose your mode
-JARVIS_VARIANT=balanced   # or 'productivity'
+JARVIS_VARIANT=productivity   # or 'balanced'
 ```
 
 **Get a free Gemini API key:** https://aistudio.google.com/apikey
@@ -78,7 +78,7 @@ npm start
 
 ## 🎯 Configuration Modes
 
-### Productivity Mode
+### Balanced Mode
 *For everyday automation on a $5/month VPS or old laptop*
 
 - ✅ Morning briefings & email triage
@@ -87,20 +87,20 @@ npm start
 - ⚠️ Limited terminal access (safe operations only)
 
 ```env
-JARVIS_VARIANT=productivity
+JARVIS_VARIANT=balanced
 ```
 
-### Balanced Mode
+### Productivity Mode
 *For developers who want an AI teammate*
 
-- ✅ Everything in Productivity, plus:
+- ✅ Everything in Balanced, plus:
 - ✅ Multi-agent delegation (Coder, Researcher, Calendar agents)
 - ✅ Full terminal and filesystem access
 - ✅ Git operations and CI/CD monitoring
 - ✅ Code generation and execution
 
 ```env
-JARVIS_VARIANT=balanced
+JARVIS_VARIANT=productivity
 ```
 
 ---

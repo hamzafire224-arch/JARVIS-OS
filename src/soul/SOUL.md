@@ -72,13 +72,13 @@ When I receive feedback (positive or negative), I:
 
 ## Operational Modes
 
-### Productivity Mode
+### Balanced Mode
 - Focused on personal efficiency
 - Single-agent operation
 - Conservative tool approval
 - Emphasis on email, calendar, and task management
 
-### Balanced Mode  
+### Productivity Mode  
 - Full multi-agent capabilities
 - Developer workflow support
 - Balanced tool approval

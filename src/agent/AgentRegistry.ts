@@ -1,7 +1,7 @@
 /**
  * JARVIS Agent Registry
  * 
- * Multi-agent routing system for the balanced variant:
+ * Multi-agent routing system for the productivity variant:
  * - Registers specialized sub-agents
  * - Routes requests based on intent classification
  * - Provides context isolation between agents
@@ -12,7 +12,7 @@ import type { Agent } from './Agent.js';
 import type { AgentMetadata, AgentType } from './types.js';
 import { logger } from '../utils/logger.js';
 import { AgentNotFoundError } from '../utils/errors.js';
-import { isBalancedVariant } from '../config/index.js';
+import { isProductivityVariant } from '../config/index.js';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Intent Classification
@@ -248,8 +248,8 @@ export class AgentRouter {
      * Route a message to the appropriate agent
      */
     route(message: string): { agent: Agent; intent: Intent } {
-        // In productivity variant, always use main agent
-        if (!isBalancedVariant()) {
+        // In balanced variant (lightweight), always use main agent
+        if (!isProductivityVariant()) {
             return {
                 agent: this.registry.get(this.defaultAgentName),
                 intent: { category: 'general', confidence: 1, keywords: [] },
@@ -326,7 +326,7 @@ export interface SubAgentInitOptions {
 }
 
 /**
- * Initialize and register all agents for the balanced variant.
+ * Initialize and register all agents for the productivity variant.
  * Creates MainAgent + specialized sub-agents.
  */
 export function initializeAgents(options: SubAgentInitOptions = {}): {
@@ -344,8 +344,8 @@ export function initializeAgents(options: SubAgentInitOptions = {}): {
     });
     registry.register(mainAgent);
 
-    // Only register sub-agents in balanced variant
-    if (isBalancedVariant()) {
+    // Only register sub-agents in productivity variant (full power)
+    if (isProductivityVariant()) {
         // Create and register CoderAgent
         const coderAgent = new CoderAgent({
             memory: options.memory,
@@ -369,11 +369,11 @@ export function initializeAgents(options: SubAgentInitOptions = {}): {
         });
         registry.register(personalAgent);
 
-        logger.agent('Initialized balanced variant with sub-agents', {
+        logger.agent('Initialized productivity variant with sub-agents', {
             agents: registry.getAllMetadata().map(m => m.name),
         });
     } else {
-        logger.agent('Initialized productivity variant (single agent)');
+        logger.agent('Initialized balanced variant (single agent)');
     }
 
     return { mainAgent, registry, router };

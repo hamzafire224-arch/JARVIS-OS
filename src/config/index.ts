@@ -2,8 +2,8 @@
  * JARVIS Agent Configuration
  * 
  * Centralized configuration management with dual-variant support:
- * - Productivity: Single-agent, low resource, conservative approval
- * - Balanced: Multi-agent routing, high resource, balanced approval
+ * - Balanced: Single-agent, low resource, conservative approval
+ * - Productivity: Multi-agent routing, high resource, full approval
  */
 
 import { config } from 'dotenv';
@@ -24,7 +24,7 @@ const LogOutput = z.enum(['console', 'file', 'both']);
 
 const ConfigSchema = z.object({
     // Variant Selection
-    variant: JarvisVariant.default('balanced'),
+    variant: JarvisVariant.default('productivity'),
 
     // LLM Provider Keys
     providers: z.object({
@@ -92,7 +92,7 @@ function parseProviderPriority(envValue: string | undefined): ProviderName[] {
 
 function loadConfigFromEnv(): JarvisConfig {
     const rawConfig = {
-        variant: process.env['JARVIS_VARIANT'] || 'balanced',
+        variant: process.env['JARVIS_VARIANT'] || 'productivity',
 
         providers: {
             anthropic: {
@@ -145,8 +145,8 @@ function loadConfigFromEnv(): JarvisConfig {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function applyVariantDefaults(config: JarvisConfig): JarvisConfig {
-    if (config.variant === 'productivity') {
-        // Productivity variant: Conservative, single-agent optimized
+    if (config.variant === 'balanced') {
+        // Balanced variant: Conservative, single-agent optimized (lightweight)
         return {
             ...config,
             toolApproval: {
@@ -157,14 +157,14 @@ function applyVariantDefaults(config: JarvisConfig): JarvisConfig {
                 ollama: {
                     ...config.providers.ollama,
                     model: config.providers.ollama.model === 'llama3:70b'
-                        ? 'llama3:8b' // Downgrade for productivity
+                        ? 'llama3:8b' // Downgrade for balanced (lightweight)
                         : config.providers.ollama.model,
                 },
             },
         };
     }
 
-    // Balanced variant: Multi-agent, high-resource
+    // Productivity variant: Multi-agent, high-resource (full power)
     return config;
 }
 
@@ -191,10 +191,12 @@ export function reloadConfig(): JarvisConfig {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export function isProductivityVariant(): boolean {
+    // Heavyweight = full power mode with multi-agent routing
     return getConfig().variant === 'productivity';
 }
 
 export function isBalancedVariant(): boolean {
+    // Lightweight = lightweight mode with single-agent
     return getConfig().variant === 'balanced';
 }
 

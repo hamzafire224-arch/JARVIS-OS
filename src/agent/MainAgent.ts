@@ -122,8 +122,8 @@ export class MainAgent extends Agent {
             messagePreview: userMessage.slice(0, 100),
         });
 
-        // In balanced variant, route to specialized agents based on intent
-        if (this.variant === 'balanced') {
+        // In productivity variant (full power), route to specialized agents based on intent
+        if (this.variant === 'productivity') {
             const delegation = await this.attemptDelegation(userMessage);
             if (delegation) {
                 return delegation;
