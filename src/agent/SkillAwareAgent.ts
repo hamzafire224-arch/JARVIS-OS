@@ -20,7 +20,7 @@ export interface SkillAwareAgentOptions extends Omit<AgentOptions, 'name' | 'sys
     workspaceDir?: string;
     userId?: string;
     sessionId?: string;
-    skillCategories?: Array<'filesystem' | 'terminal' | 'web' | 'memory' | 'system'>;
+    skillCategories?: Array<'filesystem' | 'terminal' | 'web' | 'memory' | 'system' | 'github' | 'database'>;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -63,7 +63,7 @@ export class SkillAwareAgent extends Agent {
      */
     private registerSkillTools(): void {
         for (const category of this.skillCategories) {
-            const skills = this.skillRegistry.getByCategory(category as 'filesystem' | 'terminal' | 'web' | 'memory' | 'system');
+            const skills = this.skillRegistry.getByCategory(category as 'filesystem' | 'terminal' | 'web' | 'memory' | 'system' | 'github' | 'database');
 
             for (const skill of skills) {
                 const toolDef = skill.getToolDefinition();
@@ -121,7 +121,7 @@ export interface CreateSkillAgentOptions {
     sessionId?: string;
     memory?: string;
     onApprovalRequired?: ApprovalCallback;
-    skillCategories?: Array<'filesystem' | 'terminal' | 'web' | 'memory' | 'system'>;
+    skillCategories?: Array<'filesystem' | 'terminal' | 'web' | 'memory' | 'system' | 'github' | 'database'>;
 }
 
 const DEFAULT_JARVIS_PROMPT = `You are JARVIS, an advanced AI assistant with access to various tools for interacting with the filesystem, terminal, and web.

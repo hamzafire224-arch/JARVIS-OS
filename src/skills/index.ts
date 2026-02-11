@@ -16,6 +16,19 @@ export {
     type SkillHandler,
 } from './Skill.js';
 
+// Skill Marketplace
+export {
+    SkillMarketplace,
+    getSkillMarketplace,
+    initializeSkillMarketplace,
+    resetSkillMarketplace,
+    type SkillMetadata as MarketplaceSkillMetadata,
+    type SkillCategory as MarketplaceSkillCategory,
+    type SkillSearchResult,
+    type InstalledSkill,
+    type MarketplaceConfig,
+} from './SkillMarketplace.js';
+
 // Filesystem skills
 export {
     ReadFileSkill,
@@ -64,6 +77,25 @@ export {
     closeAllBrowserSessions,
 } from './BrowserSkills.js';
 
+// Database skills
+export {
+    DatabaseSkills,
+    SQLiteProvider,
+    PostgreSQLProvider,
+    getDatabaseSkills,
+    createDatabaseSkills,
+    resetDatabaseSkills,
+    connectSQLite,
+    type DatabaseConfig,
+    type QueryResult,
+    type TableInfo,
+    type ColumnInfo,
+    type DatabaseProvider,
+} from './DatabaseSkills.js';
+
+// GitHub skills
+export { GitHubSkills } from './GitHubSkills.js';
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // Skill Initialization
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -73,6 +105,8 @@ import { ReadFileSkill, WriteFileSkill, ListDirectorySkill, SearchFilesSkill, De
 import { RunCommandSkill, StartBackgroundCommandSkill, CheckBackgroundCommandSkill, StopBackgroundCommandSkill } from './TerminalSkills.js';
 import { HttpFetchSkill, ReadWebpageSkill, WebSearchSkill, DownloadFileSkill } from './WebSkills.js';
 import { getBrowserSkills } from './BrowserSkills.js';
+import { getDatabaseSkills } from './DatabaseSkills.js';
+import { GitHubSkills, getGitHubSkills } from './GitHubSkills.js';
 import { logger } from '../utils/logger.js';
 
 export interface SkillInitOptions {
@@ -80,6 +114,8 @@ export interface SkillInitOptions {
     enableTerminal?: boolean;
     enableWeb?: boolean;
     enableBrowser?: boolean;
+    enableGitHub?: boolean;
+    enableDatabase?: boolean;
 }
 
 /**
@@ -88,11 +124,13 @@ export interface SkillInitOptions {
 export function initializeSkills(options: SkillInitOptions = {}): SkillRegistry {
     const registry = getSkillRegistry();
 
-    // Default to all enabled (except browser which requires Playwright)
+    // Default to all enabled (except browser/github/database which are opt-in)
     const enableFilesystem = options.enableFilesystem !== false;
     const enableTerminal = options.enableTerminal !== false;
     const enableWeb = options.enableWeb !== false;
     const enableBrowser = options.enableBrowser === true; // Opt-in for browser
+    const enableGitHub = options.enableGitHub === true; // Opt-in for GitHub CLI
+    const enableDatabase = options.enableDatabase === true; // Opt-in for database
 
     // Register filesystem skills
     if (enableFilesystem) {
@@ -130,6 +168,39 @@ export function initializeSkills(options: SkillInitOptions = {}): SkillRegistry 
         logger.info('Registered browser automation skills');
     }
 
+    // Register GitHub skills (requires gh CLI)
+    if (enableGitHub) {
+        const githubSkills = getGitHubSkills();
+        for (const toolDef of githubSkills.getTools()) {
+            // Create wrapper that the registry can use
+            registry.register({
+                name: toolDef.name,
+                get description() { return toolDef.description; },
+                get category() { return 'github' as const; },
+                get version() { return '1.0.0'; },
+                getToolDefinition() { return toolDef; },
+                async execute(args: Record<string, unknown>) { return githubSkills.execute(toolDef.name, args); },
+            } as any);
+        }
+        logger.info('Registered GitHub skills', { count: githubSkills.getTools().length });
+    }
+
+    // Register Database skills
+    if (enableDatabase) {
+        const dbSkills = getDatabaseSkills();
+        for (const toolDef of dbSkills.getTools()) {
+            registry.register({
+                name: toolDef.name,
+                get description() { return toolDef.description; },
+                get category() { return 'database' as const; },
+                get version() { return '1.0.0'; },
+                getToolDefinition() { return toolDef; },
+                async execute(args: Record<string, unknown>) { return dbSkills.execute(toolDef.name, args); },
+            } as any);
+        }
+        logger.info('Registered Database skills', { count: dbSkills.getTools().length });
+    }
+
     logger.info('Skills initialized', {
         total: registry.getAll().length,
         categories: {
@@ -137,6 +208,8 @@ export function initializeSkills(options: SkillInitOptions = {}): SkillRegistry 
             terminal: enableTerminal,
             web: enableWeb,
             browser: enableBrowser,
+            github: enableGitHub,
+            database: enableDatabase,
         },
     });
 

@@ -13,7 +13,7 @@ import { logger } from '../utils/logger.js';
 // Skill Types
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export type SkillCategory = 'filesystem' | 'terminal' | 'web' | 'memory' | 'system';
+export type SkillCategory = 'filesystem' | 'terminal' | 'web' | 'memory' | 'system' | 'github' | 'database';
 
 export interface SkillMetadata {
     name: string;
@@ -34,6 +34,14 @@ export type SkillHandler<TArgs = Record<string, unknown>, TResult = unknown> = (
     args: TArgs,
     context: SkillExecutionContext
 ) => Promise<TResult>;
+
+export interface BaseSkillOptions {
+    name: string;
+    description: string;
+    version: string;
+    category?: SkillCategory;
+    dangerous?: boolean;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Skill Base Class
@@ -104,6 +112,69 @@ export abstract class Skill {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// Multi-Tool Skill Base Class
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Base class for skills that provide multiple tools (e.g., GitHubSkills, DatabaseSkills)
+ */
+export abstract class MultiToolSkill {
+    readonly name: string;
+    readonly description: string;
+    readonly version: string;
+    readonly category: SkillCategory;
+    readonly dangerous: boolean;
+
+    constructor(options: BaseSkillOptions) {
+        this.name = options.name;
+        this.description = options.description;
+        this.version = options.version;
+        this.category = options.category ?? 'system';
+        this.dangerous = options.dangerous ?? false;
+    }
+
+    /**
+     * Get all tool definitions for this skill
+     */
+    abstract getTools(): ToolDefinition[];
+
+    /**
+     * Execute a specific tool by name
+     */
+    abstract execute(toolName: string, args: Record<string, unknown>): Promise<ToolResult>;
+
+    /**
+     * Get metadata about this skill
+     */
+    getMetadata(): SkillMetadata {
+        return {
+            name: this.name,
+            category: this.category,
+            description: this.description,
+            version: this.version,
+            dangerous: this.dangerous,
+        };
+    }
+
+    /**
+     * Helper to create a standard ToolResult
+     */
+    protected createResult(data: unknown, isError = false): ToolResult {
+        if (isError) {
+            return {
+                toolCallId: '',
+                result: typeof data === 'string' ? { error: data } : data,
+                error: typeof data === 'string' ? data : undefined,
+            };
+        }
+        return {
+            toolCallId: '',
+            result: data,
+        };
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // Skill Registry
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -113,7 +184,7 @@ export class SkillRegistry {
 
     constructor() {
         // Initialize category buckets
-        const categories: SkillCategory[] = ['filesystem', 'terminal', 'web', 'memory', 'system'];
+        const categories: SkillCategory[] = ['filesystem', 'terminal', 'web', 'memory', 'system', 'github', 'database'];
         for (const category of categories) {
             this.skillsByCategory.set(category, []);
         }

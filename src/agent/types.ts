@@ -58,7 +58,8 @@ export interface ToolDefinition {
         required?: string[];
     };
     dangerous?: boolean; // Requires approval
-    category?: 'filesystem' | 'terminal' | 'web' | 'memory' | 'system';
+    category?: 'filesystem' | 'terminal' | 'web' | 'memory' | 'system' | 'github' | 'database';
+    requiresApproval?: boolean;  // Alias for dangerous
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

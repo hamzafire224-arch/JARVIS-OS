@@ -12,6 +12,7 @@ import { Agent, type AgentOptions } from './Agent.js';
 import type { AgentMetadata, ApprovalCallback } from './types.js';
 import { getConfig, isProductivityVariant } from '../config/index.js';
 import { logger } from '../utils/logger.js';
+import { getPersonaManager, type PersonaContext } from '../soul/PersonaManager.js';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Main Agent System Prompt
@@ -77,13 +78,21 @@ export interface MainAgentOptions {
 
 export class MainAgent extends Agent {
     private variant: 'productivity' | 'balanced';
+    private personaManager = getPersonaManager();
 
     constructor(options: MainAgentOptions = {}) {
         const config = getConfig();
 
+        // Build system prompt with persona augmentation
+        const basePrompt = options.customSystemPrompt ?? MAIN_AGENT_SYSTEM_PROMPT;
+        const personaAugmentation = getPersonaManager().generateSystemPromptAugmentation();
+        const fullSystemPrompt = personaAugmentation
+            ? `${basePrompt}\n\n${personaAugmentation}`
+            : basePrompt;
+
         super({
             name: 'JARVIS',
-            systemPrompt: options.customSystemPrompt ?? MAIN_AGENT_SYSTEM_PROMPT,
+            systemPrompt: fullSystemPrompt,
             memory: options.memory,
             onApprovalRequired: options.onApprovalRequired,
             maxIterations: 15, // Main agent may need more iterations for complex tasks
@@ -94,7 +103,10 @@ export class MainAgent extends Agent {
         // Register core tools
         this.registerCoreTools();
 
-        logger.agent('MainAgent created', { variant: this.variant });
+        logger.agent('MainAgent created', {
+            variant: this.variant,
+            persona: this.personaManager.getCurrentPersona().id,
+        });
     }
 
     getMetadata(): AgentMetadata {

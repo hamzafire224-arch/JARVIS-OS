@@ -178,3 +178,23 @@ export { AnthropicProvider } from './AnthropicProvider.js';
 export { OpenAIProvider } from './OpenAIProvider.js';
 export { GeminiProvider } from './GeminiProvider.js';
 export { OllamaProvider } from './OllamaProvider.js';
+
+// Tiered inference exports
+export {
+    ComplexityClassifier,
+    getComplexityClassifier,
+    classifyComplexity,
+    shouldUseLocalModel,
+    type ComplexityResult,
+    type ComplexityLevel,
+} from './ComplexityClassifier.js';
+
+export {
+    TieredProviderManager,
+    getTieredProviderManager,
+    initializeTieredProvider,
+    type TieredProviderOptions,
+    type TieredResponse,
+    type UsageStats,
+} from './TieredProviderManager.js';
+

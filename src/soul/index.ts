@@ -17,6 +17,17 @@ export {
     type LearnedBehavior,
 } from './FeedbackManager.js';
 
+export {
+    PersonaManager,
+    getPersonaManager,
+    initializePersonaManager,
+    resetPersonaManager,
+    BUILTIN_PERSONAS,
+    type Persona,
+    type PersonaContext,
+    type PersonaConfig,
+} from './PersonaManager.js';
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // Soul Loading Utilities
 // ═══════════════════════════════════════════════════════════════════════════════

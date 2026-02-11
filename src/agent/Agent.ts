@@ -30,6 +30,7 @@ import {
 } from '../utils/errors.js';
 import { getConfig } from '../config/index.js';
 import { randomUUID } from 'crypto';
+import { getCapabilityManager, type CapabilityManager } from '../security/index.js';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Agent Options
@@ -57,6 +58,7 @@ export abstract class Agent {
     protected provider: LLMProvider | null = null;
     protected maxIterations: number;
     protected onApprovalRequired: ApprovalCallback | null;
+    protected capabilityManager: CapabilityManager;
 
     constructor(options: AgentOptions) {
         this.name = options.name;
@@ -68,6 +70,9 @@ export abstract class Agent {
             systemPrompt: options.systemPrompt,
             memory: options.memory,
         });
+
+        // Initialize security capability manager
+        this.capabilityManager = getCapabilityManager();
 
         // Register provided tools
         if (options.tools) {
@@ -441,6 +446,7 @@ export abstract class Agent {
 
     /**
      * Check if a tool requires approval and get it
+     * Uses CapabilityManager for enhanced security checks
      */
     protected async checkToolApproval(toolCall: ToolCall): Promise<void> {
         const config = getConfig();
@@ -448,10 +454,44 @@ export abstract class Agent {
 
         if (!toolDef) return;
 
-        // Determine if approval is needed based on mode and tool danger level
-        const needsApproval = this.toolNeedsApproval(toolDef, config.toolApproval.mode);
+        // First check with CapabilityManager for security policy
+        const securityCheck = await this.capabilityManager.checkPermission(
+            toolCall.name,
+            toolCall.arguments
+        );
 
-        if (!needsApproval) return;
+        // If blocked by security policy, deny immediately
+        if (!securityCheck.allowed) {
+            // Log the denial
+            await this.capabilityManager.logExecution(
+                toolCall.name,
+                [],
+                toolCall.arguments,
+                'denied',
+                'policy'
+            );
+
+            throw new ToolApprovalDeniedError(
+                toolCall.name,
+                securityCheck.reason ?? 'Blocked by security policy'
+            );
+        }
+
+        // Determine if approval is needed based on mode, tool danger level, AND security check
+        const needsApproval = securityCheck.requiresApproval ||
+            this.toolNeedsApproval(toolDef, config.toolApproval.mode);
+
+        if (!needsApproval) {
+            // Log auto-approved execution
+            await this.capabilityManager.logExecution(
+                toolCall.name,
+                [],
+                toolCall.arguments,
+                'auto-approved',
+                'auto'
+            );
+            return;
+        }
 
         if (!this.onApprovalRequired) {
             throw new ToolApprovalRequiredError(
@@ -466,20 +506,43 @@ export abstract class Agent {
             operation: toolDef.description,
             description: `Execute ${toolCall.name} with arguments: ${JSON.stringify(toolCall.arguments)}`,
             arguments: toolCall.arguments,
-            risk: toolDef.dangerous ? 'high' : 'medium',
+            risk: securityCheck.riskLevel === 'destructive' || securityCheck.riskLevel === 'dangerous'
+                ? 'high'
+                : toolDef.dangerous ? 'high' : 'medium',
             createdAt: new Date(),
         };
 
-        logger.agent(`${this.name} requesting approval`, { tool: toolCall.name });
+        logger.agent(`${this.name} requesting approval`, {
+            tool: toolCall.name,
+            riskLevel: securityCheck.riskLevel,
+        });
 
         const response = await this.onApprovalRequired(request);
 
         if (!response.approved) {
+            // Log the denial
+            await this.capabilityManager.logExecution(
+                toolCall.name,
+                [],
+                toolCall.arguments,
+                'denied',
+                'user'
+            );
+
             throw new ToolApprovalDeniedError(
                 toolCall.name,
                 response.reason ?? 'User denied the operation'
             );
         }
+
+        // Log the approval
+        await this.capabilityManager.logExecution(
+            toolCall.name,
+            [],
+            toolCall.arguments,
+            'approved',
+            'user'
+        );
 
         logger.agent(`${this.name} approval granted`, { tool: toolCall.name });
     }

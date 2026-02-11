@@ -15,6 +15,7 @@ import type { MemoryEntry, SessionSummary } from '../agent/types.js';
 import { resolveMemoryPath, getConfig } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import { MemoryCorruptedError } from '../utils/errors.js';
+import { getMemoryReranker, type MemoryEntry as RerankerEntry, type ScoredEntry } from './MemoryReranker.js';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Memory File Format
@@ -158,6 +159,39 @@ export class MemoryManager {
                 if (importanceScore !== 0) return importanceScore;
                 return b.updatedAt.getTime() - a.updatedAt.getTime();
             });
+    }
+
+    /**
+     * Search memories with reranking for improved relevance
+     */
+    async rerankedSearch(query: string, limit: number = 10): Promise<MemoryEntry[]> {
+        await this.ensureLoaded();
+
+        // Stage 1: Get candidates using basic keyword match
+        const candidates = await this.search(query);
+
+        if (candidates.length === 0) {
+            return [];
+        }
+
+        // Stage 2: Rerank for improved relevance
+        const reranker = getMemoryReranker();
+        const rerankerEntries: RerankerEntry[] = candidates.map(e => ({
+            id: e.id,
+            type: e.type as RerankerEntry['type'],
+            content: e.content,
+            tags: e.tags,
+            timestamp: e.updatedAt.toISOString(),
+        }));
+
+        const reranked = await reranker.rerank(query, rerankerEntries);
+
+        // Map back to original entries by ID
+        const entryMap = new Map(candidates.map(e => [e.id, e]));
+        return reranked
+            .slice(0, limit)
+            .map(scored => entryMap.get(scored.id)!)
+            .filter(Boolean);
     }
 
     /**
