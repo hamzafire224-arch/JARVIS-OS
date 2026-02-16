@@ -14,9 +14,10 @@
 import { createInterface } from 'readline';
 import { promises as fs } from 'fs';
 import { existsSync } from 'fs';
-import { join, dirname } from 'path';
+import { join, dirname, resolve } from 'path';
 import { execSync, spawn } from 'child_process';
 import { fileURLToPath } from 'url';
+import { homedir } from 'os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -32,7 +33,12 @@ interface SetupConfig {
     enableSecurity: boolean;
     enableTieredInference: boolean;
     persona: 'professional' | 'casual' | 'concise' | 'creative';
+    licenseKey?: string;
+    accountEmail?: string;
 }
+
+const DASHBOARD_URL = process.env.JARVIS_DASHBOARD_URL || 'https://app.personaljarvis.dev';
+const API_URL = process.env.JARVIS_API_URL || DASHBOARD_URL;
 
 interface ProviderInfo {
     name: string;
@@ -167,6 +173,9 @@ class SetupWizard {
     }
 
     private async runInteractiveSetup(): Promise<void> {
+        // Step 0: Account & License
+        await this.setupAccount();
+
         // Step 1: Choose provider
         await this.selectProvider();
 
@@ -185,8 +194,141 @@ class SetupWizard {
         // Generate configuration
         await this.generateConfigFile();
 
+        // Save license to ~/.jarvis/ if provided
+        if (this.config.licenseKey) {
+            await this.saveLicenseCache();
+        }
+
         // Print next steps
         this.printNextSteps();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Account & License
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    private async setupAccount(): Promise<void> {
+        console.log(c.title('\n👤 Step 0: PersonalJARVIS Account\n'));
+        console.log('Link your account for Productivity features and license management.\n');
+
+        const options = [
+            `  ${c.highlight('1.')} I have an account — enter my license key`,
+            `  ${c.highlight('2.')} Create a new account ${c.dim('(opens dashboard in browser)')}`,
+            `  ${c.highlight('3.')} Skip ${c.dim('— use free Balanced tier')}`,
+        ];
+
+        console.log(options.join('\n'));
+        console.log('');
+
+        const choice = await this.question('Enter choice [1-3] (default: 3): ');
+
+        switch (choice.trim()) {
+            case '1':
+                await this.enterLicenseKey();
+                break;
+            case '2':
+                await this.createAccount();
+                break;
+            default:
+                console.log(c.info('Skipping account setup. You can link your account later.'));
+                console.log(c.dim(`  Dashboard: ${DASHBOARD_URL}\n`));
+                break;
+        }
+    }
+
+    private async enterLicenseKey(): Promise<void> {
+        console.log(c.title('\n🔑 Enter License Key\n'));
+        console.log(c.dim('Find your key at: ' + DASHBOARD_URL + '/dashboard/license\n'));
+
+        const key = await this.question('License key: ');
+
+        if (!key.trim()) {
+            console.log(c.warn('No key entered. Continuing with free tier.'));
+            return;
+        }
+
+        // Validate key against API
+        console.log(c.dim('Validating...'));
+        try {
+            const res = await fetch(`${API_URL}/api/license/validate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ license_key: key.trim() }),
+                signal: AbortSignal.timeout(5000),
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                if (data.valid) {
+                    this.config.licenseKey = key.trim();
+                    const variant = data.variant || 'balanced';
+                    console.log(c.success(`License validated! Plan: ${variant.toUpperCase()}`));
+                    if (data.warning) {
+                        console.log(c.warn(data.warning));
+                    }
+                    return;
+                }
+            }
+
+            console.log(c.warn('Could not validate license. Saving key anyway — it will be checked on startup.'));
+            this.config.licenseKey = key.trim();
+        } catch {
+            console.log(c.warn('Could not reach API. Saving key — it will be validated on next startup.'));
+            this.config.licenseKey = key.trim();
+        }
+    }
+
+    private async createAccount(): Promise<void> {
+        console.log(c.title('\n🌐 Creating Account\n'));
+        console.log(c.info('Opening the PersonalJARVIS dashboard in your browser...'));
+        console.log(c.dim(`  ${DASHBOARD_URL}/signup\n`));
+
+        // Open browser
+        try {
+            const openCmd = process.platform === 'win32' ? 'start'
+                : process.platform === 'darwin' ? 'open'
+                    : 'xdg-open';
+            execSync(`${openCmd} ${DASHBOARD_URL}/signup`, { stdio: 'ignore' });
+        } catch {
+            console.log(c.warn(`Could not open browser. Please visit: ${DASHBOARD_URL}/signup`));
+        }
+
+        console.log(c.info('After creating your account and getting a license key, enter it below.'));
+        console.log(c.dim('(Press Enter to skip and add it later)\n'));
+
+        const key = await this.question('License key (or Enter to skip): ');
+        if (key.trim()) {
+            this.config.licenseKey = key.trim();
+            console.log(c.success('License key saved!'));
+        } else {
+            console.log(c.info('You can add your license key later by running: jarvis setup'));
+        }
+    }
+
+    private async saveLicenseCache(): Promise<void> {
+        const jarvisDir = join(homedir(), '.jarvis');
+        try {
+            if (!existsSync(jarvisDir)) {
+                await fs.mkdir(jarvisDir, { recursive: true });
+            }
+
+            // Save license to config.json (read by LicenseManager)
+            const configPath = join(jarvisDir, 'config.json');
+            let config: Record<string, unknown> = {};
+            if (existsSync(configPath)) {
+                try {
+                    config = JSON.parse(await fs.readFile(configPath, 'utf-8'));
+                } catch { /* ignore corrupt config */ }
+            }
+            config.license_key = this.config.licenseKey;
+            if (this.config.accountEmail) {
+                config.email = this.config.accountEmail;
+            }
+            await fs.writeFile(configPath, JSON.stringify(config, null, 2));
+            console.log(c.success('License key saved to ~/.jarvis/config.json'));
+        } catch (err) {
+            console.log(c.warn(`Could not save license cache: ${(err as Error).message}`));
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -195,7 +337,7 @@ class SetupWizard {
 
     private async selectProvider(): Promise<void> {
         console.log(c.title('\n📡 Step 1: Choose Your AI Provider\n'));
-        console.log('JARVIS can use different AI providers. Pick one:\n');
+        console.log('JARVIS supports multiple AI backends. Pick one:\n');
 
         const options = [
             `  ${c.highlight('1.')} Gemini (Google) - ${c.dim('Free tier available, recommended for beginners')}`,
@@ -377,6 +519,12 @@ class SetupWizard {
             '',
         ];
 
+        // Add license key
+        if (this.config.licenseKey) {
+            lines.push(`JARVIS_LICENSE_KEY=${this.config.licenseKey}`);
+            lines.push('');
+        }
+
         // Add API key
         if (this.config.apiKey && this.config.provider !== 'ollama') {
             const provider = PROVIDERS[this.config.provider!];
@@ -472,18 +620,25 @@ class SetupWizard {
         console.log('\n' + c.title('🎉 Setup Complete!\n'));
         console.log('Next steps:\n');
 
-        if (!this.config.apiKey && this.config.provider !== 'ollama') {
-            const provider = PROVIDERS[this.config.provider!];
-            console.log(`  ${c.highlight('1.')} Get your API key from: ${provider.signupUrl}`);
-            console.log(`  ${c.highlight('2.')} Add it to your .env file: ${provider.keyEnvVar}=your-key`);
-            console.log(`  ${c.highlight('3.')} Run JARVIS: ${c.dim('npm start')}`);
-        } else {
-            console.log(`  ${c.highlight('1.')} Run JARVIS: ${c.dim('npm start')}`);
-            console.log(`  ${c.highlight('2.')} Or in CLI mode: ${c.dim('npm run cli')}`);
+        let step = 1;
+
+        if (!this.config.licenseKey) {
+            console.log(`  ${c.highlight(`${step++}.`)} Create an account: ${c.dim(DASHBOARD_URL + '/signup')}`);
+            console.log(`  ${c.highlight(`${step++}.`)} Get your license key and re-run: ${c.dim('npm run setup')}`);
         }
 
+        if (!this.config.apiKey && this.config.provider !== 'ollama') {
+            const provider = PROVIDERS[this.config.provider!];
+            console.log(`  ${c.highlight(`${step++}.`)} Get your API key from: ${provider.signupUrl}`);
+            console.log(`  ${c.highlight(`${step++}.`)} Add it to your .env file: ${provider.keyEnvVar}=your-key`);
+        }
+
+        console.log(`  ${c.highlight(`${step++}.`)} Run JARVIS: ${c.dim('npm start')}`);
+        console.log(`  ${c.highlight(`${step}.`)} Or in CLI mode: ${c.dim('npm run cli')}`);
+
         console.log('');
-        console.log(c.dim('Documentation: https://github.com/your-org/jarvis#readme'));
+        console.log(c.dim(`Dashboard: ${DASHBOARD_URL}`));
+        console.log(c.dim('Documentation: https://github.com/personaljarvis/jarvis#readme'));
         console.log(c.dim('Need help? Open an issue on GitHub'));
         console.log('');
     }

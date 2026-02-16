@@ -8,8 +8,14 @@
 import { createInterface } from 'readline';
 import { createMainAgent } from './agent/index.js';
 import { initializeMemory } from './memory/index.js';
+import { initializeHierarchicalMemory, getHierarchicalMemory } from './memory/index.js';
+import { initializeEpisodicMemory, getEpisodicMemory } from './memory/index.js';
 import { getConfig, isProductivityVariant, isBalancedVariant } from './config/index.js';
 import { logger } from './utils/logger.js';
+import { getUsageAnalytics } from './analytics/index.js';
+import { SkillMarketplace } from './skills/index.js';
+import { getTieredProviderManager } from './providers/index.js';
+import { LicenseManager } from './license/index.js';
 import type { ApprovalRequest, ApprovalResponse } from './agent/types.js';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -63,17 +69,46 @@ function createCLIApprovalHandler(rl: ReturnType<typeof createInterface>) {
 async function main() {
     console.log(BANNER);
 
+    // Validate license on startup
+    console.log('🔑 Checking license...');
+    const licenseManager = new LicenseManager();
+    const licenseStatus = await licenseManager.initialize();
+    LicenseManager.printStatus(licenseStatus);
+
     const config = getConfig();
 
-    console.log(`📍 Variant: ${config.variant.toUpperCase()}`);
+    // Override variant if license says Productivity but subscription degraded
+    const effectiveVariant = licenseStatus.isProductivity ? 'productivity' : config.variant;
+
+    console.log(`📍 Variant: ${effectiveVariant.toUpperCase()}`);
     console.log(`🔌 Provider Priority: ${config.providerPriority.join(' → ')}`);
     console.log(`🔒 Approval Mode: ${config.toolApproval.mode}`);
     console.log('');
 
-    // Initialize memory
+    // Initialize memory — use hierarchical for Productivity, basic for Balanced
     console.log('📚 Initializing memory system...');
+    let memoryContext: string;
     const memoryManager = await initializeMemory();
-    const memoryContext = await memoryManager.getMemoryContext();
+
+    if (isProductivityVariant()) {
+        try {
+            await initializeHierarchicalMemory();
+            await initializeEpisodicMemory();
+            memoryContext = await memoryManager.getMemoryContext();
+            console.log('   ✓ Hierarchical memory (4-layer) active');
+        } catch (err) {
+            memoryContext = await memoryManager.getMemoryContext();
+            logger.warn(`Hierarchical memory unavailable, using basic: ${err}`);
+        }
+    } else {
+        memoryContext = await memoryManager.getMemoryContext();
+    }
+
+    // Initialize Usage Analytics
+    const analytics = getUsageAnalytics();
+    await analytics.initialize();
+    analytics.track('session_start', { variant: config.variant });
+    console.log('   ✓ Usage analytics active');
 
     // Create readline interface
     const rl = createInterface({
@@ -104,11 +139,15 @@ async function main() {
 ┌─────────────────────────────────────────────┐
 │              JARVIS Commands                │
 ├─────────────────────────────────────────────┤
-│ /help     - Show this help message          │
-│ /clear    - Clear conversation history      │
-│ /memory   - Show memory statistics          │
-│ /context  - Show context statistics         │
-│ /exit     - Exit JARVIS                     │
+│ /help        - Show this help message       │
+│ /clear       - Clear conversation history   │
+│ /memory      - Show memory statistics       │
+│ /context     - Show context statistics      │
+│ /stats       - Usage analytics summary      │
+│ /report      - Full analytics report        │
+│ /savings     - Tiered inference savings     │
+│ /marketplace - Browse community skills      │
+│ /exit        - Exit JARVIS                  │
 └─────────────────────────────────────────────┘
 `);
     };
@@ -135,6 +174,17 @@ async function main() {
                         break;
 
                     case '/clear':
+                        // Create episode summary before clearing
+                        if (isProductivityVariant()) {
+                            try {
+                                const episodic = getEpisodicMemory();
+                                const ctx = agent.getContext();
+                                await episodic.recordSession(
+                                    `session-${Date.now()}`,
+                                    ctx.messages.map(m => ({ role: m.role, content: m.content ?? '' }))
+                                );
+                            } catch { /* episodic may not be initialized */ }
+                        }
                         agent.clearHistory();
                         console.log('🗑️  Conversation history cleared.');
                         break;
@@ -154,8 +204,76 @@ async function main() {
                         console.log(`   Tools: ${context.tools.length}`);
                         break;
 
+                    case '/stats':
+                        const usageStats = analytics.getTodayStats();
+                        console.log('\n📊 Usage Statistics:');
+                        console.log(`   Sessions: ${usageStats.sessions}`);
+                        console.log(`   Messages: ${usageStats.messages}`);
+                        console.log(`   Tool calls: ${usageStats.toolCalls}`);
+                        console.log(`   Local inferences: ${usageStats.localInferences}`);
+                        console.log(`   Cloud inferences: ${usageStats.cloudInferences}`);
+                        console.log(`   Est. savings: $${usageStats.estimatedSavings.toFixed(2)}`);
+                        break;
+
+                    case '/report':
+                        const report = await analytics.getWeeklyReport();
+                        console.log('\n📈 Weekly Report:');
+                        console.log(`   Period: ${report.weekStart} → ${report.weekEnd}`);
+                        console.log(`   Total sessions: ${report.totalSessions}`);
+                        console.log(`   Total messages: ${report.totalMessages}`);
+                        console.log(`   Avg session: ${report.avgSessionLength.toFixed(0)}s`);
+                        console.log(`   Cost savings: $${report.costSavings.toFixed(2)}`);
+                        console.log(`   Productivity: ${report.productivityScore}/10`);
+                        if (report.mostUsedTools.length > 0) {
+                            console.log('   Top tools:');
+                            for (const t of report.mostUsedTools.slice(0, 5)) {
+                                console.log(`     • ${t.name}: ${t.count} uses`);
+                            }
+                        }
+                        break;
+
+                    case '/savings':
+                        try {
+                            const tiered = getTieredProviderManager();
+                            console.log('\n💰 Tiered Inference Savings:');
+                            console.log(tiered.getSavingsSummary());
+                        } catch {
+                            console.log('\n💰 Tiered inference not active (Balanced plan or Ollama unavailable)');
+                        }
+                        break;
+
+                    case '/marketplace':
+                        try {
+                            const mp = new SkillMarketplace();
+                            await mp.initialize();
+                            const skills = await mp.getFeatured();
+                            console.log('\n🛒 Skill Marketplace:');
+                            if (skills.length === 0) {
+                                console.log('   No community skills available yet.');
+                            } else {
+                                for (const s of skills.slice(0, 10)) {
+                                    console.log(`   • ${s.name} v${s.version} — ${s.description}`);
+                                    console.log(`     ⭐ ${s.rating ?? 'N/A'} | ↓ ${s.downloads ?? 0} | ${s.verified ? '✓ Verified' : 'Community'}`);
+                                }
+                            }
+                        } catch (err) {
+                            console.log(`\n🛒 Marketplace unavailable: ${err}`);
+                        }
+                        break;
+
                     case '/exit':
                     case '/quit':
+                        analytics.track('session_end', {});
+                        if (isProductivityVariant()) {
+                            try {
+                                const episodic = getEpisodicMemory();
+                                const ctx = agent.getContext();
+                                await episodic.recordSession(
+                                    `session-${Date.now()}`,
+                                    ctx.messages.map(m => ({ role: m.role, content: m.content ?? '' }))
+                                );
+                            } catch { /* ignore */ }
+                        }
                         console.log('\n👋 Goodbye! JARVIS signing off.\n');
                         rl.close();
                         process.exit(0);

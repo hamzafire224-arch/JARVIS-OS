@@ -1,9 +1,18 @@
 {
-  "name": "jarvis-agent",
+  "name": "personaljarvis",
   "version": "1.0.0",
-  "description": "JARVIS - Next-generation autonomous AI operative with local-first architecture",
+  "description": "PersonalJARVIS — Next-generation autonomous AI operative with local-first architecture",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "jarvis": "dist/cli.js"
+  },
+  "files": [
+    "dist/",
+    "scripts/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
@@ -11,6 +20,7 @@
     "setup": "tsx scripts/setup-wizard.ts",
     "quick-start": "tsx scripts/quick-start.ts",
     "cli": "tsx scripts/quick-start.ts --cli",
+    "prepublishOnly": "npm run build",
     "test": "vitest",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
@@ -22,12 +32,28 @@
     "ai",
     "agent",
     "llm",
-    "claude",
+    "jarvis",
     "autonomous",
-    "assistant"
+    "assistant",
+    "cli",
+    "gemini",
+    "claude",
+    "openai",
+    "ollama"
   ],
-  "author": "",
+  "author": "PersonalJARVIS",
   "license": "MIT",
+  "homepage": "https://personaljarvis.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/personaljarvis/jarvis"
+  },
+  "bugs": {
+    "url": "https://github.com/personaljarvis/jarvis/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=22.0.0"
   },
