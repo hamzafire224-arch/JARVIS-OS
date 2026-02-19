@@ -21,6 +21,7 @@ import type {
 } from './types.js';
 import { ContextManager } from '../context/ContextManager.js';
 import { getProviderManager, type LLMProvider } from '../providers/index.js';
+import { getTieredProviderManager, initializeTieredProvider, type TieredProviderManager } from '../providers/index.js';
 import { logger } from '../utils/logger.js';
 import {
     AgentError,
@@ -28,7 +29,7 @@ import {
     ToolApprovalDeniedError,
     ToolExecutionError,
 } from '../utils/errors.js';
-import { getConfig } from '../config/index.js';
+import { getConfig, isProductivityVariant } from '../config/index.js';
 import { randomUUID } from 'crypto';
 import { getCapabilityManager, type CapabilityManager } from '../security/index.js';
 
@@ -59,6 +60,7 @@ export abstract class Agent {
     protected maxIterations: number;
     protected onApprovalRequired: ApprovalCallback | null;
     protected capabilityManager: CapabilityManager;
+    protected tieredProvider: TieredProviderManager | null = null;
 
     constructor(options: AgentOptions) {
         this.name = options.name;
@@ -94,6 +96,18 @@ export abstract class Agent {
         const providerManager = getProviderManager();
         this.provider = await providerManager.getProvider();
         this.contextManager.setProvider(this.provider);
+
+        // If Productivity variant, attempt to initialize tiered inference
+        if (isProductivityVariant()) {
+            try {
+                this.tieredProvider = await initializeTieredProvider();
+                await this.tieredProvider.initialize();
+                logger.agent(`${this.name} tiered inference enabled: local=${this.tieredProvider.getLocalProviderName()}, cloud=${this.tieredProvider.getCloudProviderName()}`);
+            } catch (err) {
+                logger.warn(`Tiered inference unavailable, using standard provider: ${err}`);
+                this.tieredProvider = null;
+            }
+        }
 
         logger.agent(`${this.name} initialized with ${this.provider.name}`);
     }
@@ -331,6 +345,36 @@ export abstract class Agent {
             messageCount: messages.length,
             toolCount: tools.length,
         });
+
+        // Use tiered routing if available
+        if (this.tieredProvider && this.tieredProvider.isTieringEnabled()) {
+            const lastUserMsg = messages.filter(m => m.role === 'user').pop();
+            const userText = lastUserMsg?.content ?? '';
+
+            if (this.tieredProvider.shouldUseLocalModel(userText, tools.length > 0)) {
+                try {
+                    const tieredResponse = await this.tieredProvider.generateResponse(
+                        messages,
+                        systemPrompt,
+                        tools.length > 0 ? tools : undefined
+                    );
+
+                    logger.agent(`${this.name} tiered response: tier=${tieredResponse.tier}, complexity=${tieredResponse.complexity.level}`);
+
+                    // tieredResponse wraps an AgentResponse, return the underlying one
+                    return {
+                        content: (tieredResponse as any).content ?? '',
+                        toolCalls: (tieredResponse as any).toolCalls,
+                        finishReason: (tieredResponse as any).finishReason ?? 'stop',
+                        usage: (tieredResponse as any).usage ?? { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+                        model: (tieredResponse as any).model ?? 'tiered',
+                        provider: (tieredResponse as any).provider ?? tieredResponse.tier,
+                    };
+                } catch (err) {
+                    logger.warn(`Tiered routing failed, falling back to standard: ${err}`);
+                }
+            }
+        }
 
         const response = await this.provider.generateResponse(
             messages,
