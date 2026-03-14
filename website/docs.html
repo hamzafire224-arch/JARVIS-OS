@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation — PersonalJARVIS</title>
+    <meta name="description"
+        content="Get started with PersonalJARVIS in 5 minutes. Installation guide, provider setup, security configuration, and skill management.">
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/pages.css">
+</head>
+
+<body class="page-enter">
+
+    <!-- Navigation -->
+    <nav class="nav" id="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-brand">
+                <img src="assets/logo.svg" alt="PersonalJARVIS">
+                <span>PersonalJARVIS</span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html">Home</a>
+                <a href="features.html">Features</a>
+                <a href="pricing.html">Pricing</a>
+                <a href="about.html">About</a>
+                <a href="docs.html" class="active">Docs</a>
+                <a href="pricing.html" class="btn btn-primary btn-sm">Get Started Free</a>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section style="padding-top: calc(var(--nav-height) + var(--space-12)); padding-bottom: var(--space-8);">
+        <div class="container">
+            <span class="badge" style="margin-bottom: var(--space-4); display: inline-flex;">Documentation</span>
+            <h1 style="font-size: var(--font-size-4xl);">Getting <span class="text-gradient">Started</span></h1>
+            <p
+                style="color: var(--text-secondary); font-size: var(--font-size-lg); margin-top: var(--space-4); max-width: 600px;">
+                From zero to your personal AI assistant in under 5 minutes. Follow these steps to install, configure,
+                and start using PersonalJARVIS.</p>
+        </div>
+    </section>
+
+    <!-- Docs Content -->
+    <section class="section" style="padding-top: 0;">
+        <div class="container">
+            <div class="docs-layout">
+
+                <!-- Sidebar -->
+                <nav class="docs-sidebar">
+                    <a href="#quickstart" class="active">Quick Start</a>
+                    <a href="#installation">Installation</a>
+                    <a href="#providers">AI Providers</a>
+                    <a href="#security">Security</a>
+                    <a href="#memory">Memory System</a>
+                    <a href="#skills">Skills</a>
+                    <a href="#analytics">Analytics</a>
+                    <a href="#config">Configuration</a>
+                </nav>
+
+                <!-- Content -->
+                <div class="docs-content">
+
+                    <!-- Quick Start -->
+                    <section id="quickstart" class="reveal">
+                        <h2>⚡ Quick Start</h2>
+                        <p>The fastest way to get PersonalJARVIS running. Three commands, and you're ready.</p>
+
+                        <h3>Prerequisites</h3>
+                        <p>Make sure you have <strong>Node.js 18+</strong> installed. You can check with:</p>
+                        <div class="code-block">
+                            <span class="comment">$ node --version</span><br>
+                            <span class="string">v20.11.0</span>
+                        </div>
+
+                        <h3>Install & Setup</h3>
+                        <div class="code-block">
+                            <span class="comment"># 1. Clone the repository</span><br>
+                            <span class="keyword">$</span> git clone
+                            https://github.com/hamzafire224-arch/JARVIS-OS.git<br>
+                            <span class="keyword">$</span> cd JARVIS-OS<br><br>
+                            <span class="comment"># 2. Install dependencies</span><br>
+                            <span class="keyword">$</span> npm install<br><br>
+                            <span class="comment"># 3. Run the setup wizard</span><br>
+                            <span class="keyword">$</span> npm run setup<br><br>
+                            <span class="comment"># Or use quick setup with defaults (Gemini + Security)</span><br>
+                            <span class="keyword">$</span> npm run setup -- --quick
+                        </div>
+
+                        <h3>Start JARVIS</h3>
+                        <div class="code-block">
+                            <span class="comment"># Start with preflight checks</span><br>
+                            <span class="keyword">$</span> npm run quick-start<br><br>
+                            <span class="comment"># Or start directly</span><br>
+                            <span class="keyword">$</span> npm start
+                        </div>
+
+                        <p>That's it! JARVIS will start and you can begin interacting with your AI assistant.</p>
+                    </section>
+
+                    <!-- Installation -->
+                    <section id="installation" class="reveal">
+                        <h2>📦 Installation</h2>
+                        <p>PersonalJARVIS is a TypeScript application that runs on Node.js. Here's a detailed
+                            installation guide.</p>
+
+                        <h3>System Requirements</h3>
+                        <div
+                            style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin: var(--space-4) 0;">
+                            <div class="card" style="padding: var(--space-4);">
+                                <h4 style="font-size: var(--font-size-sm); margin-bottom: var(--space-2);">Required</h4>
+                                <ul style="font-size: var(--font-size-sm); color: var(--text-secondary);">
+                                    <li style="padding: var(--space-1) 0;">• Node.js 18 or higher</li>
+                                    <li style="padding: var(--space-1) 0;">• npm 9 or higher</li>
+                                    <li style="padding: var(--space-1) 0;">• 2GB RAM minimum</li>
+                                </ul>
+                            </div>
+                            <div class="card" style="padding: var(--space-4);">
+                                <h4 style="font-size: var(--font-size-sm); margin-bottom: var(--space-2);">Optional</h4>
+                                <ul style="font-size: var(--font-size-sm); color: var(--text-secondary);">
+                                    <li style="padding: var(--space-1) 0;">• Ollama (for local models)</li>
+                                    <li style="padding: var(--space-1) 0;">• Git (for version control skills)</li>
+                                    <li style="padding: var(--space-1) 0;">• GitHub CLI (for GitHub skills)</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <h3>Build from Source</h3>
+                        <div class="code-block">
+                            <span class="comment"># Clone the repository</span><br>
+                            <span class="keyword">$</span> git clone
+                            https://github.com/hamzafire224-arch/JARVIS-OS.git<br>
+                            <span class="keyword">$</span> cd JARVIS-OS<br><br>
+                            <span class="comment"># Install dependencies</span><br>
+                            <span class="keyword">$</span> npm install<br><br>
+                            <span class="comment"># Build TypeScript</span><br>
+                            <span class="keyword">$</span> npm run build<br><br>
+                            <span class="comment"># Verify (should show zero errors)</span><br>
+                            <span class="keyword">$</span> npx tsc --noEmit
+                        </div>
+                    </section>
+
+                    <!-- Providers -->
+                    <section id="providers" class="reveal">
+                        <h2>🤖 AI Providers</h2>
+                        <p>PersonalJARVIS supports multiple AI providers. Choose based on your needs and budget.</p>
+
+                        <div
+                            style="display: flex; flex-direction: column; gap: var(--space-4); margin: var(--space-6) 0;">
+                            <div class="card" style="padding: var(--space-5);">
+                                <div
+                                    style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
+                                    <span style="font-size: 24px;">🦙</span>
+                                    <div>
+                                        <h4 style="font-size: var(--font-size-base); margin-bottom: 0;">Ollama (Local)
+                                        </h4>
+                                        <span style="font-size: var(--font-size-xs); color: var(--success);">Free ·
+                                            Private · Balanced plan</span>
+                                    </div>
+                                </div>
+                                <p
+                                    style="font-size: var(--font-size-sm); color: var(--text-secondary); margin-bottom: var(--space-3);">
+                                    Run models locally on your machine. No API keys needed. Perfect for the Balanced
+                                    (free) plan.</p>
+                                <div class="code-block" style="font-size: var(--font-size-xs);">
+                                    <span class="comment"># Install Ollama: https://ollama.ai</span><br>
+                                    <span class="keyword">$</span> ollama pull llama3.2<br>
+                                    <span class="keyword">$</span> ollama serve
+                                </div>
+                            </div>
+
+                            <div class="card" style="padding: var(--space-5);">
+                                <div
+                                    style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
+                                    <span style="font-size: 24px;">✨</span>
+                                    <div>
+                                        <h4 style="font-size: var(--font-size-base); margin-bottom: 0;">Google Gemini
+                                        </h4>
+                                        <span style="font-size: var(--font-size-xs); color: var(--accent-1);">Free tier
+                                            available · Productivity plan</span>
+                                    </div>
+                                </div>
+                                <p
+                                    style="font-size: var(--font-size-sm); color: var(--text-secondary); margin-bottom: var(--space-3);">
+                                    Google's Gemini API with generous free tier. Great for getting started with cloud
+                                    AI.</p>
+                                <div class="code-block" style="font-size: var(--font-size-xs);">
+                                    <span class="comment"># Get API key: https://aistudio.google.com</span><br>
+                                    <span class="comment"># Add to .env:</span><br>
+                                    GEMINI_API_KEY=<span class="string">your-key-here</span>
+                                </div>
+                            </div>
+
+                            <div class="card" style="padding: var(--space-5);">
+                                <div
+                                    style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
+                                    <span style="font-size: 24px;">🧠</span>
+                                    <div>
+                                        <h4 style="font-size: var(--font-size-base); margin-bottom: 0;">OpenAI /
+                                            Anthropic</h4>
+                                        <span
+                                            style="font-size: var(--font-size-xs); color: var(--accent-1);">Pay-per-use
+                                            · Productivity plan</span>
+                                    </div>
+                                </div>
+                                <p
+                                    style="font-size: var(--font-size-sm); color: var(--text-secondary); margin-bottom: var(--space-3);">
+                                    GPT-4 and Claude for complex tasks. The tiered engine minimizes cloud calls
+                                    automatically.</p>
+                                <div class="code-block" style="font-size: var(--font-size-xs);">
+                                    <span class="comment"># Add to .env:</span><br>
+                                    OPENAI_API_KEY=<span class="string">your-key-here</span><br>
+                                    ANTHROPIC_API_KEY=<span class="string">your-key-here</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Security -->
+                    <section id="security" class="reveal">
+                        <h2>🛡️ Security</h2>
+                        <p>PersonalJARVIS enforces capability-based security on every tool operation.</p>
+
+                        <h3>Security Presets</h3>
+                        <div
+                            style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin: var(--space-4) 0;">
+                            <div class="card" style="padding: var(--space-4);">
+                                <h4
+                                    style="font-size: var(--font-size-sm); color: var(--success); margin-bottom: var(--space-2);">
+                                    Strict</h4>
+                                <p style="font-size: var(--font-size-xs); color: var(--text-muted);">Approve everything.
+                                    Maximum safety for untrusted environments.</p>
+                            </div>
+                            <div class="card" style="padding: var(--space-4);">
+                                <h4
+                                    style="font-size: var(--font-size-sm); color: var(--accent-1); margin-bottom: var(--space-2);">
+                                    Balanced (Default)</h4>
+                                <p style="font-size: var(--font-size-xs); color: var(--text-muted);">Auto-approve safe
+                                    ops. Prompt for moderate+. Best for most users.</p>
+                            </div>
+                            <div class="card" style="padding: var(--space-4);">
+                                <h4
+                                    style="font-size: var(--font-size-sm); color: var(--warning); margin-bottom: var(--space-2);">
+                                    Developer</h4>
+                                <p style="font-size: var(--font-size-xs); color: var(--text-muted);">Auto-approve safe +
+                                    moderate. Only prompt for dangerous ops.</p>
+                            </div>
+                            <div class="card" style="padding: var(--space-4);">
+                                <h4
+                                    style="font-size: var(--font-size-sm); color: var(--error); margin-bottom: var(--space-2);">
+                                    Trust</h4>
+                                <p style="font-size: var(--font-size-xs); color: var(--text-muted);">Auto-approve
+                                    everything. Only for trusted, isolated environments.</p>
+                            </div>
+                        </div>
+
+                        <h3>How It Works</h3>
+                        <p>Every tool call passes through the CapabilityManager which checks risk level, blocked
+                            paths/commands, and your active policy. All operations are logged to an audit trail.</p>
+                        <div class="code-block">
+                            <span class="comment">// The flow for every tool execution:</span><br>
+                            <span class="function">checkPermission</span>(<span class="string">'run_command'</span>,
+                            args)<br>
+                            &nbsp;&nbsp;→ <span class="function">assessRisk</span>() → <span
+                                class="string">'dangerous'</span><br>
+                            &nbsp;&nbsp;→ <span class="function">checkBlockedPatterns</span>() → <span
+                                class="string">pass</span><br>
+                            &nbsp;&nbsp;→ <span class="function">applyPolicy</span>(<span
+                                class="string">'balanced'</span>) → <span class="string">prompt user</span><br>
+                            &nbsp;&nbsp;→ <span class="function">logAudit</span>() → <span class="string">saved</span>
+                        </div>
+                    </section>
+
+                    <!-- Memory -->
+                    <section id="memory" class="reveal">
+                        <h2>🧠 Memory System</h2>
+                        <p>PersonalJARVIS uses a 4-layer hierarchical memory system to maintain context across
+                            conversations.</p>
+
+                        <h3>Memory Layers</h3>
+                        <table class="comparison-table" style="margin: var(--space-4) 0;">
+                            <thead>
+                                <tr>
+                                    <th>Layer</th>
+                                    <th>Purpose</th>
+                                    <th>Retention</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Working</td>
+                                    <td>Current conversation messages</td>
+                                    <td>Session only</td>
+                                </tr>
+                                <tr>
+                                    <td>Episodic</td>
+                                    <td>Session summaries & highlights</td>
+                                    <td>30 days</td>
+                                </tr>
+                                <tr>
+                                    <td>Semantic</td>
+                                    <td>User facts & preferences</td>
+                                    <td>Permanent</td>
+                                </tr>
+                                <tr>
+                                    <td>Vector</td>
+                                    <td>Similarity search & reranking</td>
+                                    <td>Permanent</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <p>On the <strong>Balanced plan</strong>, you get Working + Semantic memory. The
+                            <strong>Productivity plan</strong> unlocks all 4 layers including episodic session summaries
+                            and vector-based retrieval.</p>
+                    </section>
+
+                    <!-- Skills -->
+                    <section id="skills" class="reveal">
+                        <h2>🏪 Skills & Marketplace</h2>
+                        <p>Skills are modular capabilities that JARVIS uses to interact with your system.</p>
+
+                        <h3>Built-in Skills</h3>
+                        <div
+                            style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin: var(--space-4) 0;">
+                            <div
+                                style="padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                                <div
+                                    style="font-size: var(--font-size-sm); font-weight: 600; margin-bottom: var(--space-1);">
+                                    📁 Filesystem</div>
+                                <div style="font-size: var(--font-size-xs); color: var(--text-muted);">read, write,
+                                    list, search, delete</div>
+                            </div>
+                            <div
+                                style="padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                                <div
+                                    style="font-size: var(--font-size-sm); font-weight: 600; margin-bottom: var(--space-1);">
+                                    💻 Terminal</div>
+                                <div style="font-size: var(--font-size-xs); color: var(--text-muted);">run, background,
+                                    check, stop</div>
+                            </div>
+                            <div
+                                style="padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                                <div
+                                    style="font-size: var(--font-size-sm); font-weight: 600; margin-bottom: var(--space-1);">
+                                    🌐 Web</div>
+                                <div style="font-size: var(--font-size-xs); color: var(--text-muted);">fetch, scrape,
+                                    search, download</div>
+                            </div>
+                            <div
+                                style="padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                                <div
+                                    style="font-size: var(--font-size-sm); font-weight: 600; margin-bottom: var(--space-1);">
+                                    🎭 Browser</div>
+                                <div style="font-size: var(--font-size-xs); color: var(--text-muted);">navigate, click,
+                                    fill, screenshot</div>
+                            </div>
+                            <div
+                                style="padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                                <div
+                                    style="font-size: var(--font-size-sm); font-weight: 600; margin-bottom: var(--space-1);">
+                                    🗄️ Database</div>
+                                <div style="font-size: var(--font-size-xs); color: var(--text-muted);">SQLite,
+                                    PostgreSQL queries</div>
+                            </div>
+                            <div
+                                style="padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                                <div
+                                    style="font-size: var(--font-size-sm); font-weight: 600; margin-bottom: var(--space-1);">
+                                    🐙 GitHub</div>
+                                <div style="font-size: var(--font-size-xs); color: var(--text-muted);">issues, PRs,
+                                    repos via gh CLI</div>
+                            </div>
+                        </div>
+
+                        <h3>Marketplace</h3>
+                        <p>Browse and install community skills from the marketplace (Productivity plan). Each skill is
+                            security-scanned before installation.</p>
+                        <div class="code-block">
+                            <span class="comment"># Browse featured skills</span><br>
+                            <span class="keyword">jarvis</span> marketplace browse<br><br>
+                            <span class="comment"># Search for a skill</span><br>
+                            <span class="keyword">jarvis</span> marketplace search <span
+                                class="string">"docker"</span><br><br>
+                            <span class="comment"># Install a skill</span><br>
+                            <span class="keyword">jarvis</span> marketplace install <span
+                                class="string">jarvis-docker-manager</span>
+                        </div>
+                    </section>
+
+                    <!-- Analytics -->
+                    <section id="analytics" class="reveal">
+                        <h2>📊 Analytics</h2>
+                        <p>Track your productivity gains and cost savings — all locally, all private.</p>
+
+                        <p>The analytics system tracks sessions, messages, tool usage, and model routing decisions. Data
+                            is automatically anonymized and stored on your machine.</p>
+
+                        <h3>What's Tracked</h3>
+                        <div class="code-block">
+                            <span class="comment">// Event types tracked by UsageAnalytics:</span><br>
+                            <span class="string">'session_start'</span> | <span class="string">'session_end'</span><br>
+                            <span class="string">'message_sent'</span> | <span
+                                class="string">'message_received'</span><br>
+                            <span class="string">'tool_used'</span> | <span class="string">'model_routed'</span><br>
+                            <span class="string">'memory_saved'</span> | <span class="string">'error'</span>
+                        </div>
+
+                        <p style="margin-top: var(--space-4);">Analytics data flushes every 5 minutes and is retained
+                            for 90 days by default. All personal content is anonymized before storage.</p>
+                    </section>
+
+                    <!-- Configuration -->
+                    <section id="config" class="reveal" style="border-bottom: none; margin-bottom: 0;">
+                        <h2>⚙️ Configuration</h2>
+                        <p>PersonalJARVIS stores its configuration in two files at the project root.</p>
+
+                        <h3>.env</h3>
+                        <div class="code-block">
+                            <span class="comment"># AI Provider</span><br>
+                            JARVIS_PROVIDER=<span class="string">gemini</span><br>
+                            GEMINI_API_KEY=<span class="string">your-key-here</span><br><br>
+                            <span class="comment"># Security</span><br>
+                            JARVIS_SECURITY_ENABLED=<span class="string">true</span><br>
+                            JARVIS_SECURITY_PRESET=<span class="string">balanced</span><br><br>
+                            <span class="comment"># Tiered Inference</span><br>
+                            JARVIS_TIERED_INFERENCE=<span class="string">true</span><br>
+                            JARVIS_OLLAMA_MODEL=<span class="string">llama3.2</span>
+                        </div>
+
+                        <h3>jarvis.config.json</h3>
+                        <div class="code-block">
+                            {<br>
+                            &nbsp;&nbsp;<span class="string">"provider"</span>: <span
+                                class="string">"gemini"</span>,<br>
+                            &nbsp;&nbsp;<span class="string">"dataDir"</span>: <span class="string">"./data"</span>,<br>
+                            &nbsp;&nbsp;<span class="string">"security"</span>: { <span class="string">"enabled"</span>:
+                            <span class="keyword">true</span>, <span class="string">"preset"</span>: <span
+                                class="string">"balanced"</span> },<br>
+                            &nbsp;&nbsp;<span class="string">"inference"</span>: { <span class="string">"tiered"</span>:
+                            <span class="keyword">true</span> },<br>
+                            &nbsp;&nbsp;<span class="string">"persona"</span>: <span
+                                class="string">"professional"</span><br>
+                            }
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index.html" class="nav-brand">
+                        <img src="assets/logo.svg" alt="PersonalJARVIS" style="width:28px;height:28px;">
+                        <span>PersonalJARVIS</span>
+                    </a>
+                    <p>Your open-source AI operating system. Build faster, debug smarter, automate everything.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <a href="features.html">Features</a>
+                    <a href="pricing.html">Pricing</a>
+                    <a href="docs.html">Documentation</a>
+                    <a href="https://github.com/hamzafire224-arch/JARVIS-OS" target="_blank">GitHub</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <a href="docs.html#quickstart">Quick Start</a>
+                    <a href="docs.html#providers">Providers</a>
+                    <a href="docs.html#security">Security</a>
+                    <a href="docs.html#skills">Skills</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <a href="about.html">About</a>
+                    <a href="about.html#vision">Vision</a>
+                    <a href="mailto:contact@personaljarvis.dev">Contact</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© 2026 PersonalJARVIS. Open source under MIT License.</span>
+                <span>Built with ❤️ for developers</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Docs sidebar active state on scroll
+        const sections = document.querySelectorAll('.docs-content section[id]');
+        const sidebarLinks = document.querySelectorAll('.docs-sidebar a');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const top = section.offsetTop - 120;
+                if (window.scrollY >= top) {
+                    current = section.getAttribute('id');
+                }
+            });
+            sidebarLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
