@@ -9,6 +9,9 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { promises as fs, existsSync } from 'fs';
+import type { SkillExecutionContext } from '../../src/skills/Skill.js';
+
+const context: SkillExecutionContext = {};
 import { randomUUID } from 'crypto';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -19,7 +22,7 @@ describe('Skills Smoke', () => {
     it('ReadFileSkill reads a real file', async () => {
         const { ReadFileSkill } = await import('../../src/skills/FilesystemSkills.js');
         const skill = new ReadFileSkill();
-        const result = await skill.execute({ path: 'package.json' });
+        const result = await skill.execute({ path: 'package.json' }, context);
         const data = result as any;
         expect(data.content).toBeDefined();
         expect(data.content).toContain('"name"');
@@ -30,7 +33,7 @@ describe('Skills Smoke', () => {
         const skill = new RunCommandSkill();
         const result = await skill.execute({
             command: process.platform === 'win32' ? 'cmd /c echo smoke' : 'echo smoke',
-        });
+        }, context);
         const data = result as any;
         expect(data.stdout).toContain('smoke');
     });
@@ -60,10 +63,11 @@ describe('Memory Round-Trip', () => {
         await manager.add({
             type: 'preference',
             content: 'I prefer dark mode for all IDEs',
+            source: 'user',
             tags: ['preferences', 'ide'],
         });
 
-        const results = await manager.searchMemories('dark mode');
+        const results = await manager.search('dark mode');
         expect(results.length).toBeGreaterThan(0);
         expect(results[0].content).toContain('dark mode');
     });
@@ -215,22 +219,25 @@ describe('Context Trimming', () => {
             return;
         }
 
-        // Create messages that need trimming
+        // Create messages that need trimming (6+ messages to have trim range)
         const messages = Array.from({ length: 20 }, (_, i) => ({
             role: i % 2 === 0 ? 'user' as const : 'assistant' as const,
             content: `This is test message ${i} with enough text to consume tokens. `.repeat(5),
             timestamp: new Date(Date.now() - (20 - i) * 60000),
         }));
 
-        // The function needs tokenBudget and provider — call with small budget
-        const result = trimMessages.call(
-            { provider: null },   // no provider → uses estimateTokens
+        // trimMessages uses this.messages and this.countTokens — provide proper context
+        const fakeThis = {
             messages,
-            200                   // very small budget
-        );
+            provider: null,
+            countTokens: (text: string) => Math.ceil(text.length / 4),
+        };
 
-        if (result !== messages) {
-            // Trimming occurred — check for the notification
+        // Call with a big tokensToFree to trigger trimming
+        const result = trimMessages.call(fakeThis, 5000);
+
+        // Trimming should have occurred
+        if (result.length < messages.length) {
             const trimMsg = result.find((m: any) => m.content?.includes('⚠️'));
             expect(trimMsg).toBeDefined();
             expect(trimMsg?.content).toContain('compacted');
@@ -317,7 +324,7 @@ describe('Graceful Error Handling', () => {
         try {
             const { WebSearchSkill } = await import('../../src/skills/WebSkills.js');
             const skill = new WebSearchSkill();
-            const result = await skill.execute({ query: 'test' }) as any;
+            const result = await skill.execute({ query: 'test' }, context) as any;
             // Should return results (possibly empty) or error — not crash
             expect(result).toBeDefined();
         } finally {
@@ -331,16 +338,21 @@ describe('Graceful Error Handling', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 describe('Blocked Path Security', () => {
-    it('getCapabilityManager returns a manager that validates paths', async () => {
+    it('CapabilityManager checkPermission validates tool access', async () => {
         const { getCapabilityManager } = await import('../../src/security/CapabilityManager.js');
         const cm = getCapabilityManager();
 
-        // Verify the manager exists and has the isPathAllowed method
+        // Verify the manager exists and has the checkPermission method
         expect(cm).toBeDefined();
-        expect(typeof cm.isPathAllowed).toBe('function');
+        expect(typeof cm.checkPermission).toBe('function');
 
-        // Test with a normal path — should not crash
-        const allowed = cm.isPathAllowed('./package.json');
-        expect(typeof allowed).toBe('boolean');
+        // Test with a tool name and args — should not crash
+        const result = await cm.checkPermission(
+            'read_file',
+            { path: '/etc/shadow' }
+        );
+        // Result should be an object with allowed/requiresApproval
+        expect(result).toBeDefined();
+        expect(typeof result.allowed).toBe('boolean');
     });
 });

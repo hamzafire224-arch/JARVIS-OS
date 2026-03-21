@@ -16,6 +16,8 @@ import { resolveMemoryPath, getConfig } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import { MemoryCorruptedError } from '../utils/errors.js';
 import { getMemoryReranker, type MemoryEntry as RerankerEntry, type ScoredEntry } from './MemoryReranker.js';
+import { getEncryptionKey, encryptMemory, decryptMemory } from '../security/MemoryEncryption.js';
+import { getVectorStore } from './VectorStore.js';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Memory File Format
@@ -81,6 +83,12 @@ export class MemoryManager {
         logger.memory('Added entry', { id: newEntry.id, type: newEntry.type });
 
         await this.save();
+
+        // Sync vector to remote store if configured
+        getVectorStore().upsertRemoteMemory(newEntry).catch(err => {
+            logger.warn('Failed to sync new memory to vector store', { error: String(err) });
+        });
+
         return newEntry;
     }
 
@@ -99,6 +107,12 @@ export class MemoryManager {
         logger.memory('Updated entry', { id });
 
         await this.save();
+
+        // Sync updated vector to remote store if configured
+        getVectorStore().upsertRemoteMemory(entry).catch(err => {
+            logger.warn('Failed to sync updated memory to vector store', { error: String(err) });
+        });
+
         return entry;
     }
 
@@ -139,11 +153,18 @@ export class MemoryManager {
     }
 
     /**
-     * Search memories by content (simple keyword search)
+     * Search memories by content 
+     * Uses semantic search if embeddings are configured, otherwise falls back to keyword match
      */
-    async search(query: string): Promise<MemoryEntry[]> {
+    async search(query: string, limit: number = 10): Promise<MemoryEntry[]> {
         await this.ensureLoaded();
 
+        const vectorStore = getVectorStore();
+        if (vectorStore.canGenerateEmbeddings()) {
+            return vectorStore.semanticSearch(query, this.store!.entries, limit);
+        }
+
+        // Fallback: simple keyword search
         const lowerQuery = query.toLowerCase();
         const keywords = lowerQuery.split(/\s+/);
 
@@ -158,7 +179,8 @@ export class MemoryManager {
                 const importanceScore = b.importance - a.importance;
                 if (importanceScore !== 0) return importanceScore;
                 return b.updatedAt.getTime() - a.updatedAt.getTime();
-            });
+            })
+            .slice(0, limit);
     }
 
     /**
@@ -311,7 +333,17 @@ export class MemoryManager {
 
     private async load(): Promise<void> {
         try {
-            const content = await readFile(this.filePath, 'utf-8');
+            let content = await readFile(this.filePath, 'utf-8');
+            
+            // Check if decryption is needed (content doesn't start with { indicating JSON)
+            const key = getEncryptionKey();
+            if (!content.trim().startsWith('{')) {
+                if (!key) {
+                    throw new Error('Memory is encrypted but JARVIS_MEMORY_KEY is not set');
+                }
+                content = decryptMemory(content, key);
+            }
+
             const data = JSON.parse(content);
 
             // Convert date strings back to Date objects
@@ -342,7 +374,12 @@ export class MemoryManager {
 
         this.store.lastUpdated = new Date().toISOString();
 
-        const content = JSON.stringify(this.store, null, 2);
+        let content = JSON.stringify(this.store, null, 2);
+        
+        const key = getEncryptionKey();
+        if (key) {
+            content = encryptMemory(content, key);
+        }
 
         // Create backup of current file before overwriting
         if (existsSync(this.filePath)) {

@@ -112,6 +112,45 @@ export {
     type Task,
 } from './TaskSkills.js';
 
+// MCP Bridge
+export {
+    MCPBridge,
+    getMCPBridge,
+    initializeMCPBridge,
+    resetMCPBridge,
+    type MCPServerConfig,
+    type MCPConfig,
+} from './MCPBridge.js';
+
+// Vision skills
+export {
+    VisionSkills,
+    getVisionSkills,
+    resetVisionSkills,
+    type ImageAnalysis,
+    type PDFContent,
+} from './VisionSkills.js';
+
+// Voice skills
+export {
+    VoiceSkills,
+    getVoiceSkills,
+    resetVoiceSkills,
+} from './VoiceSkills.js';
+
+// Project Analyzer
+export {
+    ProjectAnalyzer,
+    getProjectAnalyzer,
+} from './ProjectAnalyzer.js';
+
+// Email skills
+export {
+    EmailSkills,
+    getEmailSkills,
+    resetEmailSkills,
+} from './EmailSkills.js';
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // Skill Initialization
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -126,6 +165,11 @@ import { GitHubSkills, getGitHubSkills } from './GitHubSkills.js';
 import { logger } from '../utils/logger.js';
 import { getCalendarSkills } from './CalendarSkills.js';
 import { getTaskSkills } from './TaskSkills.js';
+import { getMCPBridge } from './MCPBridge.js';
+import { getVisionSkills } from './VisionSkills.js';
+import { getVoiceSkills } from './VoiceSkills.js';
+import { getProjectAnalyzer } from './ProjectAnalyzer.js';
+import { getEmailSkills } from './EmailSkills.js';
 
 export interface SkillInitOptions {
     enableFilesystem?: boolean;
@@ -135,6 +179,9 @@ export interface SkillInitOptions {
     enableGitHub?: boolean;
     enableDatabase?: boolean;
     enablePersonal?: boolean;
+    enableMCP?: boolean;
+    enableVision?: boolean;
+    enableVoice?: boolean;
 }
 
 /**
@@ -159,7 +206,20 @@ export function initializeSkills(options: SkillInitOptions = {}): SkillRegistry 
         registry.register(new ListDirectorySkill());
         registry.register(new SearchFilesSkill());
         registry.register(new DeleteFileSkill());
-        logger.info('Registered filesystem skills');
+        
+        const projectAnalyzer = getProjectAnalyzer();
+        for (const toolDef of projectAnalyzer.getTools()) {
+            registry.register({
+                name: toolDef.name,
+                get description() { return toolDef.description; },
+                get category() { return 'filesystem' as const; },
+                get version() { return '1.0.0'; },
+                getToolDefinition() { return toolDef; },
+                async execute(args: Record<string, unknown>) { return projectAnalyzer.execute(toolDef.name, args); },
+            } as any);
+        }
+
+        logger.info('Registered filesystem and project analysis skills');
     }
 
     // Register terminal skills
@@ -221,7 +281,7 @@ export function initializeSkills(options: SkillInitOptions = {}): SkillRegistry 
         logger.info('Registered Database skills', { count: dbSkills.getTools().length });
     }
 
-    // Register Calendar and Task skills
+    // Register Calendar, Task, and Email skills
     if (enablePersonal) {
         const calendarSkills = getCalendarSkills();
         for (const toolDef of calendarSkills.getTools()) {
@@ -245,7 +305,71 @@ export function initializeSkills(options: SkillInitOptions = {}): SkillRegistry 
                 async execute(args: Record<string, unknown>) { return taskSkills.execute(toolDef.name, args); },
             } as any);
         }
-        logger.info('Registered personal skills (calendar + tasks)');
+        const emailSkills = getEmailSkills();
+        for (const toolDef of emailSkills.getTools()) {
+            registry.register({
+                name: toolDef.name,
+                get description() { return toolDef.description; },
+                get category() { return 'personal' as const; },
+                get version() { return '1.0.0'; },
+                getToolDefinition() { return toolDef; },
+                async execute(args: Record<string, unknown>) { return emailSkills.execute(toolDef.name, args); },
+            } as any);
+        }
+        logger.info('Registered personal skills (calendar, tasks, email)');
+    }
+
+    // Register MCP Bridge (opt-in)
+    const enableMCP = options.enableMCP === true;
+    if (enableMCP) {
+        const mcpBridge = getMCPBridge();
+        // MCP tools are registered after initialize() is called
+        // But we register the bridge so it's accessible
+        for (const toolDef of mcpBridge.getTools()) {
+            registry.register({
+                name: toolDef.name,
+                get description() { return toolDef.description; },
+                get category() { return 'system' as const; },
+                get version() { return '1.0.0'; },
+                getToolDefinition() { return toolDef; },
+                async execute(args: Record<string, unknown>) { return mcpBridge.execute(toolDef.name, args); },
+            } as any);
+        }
+        logger.info('MCP Bridge registered', { tools: mcpBridge.getTools().length });
+    }
+
+    // Register Vision skills (opt-in)
+    const enableVision = options.enableVision === true;
+    if (enableVision) {
+        const vision = getVisionSkills();
+        for (const toolDef of vision.getTools()) {
+            registry.register({
+                name: toolDef.name,
+                get description() { return toolDef.description; },
+                get category() { return 'web' as const; },
+                get version() { return '1.0.0'; },
+                getToolDefinition() { return toolDef; },
+                async execute(args: Record<string, unknown>) { return vision.execute(toolDef.name, args); },
+            } as any);
+        }
+        logger.info('Registered Vision skills (image + PDF)');
+    }
+
+    // Register Voice skills (opt-in)
+    const enableVoice = options.enableVoice === true;
+    if (enableVoice) {
+        const voice = getVoiceSkills();
+        for (const toolDef of voice.getTools()) {
+            registry.register({
+                name: toolDef.name,
+                get description() { return toolDef.description; },
+                get category() { return 'system' as const; },
+                get version() { return '1.0.0'; },
+                getToolDefinition() { return toolDef; },
+                async execute(args: Record<string, unknown>) { return voice.execute(toolDef.name, args); },
+            } as any);
+        }
+        logger.info('Registered Voice skills ( TTS + STT )');
     }
 
     logger.info('Skills initialized', {
@@ -258,6 +382,9 @@ export function initializeSkills(options: SkillInitOptions = {}): SkillRegistry 
             github: enableGitHub,
             database: enableDatabase,
             personal: enablePersonal,
+            mcp: enableMCP,
+            vision: enableVision,
+            voice: enableVoice,
         },
     });
 

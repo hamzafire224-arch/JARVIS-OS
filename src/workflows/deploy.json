@@ -1,0 +1,40 @@
+{
+  "name": "Production Deployment",
+  "description": "Runs tests, builds the application, and deploys to production.",
+  "version": "1.0.0",
+  "steps": [
+    {
+      "name": "Typecheck",
+      "tool": "run_command",
+      "args": {
+        "command": "npm run typecheck"
+      },
+      "safeToAutoRun": true
+    },
+    {
+      "name": "Run Tests",
+      "tool": "run_command",
+      "args": {
+        "command": "npm run test:unit"
+      },
+      "safeToAutoRun": true
+    },
+    {
+      "name": "Build Project",
+      "tool": "run_command",
+      "args": {
+        "command": "npm run build"
+      },
+      "safeToAutoRun": true
+    },
+    {
+      "name": "Deploy",
+      "description": "Pushes code or artifact to production hosting. Edit command as required.",
+      "tool": "run_command",
+      "args": {
+        "command": "echo 'Deploy command goes here (e.g. vercel --prod, npm publish)'"
+      },
+      "safeToAutoRun": false
+    }
+  ]
+}

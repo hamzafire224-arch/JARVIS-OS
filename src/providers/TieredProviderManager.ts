@@ -32,7 +32,7 @@
 
 import type { LLMProvider } from './LLMProvider.js';
 import type { Message, ToolDefinition } from '../agent/types.js';
-import type { AgentResponse } from '../agent/types.js';
+import type { AgentResponse, StreamChunk } from '../agent/types.js';
 import { getProvider, ProviderManager, getProviderManager } from './index.js';
 import { classifyComplexity, type ComplexityResult, type ComplexityLevel } from './ComplexityClassifier.js';
 import { getConfig, type ProviderName } from '../config/index.js';
@@ -199,6 +199,44 @@ export class TieredProviderManager {
             complexity,
             costSavings,
         };
+    }
+
+    /**
+     * Stream a response using the appropriate tier.
+     * Delegates to the selected provider's streamResponse() and yields StreamChunk tokens in real-time.
+     */
+    async *streamResponse(
+        messages: Message[],
+        systemPrompt: string,
+        tools?: ToolDefinition[]
+    ): AsyncGenerator<StreamChunk> {
+        // Rate limit check
+        this.enforceRateLimit();
+
+        // Classify complexity and select provider
+        const lastMessage = messages.filter(m => m.role === 'user').pop();
+        const messageText = lastMessage?.content ?? '';
+        const complexity = classifyComplexity(messageText);
+        const { provider, tier } = this.selectProvider(complexity, tools);
+
+        logger.debug('Tiered streaming decision', {
+            complexity: complexity.level,
+            tier,
+            provider: provider.name,
+        });
+
+        // Stream from the selected provider
+        let totalTokens = 0;
+        for await (const chunk of provider.streamResponse(messages, systemPrompt, tools)) {
+            // Approximate token count from text chunks
+            if (chunk.type === 'text' && chunk.content) {
+                totalTokens += Math.ceil(chunk.content.length / 4);
+            }
+            yield chunk;
+        }
+
+        // Update stats after streaming completes
+        this.updateStats(tier, complexity, totalTokens);
     }
 
     /**

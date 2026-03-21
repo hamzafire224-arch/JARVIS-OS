@@ -17,6 +17,7 @@ import { SkillMarketplace, initializeSkills } from './skills/index.js';
 import { getTieredProviderManager } from './providers/index.js';
 import { LicenseManager } from './license/index.js';
 import type { ApprovalRequest, ApprovalResponse } from './agent/types.js';
+import { ConversationHistory } from './context/ConversationHistory.js';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Banner
@@ -145,6 +146,12 @@ async function main() {
         process.exit(1);
     }
 
+    // Initialize conversation history (branching & rollback)
+    const conversationHistory = new ConversationHistory({
+        maxSnapshots: 100,
+        autoSnapshotInterval: 2,   // Auto-snapshot every 2 messages
+    });
+
     // Help text
     const showHelp = () => {
         console.log(`
@@ -159,6 +166,10 @@ async function main() {
 │ /report      - Full analytics report        │
 │ /savings     - Tiered inference savings     │
 │ /marketplace - Browse community skills      │
+│ /rollback N  - Undo last N exchanges        │
+│ /branch NAME - Fork conversation            │
+│ /branches    - List all branches            │
+│ /switch NAME - Switch to branch             │
 │ /exit        - Exit JARVIS                  │
 └─────────────────────────────────────────────┘
 `);
@@ -290,28 +301,135 @@ async function main() {
                         rl.close();
                         process.exit(0);
 
-                    default:
-                        console.log(`❓ Unknown command: ${command}. Type /help for available commands.`);
+                    default: {
+                        // Handle parameterized commands
+                        const parts = trimmed.split(/\s+/);
+                        const cmd = parts[0]!.toLowerCase();
+                        const cmdArg = parts.slice(1).join(' ');
+
+                        switch (cmd) {
+                            case '/rollback': {
+                                const steps = parseInt(cmdArg || '1', 10);
+                                const restored = conversationHistory.rollback(steps);
+                                if (restored) {
+                                    agent.clearHistory();
+                                    for (const msg of restored) {
+                                        agent.getContext().messages.push(msg);
+                                    }
+                                    console.log(`⏪ Rolled back ${steps} step${steps > 1 ? 's' : ''}. Conversation restored to ${restored.length} messages.`);
+                                } else {
+                                    console.log('⚠️  No snapshots available. Send some messages first.');
+                                }
+                                break;
+                            }
+
+                            case '/branch': {
+                                if (!cmdArg) {
+                                    console.log('Usage: /branch <name> — create a fork of the current conversation');
+                                    break;
+                                }
+                                try {
+                                    const branchCtx = agent.getContext();
+                                    conversationHistory.branch(cmdArg, branchCtx.messages);
+                                    const branchMsgs = conversationHistory.switchBranch(cmdArg);
+                                    if (branchMsgs) {
+                                        agent.clearHistory();
+                                        for (const msg of branchMsgs) {
+                                            agent.getContext().messages.push(msg);
+                                        }
+                                    }
+                                    console.log(`🌿 Created and switched to branch "${cmdArg}"`);
+                                } catch (err) {
+                                    console.log(`⚠️  ${err instanceof Error ? err.message : err}`);
+                                }
+                                break;
+                            }
+
+                            case '/switch': {
+                                if (!cmdArg) {
+                                    console.log('Usage: /switch <name> — switch to a different branch');
+                                    break;
+                                }
+                                const switchMsgs = conversationHistory.switchBranch(cmdArg);
+                                if (switchMsgs) {
+                                    agent.clearHistory();
+                                    for (const msg of switchMsgs) {
+                                        agent.getContext().messages.push(msg);
+                                    }
+                                    console.log(`🔀 Switched to branch "${cmdArg}" (${switchMsgs.length} messages)`);
+                                } else {
+                                    console.log(`⚠️  Branch "${cmdArg}" not found. Use /branches to list.`);
+                                }
+                                break;
+                            }
+
+                            case '/branches': {
+                                const allBranches = conversationHistory.listBranches();
+                                console.log('\n🌳 Conversation Branches:');
+                                for (const b of allBranches) {
+                                    const active = b.isActive ? ' ← active' : '';
+                                    const parent = b.parentBranch ? ` (from ${b.parentBranch})` : '';
+                                    console.log(`   ${b.isActive ? '●' : '○'} ${b.name}${parent} — ${b.snapshotCount} snapshots${active}`);
+                                }
+                                break;
+                            }
+
+                            default:
+                                console.log(`❓ Unknown command: ${command}. Type /help for available commands.`);
+                        }
+                    }
                 }
 
                 prompt();
                 return;
             }
 
-            // Process user message
+            // Process user message (streaming)
             try {
-                console.log('\n🤖 JARVIS: Thinking...');
+                process.stdout.write('\n🤖 JARVIS: ');
                 const startTime = Date.now();
+                let hasContent = false;
+                let toolCount = 0;
 
-                const result = await agent.execute(trimmed);
+                for await (const chunk of agent.runStream(trimmed)) {
+                    switch (chunk.type) {
+                        case 'text':
+                            if (chunk.content) {
+                                if (!hasContent) {
+                                    // Clear the "JARVIS: " and start fresh with response
+                                    process.stdout.write('\r🤖 JARVIS:\n\n');
+                                    hasContent = true;
+                                }
+                                process.stdout.write(chunk.content);
+                            }
+                            break;
+
+                        case 'tool_call_start':
+                            if (chunk.toolCall?.name) {
+                                toolCount++;
+                                process.stdout.write(`\n  ⚙️  Running ${chunk.toolCall.name}...`);
+                            }
+                            break;
+
+                        case 'tool_call_end':
+                            process.stdout.write(' ✓\n');
+                            break;
+
+                        case 'done':
+                            // Handled after loop
+                            break;
+                    }
+                }
 
                 const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-                console.log(`\n🤖 JARVIS (${elapsed}s):\n`);
-                console.log(result.finalContent);
-
-                if (result.toolResults && result.toolResults.length > 0) {
-                    console.log(`\n📋 Tools used: ${result.toolResults.length}`);
+                process.stdout.write(`\n\n⏱️  ${elapsed}s`);
+                if (toolCount > 0) {
+                    process.stdout.write(` · 📋 ${toolCount} tool${toolCount > 1 ? 's' : ''}`);
                 }
+                process.stdout.write('\n');
+
+                // Auto-snapshot after each exchange
+                conversationHistory.autoSnapshot(agent.getContext().messages);
             } catch (error) {
                 console.error('\n❌ Error:', error instanceof Error ? error.message : error);
                 logger.error('Execution error', { error: String(error) });

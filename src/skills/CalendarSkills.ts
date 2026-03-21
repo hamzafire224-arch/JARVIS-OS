@@ -121,13 +121,52 @@ export class CalendarSkills extends MultiToolSkill {
     // ─────────────────────────────────────────────────────────────────────────────
 
     private async createEvent(args: Record<string, unknown>): Promise<ToolResult> {
+        let eventId: string = randomUUID();
+        const title = args['title'] as string;
+        const startTimeStr = new Date(args['startTime'] as string).toISOString();
+        const endTimeStr = args['endTime'] ? new Date(args['endTime'] as string).toISOString() : undefined;
+        const description = args['description'] as string | undefined;
+        const locationStr = args['location'] as string | undefined;
+        
+        // Attempt Microsoft 365 Sync
+        const msToken = process.env['MS_GRAPH_ACCESS_TOKEN'];
+        if (msToken) {
+            try {
+                const payload = {
+                    subject: title,
+                    body: description ? { contentType: 'Text', content: description } : undefined,
+                    start: { dateTime: startTimeStr, timeZone: 'UTC' },
+                    end: endTimeStr ? { dateTime: endTimeStr, timeZone: 'UTC' } : { dateTime: startTimeStr, timeZone: 'UTC' },
+                    location: locationStr ? { displayName: locationStr } : undefined,
+                };
+
+                const res = await fetch('https://graph.microsoft.com/v1.0/me/events', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${msToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    const data = await res.json() as { id: string };
+                    eventId = data.id; // Use remote MS Graph ID
+                } else {
+                    logger.warn('MS Graph event creation failed, falling back to local only', { status: res.status });
+                }
+            } catch (err) {
+                logger.warn('MS Graph event sync error', { error: String(err) });
+            }
+        }
+
         const event: CalendarEvent = {
-            id: randomUUID(),
-            title: args['title'] as string,
-            startTime: new Date(args['startTime'] as string).toISOString(),
-            endTime: args['endTime'] ? new Date(args['endTime'] as string).toISOString() : undefined,
-            description: args['description'] as string | undefined,
-            location: args['location'] as string | undefined,
+            id: eventId,
+            title,
+            startTime: startTimeStr,
+            endTime: endTimeStr,
+            description,
+            location: locationStr,
             reminder: args['reminder'] as number | undefined,
             createdAt: new Date().toISOString(),
         };
@@ -149,6 +188,39 @@ export class CalendarSkills extends MultiToolSkill {
         const to = args['to'] ? new Date(args['to'] as string) : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
         const limit = (args['limit'] as number) ?? 20;
 
+        // Attempt Microsoft 365 Sync
+        const msToken = process.env['MS_GRAPH_ACCESS_TOKEN'];
+        if (msToken) {
+            try {
+                const res = await fetch(
+                    `https://graph.microsoft.com/v1.0/me/calendarview?startdatetime=${from.toISOString()}&enddatetime=${to.toISOString()}&$top=${limit}`,
+                    { headers: { 'Authorization': `Bearer ${msToken}` } }
+                );
+
+                if (res.ok) {
+                    const data = await res.json() as any;
+                    const msEvents = data.value.map((e: any) => ({
+                        id: e.id,
+                        title: e.subject,
+                        startTime: e.start.dateTime,
+                        endTime: e.end.dateTime,
+                        description: e.bodyPreview,
+                        location: e.location?.displayName,
+                        source: 'microsoft365'
+                    }));
+
+                    return this.createResult({
+                        events: msEvents,
+                        count: msEvents.length,
+                        range: { from: from.toISOString(), to: to.toISOString() },
+                        source: 'Microsoft 365',
+                    });
+                }
+            } catch (err) {
+                logger.warn('MS Graph list events error, falling back to local', { error: String(err) });
+            }
+        }
+
         const events = this.store!.events
             .filter(e => {
                 const start = new Date(e.startTime);
@@ -161,15 +233,36 @@ export class CalendarSkills extends MultiToolSkill {
             events,
             count: events.length,
             range: { from: from.toISOString(), to: to.toISOString() },
+            source: 'local',
         });
     }
 
     private async deleteEvent(args: Record<string, unknown>): Promise<ToolResult> {
         const id = args['id'] as string;
+        
+        // Attempt Microsoft 365 Sync Deletion
+        const msToken = process.env['MS_GRAPH_ACCESS_TOKEN'];
+        if (msToken) {
+            try {
+                const res = await fetch(`https://graph.microsoft.com/v1.0/me/events/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${msToken}` }
+                });
+                
+                if (!res.ok && res.status !== 404) {
+                    logger.warn('MS Graph event deletion warning', { status: res.status });
+                }
+            } catch (err) {
+                logger.warn('MS Graph event deletion error', { error: String(err) });
+            }
+        }
+
         const index = this.store!.events.findIndex(e => e.id === id);
 
         if (index === -1) {
-            return this.createResult(`Event not found: ${id}`, true);
+            // If we deleted it remotely, say so, else error
+            if (msToken) return this.createResult({ message: `Deleted event remotely: "${id}"` });
+            return this.createResult(`Event not found locally: ${id}`, true);
         }
 
         const removed = this.store!.events.splice(index, 1)[0]!;

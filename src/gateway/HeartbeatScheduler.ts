@@ -326,6 +326,20 @@ export class HeartbeatScheduler {
     private async checkTasks(): Promise<void> {
         const now = new Date();
 
+        // AGI Feature 5D: Continuously evaluate global world state
+        try {
+            const { getWorldModel } = await import('../agent/WorldModel.js');
+            const worldModel = getWorldModel();
+            const state = await worldModel.assessEnvironment();
+            
+            if (worldModel.shouldTriggerProactiveIntervention()) {
+                logger.warn('World Model triggered proactive agent intervention', { alerts: state.alerts });
+                // In a mature system, this would push an intent back up to MainAgent
+            }
+        } catch (err) {
+            logger.warn('WorldModel evaluation failed silently', { error: String(err) });
+        }
+
         for (const task of this.tasks.values()) {
             // Skip if not enabled or already running
             if (!task.enabled || this.activeTasks.has(task.id)) {

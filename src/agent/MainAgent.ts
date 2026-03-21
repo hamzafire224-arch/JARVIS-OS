@@ -519,6 +519,55 @@ export class MainAgent extends Agent {
                 };
             }
         );
+        // Autonomous Tool Creation (AGI Feature 5B)
+        this.registerTool(
+            {
+                name: 'create_new_skill',
+                description: 'Write, compile, and deploy a brand new tool dynamically into the JARVIS registry if you lack the capability to complete a user request natively.',
+                parameters: {
+                    type: 'object',
+                    properties: {
+                        capablityName: { type: 'string', description: 'Name of the missing capability (e.g. "bluetooth_manager")' },
+                        specifications: { type: 'string', description: 'What the tool should precisely do, arguments it should take, and technical requirements.' }
+                    },
+                    required: ['capablityName', 'specifications'],
+                },
+                category: 'system',
+                dangerous: true,
+            },
+            async (args) => {
+                const { capablityName, specifications } = args as { capablityName: string; specifications: string };
+                logger.info(`Autonomous Tool Creation Initiated: ${capablityName}`);
+
+                try {
+                    // Lazy import to prevent circular dependencies at boot
+                    const { CoderAgent } = await import('./CoderAgent.js');
+                    const coder = new CoderAgent({ workspaceDir: process.cwd() });
+                    await coder.initialize();
+
+                    const prompt = `You are tasked with dynamically creating a new Skill for JARVIS.
+Capability needed: ${capablityName}
+Specs: ${specifications}
+
+Requirements:
+1. Create a new file in src/skills/ (e.g. src/skills/${capablityName}Skills.ts)
+2. Extend MultiToolSkill from './Skill.js'
+3. Implement getTools() and execute() based on the specs
+4. Modify src/skills/index.ts to export and register your new skill in the initializeSkills function.
+5. Provide pure, compiled logic. Use 'write_to_file' and 'replace_file_content' strictly.`;
+
+                    logger.agent('Spawning CoderAgent for dynamic tool creation...');
+                    const result = await coder.execute(prompt);
+
+                    return {
+                        success: true,
+                        message: `Successfully commissioned tool creation for '${capablityName}'. CoderAgent output: ${result.finalContent}. A system reboot may be required if hot-loading fails.`,
+                    };
+                } catch (err) {
+                    return { success: false, error: err instanceof Error ? err.message : String(err) };
+                }
+            }
+        );
     }
 }
 

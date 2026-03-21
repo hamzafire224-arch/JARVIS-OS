@@ -32,6 +32,7 @@ import {
 import { getConfig, isProductivityVariant } from '../config/index.js';
 import { randomUUID } from 'crypto';
 import { getCapabilityManager, type CapabilityManager } from '../security/index.js';
+import { getLessonMemory } from '../memory/LessonMemory.js';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Agent Options
@@ -338,7 +339,9 @@ export abstract class Agent {
         }
 
         const messages = this.contextManager.getOptimizedMessages();
-        const systemPrompt = this.contextManager.getFullSystemPrompt();
+        const baseSystemPrompt = this.contextManager.getFullSystemPrompt();
+        const lessons = await getLessonMemory().getLessonAugmentation();
+        const systemPrompt = lessons ? `${baseSystemPrompt}\n\n${lessons}` : baseSystemPrompt;
         const tools = this.getToolDefinitions();
 
         logger.agent(`${this.name} thinking`, {
@@ -416,6 +419,9 @@ export abstract class Agent {
                     resultType: typeof result,
                     resultLength: typeof result === 'string' ? result.length : undefined,
                 });
+                
+                // Track tool execution success telemetry
+                getLessonMemory().recordToolUsage(toolCall.name, true).catch(() => {});
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : String(error);
 
@@ -426,6 +432,9 @@ export abstract class Agent {
                 });
 
                 logger.tool(toolCall.name, 'Failed', { error: errorMessage });
+                
+                // Track tool execution failure telemetry
+                getLessonMemory().recordToolUsage(toolCall.name, false, errorMessage).catch(() => {});
             }
         }
 
