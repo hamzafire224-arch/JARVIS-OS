@@ -12,6 +12,7 @@ import { readFile, writeFile, mkdir, rename } from 'fs/promises';
 import { dirname, resolve } from 'path';
 import { randomUUID } from 'crypto';
 import { logger } from '../utils/logger.js';
+import { getSupabaseClient } from '../db/SupabaseClient.js';
 
 export interface Lesson {
     id: string;
@@ -52,6 +53,32 @@ export class LessonMemory {
     async initialize(): Promise<void> {
         if (this.store) return;
 
+        // Try Supabase first if configured
+        const supabase = getSupabaseClient();
+        if (supabase) {
+            try {
+                // Fetch lessons
+                const { data: lessonsData } = await supabase.from('jarvis_lessons').select('*');
+                // Fetch tool stats
+                const { data: statsData } = await supabase.from('jarvis_tool_stats').select('*');
+                
+                if (lessonsData || statsData) {
+                    this.store = {
+                        version: '1.0.0',
+                        lessons: lessonsData || [],
+                        toolStats: (statsData || []).reduce((acc: any, cur: any) => {
+                            acc[cur.tool_name] = { success: cur.success, failure: cur.failure, lastFailureReason: cur.last_failure_reason };
+                            return acc;
+                        }, {})
+                    };
+                    logger.info('Meta-Learning loaded from Supabase Cloud', { lessons: this.store!.lessons.length });
+                    return;
+                }
+            } catch (err) {
+                logger.warn('Failed to load Meta-Learning from Supabase, falling back to local', { error: String(err) });
+            }
+        }
+
         const dir = dirname(this.filePath);
         if (!existsSync(dir)) {
             await mkdir(dir, { recursive: true });
@@ -70,7 +97,7 @@ export class LessonMemory {
             await this.save();
         }
 
-        logger.info('Meta-Learning subsystem initialized', { 
+        logger.info('Meta-Learning subsystem initialized locally', { 
             lessons: this.store!.lessons.length, 
             trackedTools: Object.keys(this.store!.toolStats).length 
         });
@@ -97,7 +124,16 @@ export class LessonMemory {
 
         this.store!.lessons.push(lesson);
         this.isDirty = true;
-        await this.save();
+        
+        // Parallel sync
+        this.save();
+        
+        const supabase = getSupabaseClient();
+        if (supabase) {
+            supabase.from('jarvis_lessons').insert(lesson).then(({ error }) => {
+                if (error) logger.warn('Failed to sync lesson to Cloud', { err: error.message });
+            });
+        }
 
         logger.info('Learned a new lesson', { topic, rule });
         return lesson;
@@ -155,6 +191,19 @@ export class LessonMemory {
         this.isDirty = true;
         // Optimization: Do not block for logging
         this.save().catch(e => logger.warn('Failed to save tool telemetry', { error: String(e) }));
+
+        // Cloud sync
+        const supabase = getSupabaseClient();
+        if (supabase) {
+            supabase.from('jarvis_tool_stats').upsert({
+                tool_name: toolName,
+                success: stat.success,
+                failure: stat.failure,
+                last_failure_reason: stat.lastFailureReason
+            }).then(({ error }) => {
+                if (error) logger.warn('Failed to sync telemetry to Cloud', { error: error.message });
+            });
+        }
     }
 
     /**

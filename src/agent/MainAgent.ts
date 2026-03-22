@@ -136,6 +136,31 @@ export class MainAgent extends Agent {
 
         // In productivity variant (full power), route to specialized agents based on intent
         if (this.variant === 'productivity') {
+            // SaaS Monetization Hook
+            const userId = process.env['USER_ID'];
+            if (userId) {
+                const { getLemonSqueezyManager } = await import('../billing/LemonSqueezyManager.js');
+                const subStatus = await getLemonSqueezyManager().checkUserSubscription(userId);
+                
+                if (!subStatus.isActive) {
+                    logger.warn('SaaS Paywall hit: Free user attempted to access Productivity routing', { userId });
+                    const blockMsg = 'You have requested an advanced AGI capability that requires a Pro subscription. Please upgrade your JARVIS-OS SaaS subscription at your dashboard billing portal.';
+                    return {
+                        response: {
+                            content: blockMsg,
+                            finishReason: 'stop',
+                            usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+                            model: 'jarvis-gateway',
+                            provider: 'system',
+                        },
+                        finalContent: blockMsg,
+                        conversationHistory: [
+                            { role: 'assistant', content: blockMsg }
+                        ],
+                    } as import('./types.js').AgentExecutionResult;
+                }
+            }
+
             const delegation = await this.attemptDelegation(userMessage);
             if (delegation) {
                 return delegation;

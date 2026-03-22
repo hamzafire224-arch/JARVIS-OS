@@ -8,6 +8,7 @@
 
 import { logger } from '../utils/logger.js';
 import type { MemoryEntry } from '../agent/types.js';
+import { getSupabaseClient } from '../db/SupabaseClient.js';
 
 // Configuration
 export interface VectorConfig {
@@ -40,7 +41,7 @@ export class VectorStore {
      * Checks if Supabase connection is configured and available
      */
     public hasRemoteVectorStore(): boolean {
-        return !!(this.config.supabaseUrl && this.config.supabaseKey);
+        return !!getSupabaseClient();
     }
 
     /**
@@ -184,32 +185,24 @@ export class VectorStore {
      * Save an embedded memory directly to Supabase if configured
      */
     public async upsertRemoteMemory(entry: MemoryEntry): Promise<void> {
-        if (!this.hasRemoteVectorStore() || !this.canGenerateEmbeddings()) return;
+        const supabase = getSupabaseClient();
+        if (!supabase || !this.canGenerateEmbeddings()) return;
 
         try {
             const { vector } = await this.generateEmbedding(entry.content);
             
-            const response = await fetch(`${this.config.supabaseUrl}/rest/v1/memory_vectors`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': this.config.supabaseKey!,
-                    'Authorization': `Bearer ${this.config.supabaseKey}`,
-                    'Prefer': 'resolution=merge-duplicates'
-                },
-                body: JSON.stringify({
-                    id: entry.id,
-                    content: entry.content,
-                    type: entry.type,
-                    tags: entry.tags,
-                    embedding: vector,
-                    importance: entry.importance,
-                    updated_at: entry.updatedAt.toISOString(),
-                })
+            const { error } = await supabase.from('memory_vectors').upsert({
+                id: entry.id,
+                content: entry.content,
+                type: entry.type,
+                tags: entry.tags,
+                embedding: vector,
+                importance: entry.importance,
+                updated_at: entry.updatedAt.toISOString(),
             });
 
-            if (!response.ok) {
-                logger.warn('Failed to sync vector to Supabase', { status: response.status });
+            if (error) {
+                logger.warn('Failed to sync vector to Supabase', { status: error.code, message: error.message });
             }
         } catch (err) {
             logger.warn('Vector sync error', { error: err instanceof Error ? err.message : String(err) });
@@ -224,25 +217,20 @@ export class VectorStore {
      * Call the Supabase match_memories RPC function
      */
     private async supabaseSearch(queryEmbedding: number[], matchCount: number): Promise<Array<{ id: string; similarity: number }>> {
-        const response = await fetch(`${this.config.supabaseUrl}/rest/v1/rpc/match_memories`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'apikey': this.config.supabaseKey!,
-                'Authorization': `Bearer ${this.config.supabaseKey}`,
-            },
-            body: JSON.stringify({
-                query_embedding: queryEmbedding,
-                match_threshold: this.config.similarityThreshold,
-                match_count: matchCount
-            })
+        const supabase = getSupabaseClient();
+        if (!supabase) throw new Error('Supabase client not initialized');
+
+        const { data, error } = await supabase.rpc('match_memories', {
+            query_embedding: queryEmbedding,
+            match_threshold: this.config.similarityThreshold,
+            match_count: matchCount
         });
 
-        if (!response.ok) {
-            throw new Error(`Supabase search failed: ${response.status}`);
+        if (error) {
+            throw new Error(`Supabase search failed: ${error.message}`);
         }
 
-        return await response.json() as Array<{ id: string; similarity: number }>;
+        return data as Array<{ id: string; similarity: number }>;
     }
 
     /**

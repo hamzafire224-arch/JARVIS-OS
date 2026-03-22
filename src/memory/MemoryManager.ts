@@ -18,6 +18,7 @@ import { MemoryCorruptedError } from '../utils/errors.js';
 import { getMemoryReranker, type MemoryEntry as RerankerEntry, type ScoredEntry } from './MemoryReranker.js';
 import { getEncryptionKey, encryptMemory, decryptMemory } from '../security/MemoryEncryption.js';
 import { getVectorStore } from './VectorStore.js';
+import { getSupabaseClient } from '../db/SupabaseClient.js';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Memory File Format
@@ -56,6 +57,43 @@ export class MemoryManager {
         } else {
             this.store = this.createEmptyStore();
             await this.save();
+        }
+
+        // Cloud sync: hydrate local memory from Supabase
+        const supabase = getSupabaseClient();
+        if (supabase) {
+            try {
+                const { data, error } = await supabase.from('memory_vectors').select('*');
+                if (!error && data) {
+                    const cloudEntries: MemoryEntry[] = data.map((row: any) => ({
+                        id: row.id,
+                        content: row.content,
+                        type: row.type || 'fact',
+                        source: 'cloud',
+                        importance: row.importance || 5,
+                        tags: row.tags || [],
+                        createdAt: new Date(row.updated_at),
+                        updatedAt: new Date(row.updated_at),
+                    }));
+                    
+                    // Merge avoiding duplicates
+                    const localIds = new Set(this.store!.entries.map(e => e.id));
+                    let additions = 0;
+                    for (const ce of cloudEntries) {
+                        if (!localIds.has(ce.id)) {
+                            this.store!.entries.push(ce);
+                            additions++;
+                        }
+                    }
+                    if (additions > 0) {
+                        this.isDirty = true;
+                        await this.save();
+                        logger.info(`Hydrated ${additions} memories from Supabase Cloud`);
+                    }
+                }
+            } catch (err) {
+                logger.warn('Failed to sync memories from Cloud', { err: String(err) });
+            }
         }
 
         logger.memory('Initialized', {
@@ -131,6 +169,15 @@ export class MemoryManager {
         logger.memory('Deleted entry', { id });
 
         await this.save();
+
+        // Cloud sync
+        const supabase = getSupabaseClient();
+        if (supabase) {
+            supabase.from('memory_vectors').delete().eq('id', id).then(({ error }) => {
+                if (error) logger.warn('Failed to delete memory from Cloud', { error: error.message });
+            });
+        }
+
         return true;
     }
 

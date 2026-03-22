@@ -95,7 +95,17 @@ export class Gateway extends EventEmitter {
         };
 
         // Create HTTP server
-        this.httpServer = createServer((req, res) => {
+        // Create HTTP server
+        this.httpServer = createServer(async (req, res) => {
+            // Apply CORS headers for SaaS Dashboards
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+            if (req.method === 'OPTIONS') {
+                res.writeHead(200);
+                res.end();
+                return;
+            }
+
             // Health check endpoint
             if (req.url === '/health') {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -104,6 +114,25 @@ export class Gateway extends EventEmitter {
                     connections: this.sessions.size,
                     uptime: process.uptime(),
                 }));
+                return;
+            }
+
+            // Dashboard Metrics API
+            if (req.url === '/api/v1/metrics') {
+                try {
+                    const { getLessonMemory } = await import('../memory/LessonMemory.js');
+                    const telemetry = await getLessonMemory().getToolTelemetry();
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        status: 'ok',
+                        connections: this.sessions.size,
+                        uptime: process.uptime(),
+                        tools: telemetry,
+                    }));
+                } catch (err) {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: String(err) }));
+                }
                 return;
             }
 

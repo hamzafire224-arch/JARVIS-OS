@@ -60,6 +60,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "@google/generative-ai": "^0.21.0",
+    "@supabase/supabase-js": "^2.99.3",
     "@types/ws": "^8.18.1",
     "dotenv": "^16.4.7",
     "ollama": "^0.5.12",
