@@ -184,7 +184,7 @@ export class SkillRegistry {
 
     constructor() {
         // Initialize category buckets
-        const categories: SkillCategory[] = ['filesystem', 'terminal', 'web', 'memory', 'system', 'github', 'database'];
+        const categories: SkillCategory[] = ['filesystem', 'terminal', 'web', 'memory', 'system', 'github', 'database', 'personal'];
         for (const category of categories) {
             this.skillsByCategory.set(category, []);
         }

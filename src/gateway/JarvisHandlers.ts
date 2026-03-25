@@ -296,7 +296,7 @@ export async function registerJarvisHandlers(
 
     // Register preset tasks if not already registered
     if (scheduler.getTasks().length === 0) {
-        scheduler.registerPresets();
+        await scheduler.registerPresets();
     }
 
     // Wire task execution to create an agent and run the prompt

@@ -164,6 +164,20 @@ export class LessonMemory {
         return injection;
     }
 
+    /**
+     * Get tool chain recommendation for a task (Tier 3 meta-learning).
+     * Queries ToolChainMemory for the optimal sequence of tools.
+     */
+    async getToolRecommendation(taskDescription: string): Promise<string> {
+        try {
+            const { getToolChainMemory } = await import('./ToolChainMemory.js');
+            const chainMemory = getToolChainMemory();
+            return chainMemory.getChainAugmentation(taskDescription);
+        } catch {
+            return ''; // ToolChainMemory not available
+        }
+    }
+
     // ─────────────────────────────────────────────────────────────────────────────
     // Tool Telemetry
     // ─────────────────────────────────────────────────────────────────────────────

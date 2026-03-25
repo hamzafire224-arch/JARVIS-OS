@@ -29,6 +29,16 @@ export {
     type MarketplaceConfig,
 } from './SkillMarketplace.js';
 
+// Dynamic Skill Generator (Tier 1 AGI Upgrade)
+export {
+    DynamicSkillGenerator,
+    getDynamicSkillGenerator,
+    resetDynamicSkillGenerator,
+    CREATE_NEW_SKILL_TOOL,
+    type GeneratedSkillSpec,
+    type GenerationResult,
+} from './DynamicSkillGenerator.js';
+
 // Filesystem skills
 export {
     ReadFileSkill,
@@ -170,6 +180,7 @@ import { getVisionSkills } from './VisionSkills.js';
 import { getVoiceSkills } from './VoiceSkills.js';
 import { getProjectAnalyzer } from './ProjectAnalyzer.js';
 import { getEmailSkills } from './EmailSkills.js';
+import { getDynamicSkillGenerator, CREATE_NEW_SKILL_TOOL } from './DynamicSkillGenerator.js';
 
 export interface SkillInitOptions {
     enableFilesystem?: boolean;
@@ -371,6 +382,20 @@ export function initializeSkills(options: SkillInitOptions = {}): SkillRegistry 
         }
         logger.info('Registered Voice skills ( TTS + STT )');
     }
+
+    // Register Dynamic Skill Generator (always available — core AGI capability)
+    const skillGenerator = getDynamicSkillGenerator();
+    registry.register({
+        name: CREATE_NEW_SKILL_TOOL.name,
+        get description() { return CREATE_NEW_SKILL_TOOL.description; },
+        get category() { return 'system' as const; },
+        get version() { return '1.0.0'; },
+        getToolDefinition() { return CREATE_NEW_SKILL_TOOL; },
+        async execute(args: Record<string, unknown>) {
+            return skillGenerator.generateAndRegister(args as any);
+        },
+    } as any);
+    logger.info('Registered Dynamic Skill Generator (create_new_skill)');
 
     logger.info('Skills initialized', {
         total: registry.getAll().length,

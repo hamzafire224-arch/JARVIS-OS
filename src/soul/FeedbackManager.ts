@@ -371,6 +371,39 @@ export class FeedbackManager {
     }
 
     /**
+     * Publish anonymized patterns to the federated pool (Tier 3 upgrade).
+     * Only publishes aggregate stats, never raw feedback text.
+     */
+    async publishToFederated(): Promise<number> {
+        try {
+            const { getFederatedInsights } = await import('./FederatedInsights.js');
+            const federated = getFederatedInsights();
+
+            // Extract topic co-occurrences from feedback patterns
+            const patterns = this.analyzePatterns();
+            const categories = patterns.map(p => p.category);
+            federated.recordTopicsFromConversation(categories);
+
+            return federated.publishAnonymized();
+        } catch {
+            return 0; // Federated module not available
+        }
+    }
+
+    /**
+     * Get suggestions enhanced with community intelligence (Tier 3 upgrade).
+     */
+    async getCommunityEnhancedSuggestions(currentTopics: string[]): Promise<string> {
+        try {
+            const { getFederatedInsights } = await import('./FederatedInsights.js');
+            const federated = getFederatedInsights();
+            return federated.getCommunityAugmentation(currentTopics);
+        } catch {
+            return '';
+        }
+    }
+
+    /**
      * Deactivate a learning (if it's no longer relevant)
      */
     async deactivateLearning(learningId: string): Promise<boolean> {

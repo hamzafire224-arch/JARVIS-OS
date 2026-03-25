@@ -421,11 +421,12 @@ export class HeartbeatScheduler {
     /**
      * Register common preset tasks
      */
-    registerPresets(): void {
+    async registerPresets(): Promise<void> {
         // Check if productivity variant — auto-enable morning briefing
         let autoEnableBriefing = false;
         try {
-            const config = require('../config/index.js').getConfig();
+            const { getConfig } = await import('../config/index.js');
+            const config = getConfig();
             autoEnableBriefing = config.variant === 'productivity';
         } catch {
             // Config not available — default to disabled

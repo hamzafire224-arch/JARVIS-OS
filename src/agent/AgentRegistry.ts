@@ -285,6 +285,43 @@ export class AgentRouter {
     routeTo(agentName: string): Agent {
         return this.registry.get(agentName);
     }
+
+    /**
+     * Route to multiple agents for collaborative execution (Tier 2 upgrade).
+     * Returns agents that should work on the task in parallel.
+     */
+    routeParallel(message: string): { agents: Agent[]; intent: Intent; isComplex: boolean } {
+        const intent = this.classifier.classify(message);
+        const wordCount = message.split(/\s+/).length;
+
+        // Determine complexity
+        const isComplex = wordCount > 30 || intent.keywords.length >= 3;
+
+        if (!isComplex || !isProductivityVariant()) {
+            return {
+                agents: [this.registry.get(this.defaultAgentName)],
+                intent,
+                isComplex: false,
+            };
+        }
+
+        // Collect all available specialized agents
+        const agents: Agent[] = [this.registry.get(this.defaultAgentName)];
+
+        for (const agentType of (['coder', 'researcher', 'personal'] as const)) {
+            const typeAgents = this.registry.getByType(agentType);
+            if (typeAgents.length > 0) {
+                agents.push(...typeAgents);
+            }
+        }
+
+        logger.agent('Parallel routing for complex task', {
+            agentCount: agents.length,
+            agentNames: agents.map(a => a.getMetadata().name),
+        });
+
+        return { agents, intent, isComplex: true };
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

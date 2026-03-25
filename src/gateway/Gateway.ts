@@ -15,6 +15,7 @@ import { randomUUID } from 'crypto';
 import { EventEmitter } from 'events';
 import { logger } from '../utils/logger.js';
 import type { Message, StreamChunk, AgentResponse } from '../agent/types.js';
+import type { StreamEvent } from './StreamProtocol.js';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Gateway Types
@@ -97,8 +98,12 @@ export class Gateway extends EventEmitter {
         // Create HTTP server
         // Create HTTP server
         this.httpServer = createServer(async (req, res) => {
-            // Apply CORS headers for SaaS Dashboards
-            res.setHeader('Access-Control-Allow-Origin', '*');
+            // Apply CORS headers — restricted to configured origins
+            const allowedOrigins = (process.env['GATEWAY_ALLOWED_ORIGINS'] ?? 'http://localhost:3000,http://localhost:3001')
+                .split(',').map(o => o.trim());
+            const requestOrigin = req.headers.origin ?? '';
+            const corsOrigin = allowedOrigins.includes(requestOrigin) ? requestOrigin : allowedOrigins[0]!;
+            res.setHeader('Access-Control-Allow-Origin', corsOrigin);
             res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
             if (req.method === 'OPTIONS') {
                 res.writeHead(200);
@@ -424,6 +429,38 @@ export class Gateway extends EventEmitter {
     }
 
     /**
+     * Send a structured stream event to a session (Tier 2 upgrade).
+     * Provides granular visibility: thinking, tool_start, tool_result, progress, etc.
+     */
+    sendStructuredEvent(sessionId: string, event: StreamEvent): void {
+        const session = this.sessions.get(sessionId);
+        if (!session) return;
+
+        this.sendMessage(session, {
+            jsonrpc: '2.0',
+            method: 'stream.event',
+            params: event as unknown as Record<string, unknown>,
+        });
+    }
+
+    /**
+     * Broadcast a structured event to all authenticated sessions
+     */
+    broadcastStructuredEvent(event: StreamEvent): void {
+        const message: GatewayMessage = {
+            jsonrpc: '2.0',
+            method: 'stream.event',
+            params: event as unknown as Record<string, unknown>,
+        };
+
+        for (const session of this.sessions.values()) {
+            if (session.authenticated) {
+                this.sendMessage(session, message);
+            }
+        }
+    }
+
+    /**
      * Get a session by ID
      */
     getSession(sessionId: string): GatewaySession | undefined {
@@ -474,6 +511,89 @@ export class Gateway extends EventEmitter {
                 connectedAt: session.connectedAt.toISOString(),
                 authenticated: session.authenticated,
             };
+        });
+
+        // ─────────────────────────────────────────────────────────────────
+        // Chat handler — bridges dashboard/clients to the agent
+        // ─────────────────────────────────────────────────────────────────
+        this.registerHandler('chat', async (session, params) => {
+            const message = params['message'] as string;
+            const conversationId = (params['conversationId'] as string) ?? session.id;
+
+            if (!message || typeof message !== 'string') {
+                throw new Error('Invalid params: "message" (string) is required');
+            }
+
+            // Emit event for the host application to handle agent routing
+            // The host calls gateway.onChatRequest(handler) to register
+            return new Promise<unknown>((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error('Chat request timed out (no handler registered or agent unresponsive)'));
+                }, 120_000); // 2 minute timeout for agent processing
+
+                this.emit('chat_request', {
+                    sessionId: session.id,
+                    userId: session.userId,
+                    message,
+                    conversationId,
+                    resolve: (response: unknown) => {
+                        clearTimeout(timeout);
+                        resolve(response);
+                    },
+                    reject: (error: Error) => {
+                        clearTimeout(timeout);
+                        reject(error);
+                    },
+                    sendStream: (chunk: StreamChunk) => {
+                        this.sendStreamChunk(session.id, chunk);
+                    },
+                });
+            });
+        });
+
+        // ─────────────────────────────────────────────────────────────────
+        // Fire-and-forget message with streaming response
+        // ─────────────────────────────────────────────────────────────────
+        this.registerHandler('sendMessage', async (session, params) => {
+            const message = params['message'] as string;
+
+            if (!message || typeof message !== 'string') {
+                throw new Error('Invalid params: "message" (string) is required');
+            }
+
+            // Emit for async processing — response streams via 'stream' method
+            this.emit('message', {
+                sessionId: session.id,
+                userId: session.userId,
+                message,
+                sendStream: (chunk: StreamChunk) => {
+                    this.sendStreamChunk(session.id, chunk);
+                },
+                sendComplete: (result: unknown) => {
+                    this.sendMessage(session, {
+                        jsonrpc: '2.0',
+                        method: 'messageComplete',
+                        params: { result } as unknown as Record<string, unknown>,
+                    });
+                },
+            });
+
+            return { accepted: true, sessionId: session.id };
+        });
+
+        // ─────────────────────────────────────────────────────────────────
+        // Stream subscription handler (Tier 2 upgrade)
+        // Clients opt into structured events by calling this method
+        // ─────────────────────────────────────────────────────────────────
+        this.registerHandler('stream.subscribe', async (session, params) => {
+            const eventTypes = params['eventTypes'] as string[] | undefined;
+            session.metadata['structuredStreaming'] = true;
+            session.metadata['subscribedEventTypes'] = eventTypes ?? 'all';
+            logger.agent('Client subscribed to structured streaming', {
+                sessionId: session.id,
+                eventTypes: eventTypes ?? 'all',
+            });
+            return { subscribed: true, eventTypes: eventTypes ?? 'all' };
         });
     }
 

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { withCors, corsPreflightResponse } from '@/lib/cors';
+import { validateLimiter, getClientIp } from '@/lib/rate-limit';
 
 export async function OPTIONS() {
     return corsPreflightResponse();
@@ -8,6 +9,16 @@ export async function OPTIONS() {
 
 export async function POST(request: Request) {
     try {
+        // Rate limit: 30 requests per minute per IP
+        const ip = getClientIp(request);
+        const { success: rateLimitOk } = validateLimiter.check(ip);
+        if (!rateLimitOk) {
+            return withCors(NextResponse.json(
+                { valid: false, reason: 'rate_limited' },
+                { status: 429, headers: { 'Retry-After': '60' } }
+            ));
+        }
+
         const { license_key } = await request.json();
 
         if (!license_key) {
@@ -50,6 +61,44 @@ export async function POST(request: Request) {
                 variant: 'productivity',
                 status: 'active',
                 expires: sub?.current_period_end,
+            }));
+        }
+
+        // Handle trial period
+        if (status === 'trial') {
+            const trialEnd = sub?.trial_ends_at ? new Date(sub.trial_ends_at) : null;
+            const now = new Date();
+
+            if (trialEnd && now < trialEnd) {
+                const msLeft = trialEnd.getTime() - now.getTime();
+                const daysLeft = Math.ceil(msLeft / (24 * 60 * 60 * 1000));
+
+                let warning: string | undefined;
+                if (daysLeft <= 3) {
+                    warning = `Free Productivity access ends in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}. Subscribe to keep all features.`;
+                } else if (daysLeft <= 7) {
+                    warning = `Free Productivity access ends in ${daysLeft} days. Subscribe at your dashboard.`;
+                }
+
+                return withCors(NextResponse.json({
+                    valid: true,
+                    variant: 'productivity',
+                    status: 'trial',
+                    trial_days_left: daysLeft,
+                    trial_expired: false,
+                    warning,
+                    expires: sub.trial_ends_at,
+                }));
+            }
+
+            // Trial has expired
+            return withCors(NextResponse.json({
+                valid: true,
+                variant: 'balanced',
+                status: 'trial_expired',
+                trial_days_left: 0,
+                trial_expired: true,
+                warning: 'Free Productivity access has ended. Subscribe for $20/mo to restore all features.',
             }));
         }
 

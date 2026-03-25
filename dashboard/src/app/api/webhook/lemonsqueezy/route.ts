@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 // Verify LemonSqueezy webhook signature
 function verifySignature(payload: string, signature: string, secret: string): boolean {
@@ -36,11 +36,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing user_id' }, { status: 400 });
         }
 
-        const supabase = await createClient();
+        const supabase = createAdminClient();
 
         switch (eventName) {
             case 'subscription_created': {
-                // Create or update subscription
+                // Create or update subscription (clears trial fields on conversion)
                 await supabase.from('subscriptions').upsert({
                     user_id: userId,
                     lemon_subscription_id: String(payload.data.id),
@@ -49,6 +49,8 @@ export async function POST(request: Request) {
                     status: 'active',
                     current_period_start: attrs.renews_at ? new Date().toISOString() : null,
                     current_period_end: attrs.renews_at || null,
+                    trial_started_at: null,
+                    trial_ends_at: null,
                     updated_at: new Date().toISOString(),
                 }, {
                     onConflict: 'user_id',

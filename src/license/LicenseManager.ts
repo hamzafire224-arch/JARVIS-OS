@@ -25,6 +25,8 @@ export interface CachedLicense {
     validated_at: string;      // ISO timestamp
     expires?: string;
     warning?: string;
+    trial_days_left?: number;
+    trial_expired?: boolean;
 }
 
 export interface LicenseStatus {
@@ -32,6 +34,8 @@ export interface LicenseStatus {
     status: string;
     warning?: string;
     isProductivity: boolean;
+    trialDaysLeft?: number;
+    trialExpired?: boolean;
 }
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -82,6 +86,8 @@ export class LicenseManager {
                 validated_at: new Date().toISOString(),
                 expires: result.expires,
                 warning: result.warning,
+                trial_days_left: result.trial_days_left,
+                trial_expired: result.trial_expired,
             };
             this.writeCache(newCache);
             return this.toStatus(newCache);
@@ -172,6 +178,8 @@ export class LicenseManager {
             status: cache.status,
             warning: cache.warning,
             isProductivity: cache.variant === 'productivity',
+            trialDaysLeft: cache.trial_days_left,
+            trialExpired: cache.trial_expired,
         };
     }
 
@@ -179,15 +187,45 @@ export class LicenseManager {
      * Print license status to console with appropriate formatting.
      */
     static printStatus(status: LicenseStatus): void {
-        if (status.warning) {
-            const isError = status.status === 'degraded' || status.status === 'expired';
-            const color = isError ? '\x1b[31m' : '\x1b[33m'; // red or yellow
-            const reset = '\x1b[0m';
-            console.log(`${color}⚠ ${status.warning}${reset}`);
+        const reset = '\x1b[0m';
+        const yellow = '\x1b[33m';
+        const red = '\x1b[31m';
+        const magenta = '\x1b[35m';
+        const cyan = '\x1b[36m';
+        const dim = '\x1b[2m';
+        const billingUrl = 'https://app.personaljarvis.dev/dashboard/billing';
+
+        // Free Productivity period notifications
+        if (status.status === 'trial' && status.trialDaysLeft != null) {
+            if (status.trialDaysLeft <= 3) {
+                console.log(`${red}⚠ Your free Productivity access ends in ${status.trialDaysLeft} day${status.trialDaysLeft !== 1 ? 's' : ''}. Subscribe to keep all features.${reset}`);
+                console.log(`${dim}   → ${billingUrl}${reset}`);
+            } else if (status.trialDaysLeft <= 7) {
+                console.log(`${yellow}⚠ Free Productivity access ends in ${status.trialDaysLeft} days. Subscribe to continue:${reset}`);
+                console.log(`${dim}   → ${billingUrl}${reset}`);
+            } else {
+                console.log(`${cyan}⚡ Productivity plan active (free)${reset}`);
+            }
         }
 
-        if (status.isProductivity) {
-            console.log('\x1b[35m⚡ Productivity\x1b[0m plan active');
+        // Free period ended
+        if (status.status === 'trial_expired' || status.trialExpired) {
+            console.log(`${yellow}⏸ Free Productivity access has ended. Balanced mode active.${reset}`);
+            console.log(`${dim}   Your preferences are saved. Subscribe for $20/mo to restore Productivity → ${billingUrl}${reset}`);
+        }
+
+        // Payment/subscription warnings
+        if (status.warning && status.status !== 'trial' && !status.trialExpired) {
+            const isError = status.status === 'degraded' || status.status === 'expired';
+            const color = isError ? red : yellow;
+            console.log(`${color}⚠ ${status.warning}${reset}`);
+            if (status.status === 'past_due') {
+                console.log(`${dim}   Fix payment → ${billingUrl}${reset}`);
+            }
+        }
+
+        if (status.isProductivity && status.status !== 'trial') {
+            console.log(`${magenta}⚡ Productivity${reset} plan active`);
         }
     }
 }

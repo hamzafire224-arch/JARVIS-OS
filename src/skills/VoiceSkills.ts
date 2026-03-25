@@ -52,8 +52,12 @@ export class VoiceSkills extends MultiToolSkill {
                         },
                         voice: {
                             type: 'string',
-                            description: 'Voice to use (alloy, echo, fable, onyx, nova, shimmer). Default: alloy',
-                            enum: ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'],
+                            description: 'Voice to use. OpenAI: alloy, echo, fable, onyx, nova, shimmer. ElevenLabs: any voice ID.',
+                        },
+                        provider: {
+                            type: 'string',
+                            description: 'TTS provider: "openai" or "elevenlabs". Default: auto-detect from available API keys.',
+                            enum: ['openai', 'elevenlabs'],
                         },
                         outputPath: {
                             type: 'string',
@@ -61,6 +65,24 @@ export class VoiceSkills extends MultiToolSkill {
                         },
                     },
                     required: ['text'],
+                },
+            },
+            {
+                name: 'listen_microphone',
+                description: 'Record audio from the microphone for a specified duration. Requires sox or ffmpeg.',
+                parameters: {
+                    type: 'object',
+                    properties: {
+                        durationSeconds: {
+                            type: 'number',
+                            description: 'Duration to record in seconds (default: 5)',
+                        },
+                        outputPath: {
+                            type: 'string',
+                            description: 'Optional path to save the recording.',
+                        },
+                    },
+                    required: [],
                 },
             },
         ];
@@ -72,6 +94,8 @@ export class VoiceSkills extends MultiToolSkill {
                 return this.transcribeAudio(args);
             case 'speak_text':
                 return this.speakText(args);
+            case 'listen_microphone':
+                return this.listenMicrophone(args);
             default:
                 return this.createResult(`Unknown voice tool: ${toolName}`, true);
         }
@@ -153,53 +177,119 @@ export class VoiceSkills extends MultiToolSkill {
         const text = args['text'] as string;
         const voice = (args['voice'] as string) || 'alloy';
         const outputPath = (args['outputPath'] as string) || join(tmpdir(), `jarvis_speech_${randomUUID()}.mp3`);
+        const provider = (args['provider'] as string) || (process.env['ELEVENLABS_API_KEY'] ? 'elevenlabs' : 'openai');
 
         if (!text) {
             return this.createResult('Missing required argument: text', true);
         }
 
-        const apiKey = process.env['OPENAI_API_KEY'];
-        if (!apiKey) {
-            return this.createResult('OPENAI_API_KEY is required for text-to-speech', true);
-        }
-
         try {
-            logger.tool('speak_text', 'Generating speech', { voice });
-
-            const response = await fetch('https://api.openai.com/v1/audio/speech', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    model: 'tts-1',
-                    input: text,
-                    voice,
-                }),
-            });
-
-            if (!response.ok) {
-                const err = await response.text();
-                throw new Error(`OpenAI TTS API error: ${response.status} ${err}`);
+            if (provider === 'elevenlabs') {
+                return this.speakElevenLabs(text, voice, outputPath);
             }
-
-            const arrayBuffer = await response.arrayBuffer();
-            const buffer = Buffer.from(arrayBuffer);
-            
-            await writeFile(outputPath, buffer);
-            logger.tool('speak_text', 'Audio generated and saved', { path: outputPath });
-
-            return this.createResult({ 
-                audioPath: outputPath,
-                message: 'Audio generated and saved successfully',
-            });
+            return this.speakOpenAI(text, voice, outputPath);
         } catch (err) {
             return this.createResult(
                 `Text-to-speech failed: ${err instanceof Error ? err.message : String(err)}`, 
                 true
             );
         }
+    }
+
+    private async speakOpenAI(text: string, voice: string, outputPath: string): Promise<ToolResult> {
+        const apiKey = process.env['OPENAI_API_KEY'];
+        if (!apiKey) {
+            return this.createResult('OPENAI_API_KEY is required for OpenAI TTS', true);
+        }
+
+        logger.tool('speak_text', 'Generating speech via OpenAI', { voice });
+
+        const response = await fetch('https://api.openai.com/v1/audio/speech', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ model: 'tts-1', input: text, voice }),
+        });
+
+        if (!response.ok) {
+            const err = await response.text();
+            throw new Error(`OpenAI TTS API error: ${response.status} ${err}`);
+        }
+
+        const buffer = Buffer.from(await response.arrayBuffer());
+        await writeFile(outputPath, buffer);
+        logger.tool('speak_text', 'Audio saved', { path: outputPath, provider: 'openai' });
+
+        return this.createResult({ audioPath: outputPath, provider: 'openai', message: 'Audio generated' });
+    }
+
+    private async speakElevenLabs(text: string, voice: string, outputPath: string): Promise<ToolResult> {
+        const apiKey = process.env['ELEVENLABS_API_KEY'];
+        if (!apiKey) {
+            return this.createResult('ELEVENLABS_API_KEY is required for ElevenLabs TTS', true);
+        }
+
+        const voiceId = voice || 'EXAVITQu4vr4xnSDxMaL'; // Default: "Bella"
+        logger.tool('speak_text', 'Generating speech via ElevenLabs', { voiceId });
+
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+            method: 'POST',
+            headers: {
+                'xi-api-key': apiKey,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                text,
+                model_id: 'eleven_monolingual_v1',
+                voice_settings: { stability: 0.5, similarity_boost: 0.75 },
+            }),
+        });
+
+        if (!response.ok) {
+            const err = await response.text();
+            throw new Error(`ElevenLabs API error: ${response.status} ${err}`);
+        }
+
+        const buffer = Buffer.from(await response.arrayBuffer());
+        await writeFile(outputPath, buffer);
+        logger.tool('speak_text', 'Audio saved', { path: outputPath, provider: 'elevenlabs' });
+
+        return this.createResult({ audioPath: outputPath, provider: 'elevenlabs', message: 'Audio generated' });
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Microphone Recording (Tier 3 upgrade)
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    private async listenMicrophone(args: Record<string, unknown>): Promise<ToolResult> {
+        const durationSeconds = (args['durationSeconds'] as number) || 5;
+        const outputPath = (args['outputPath'] as string) || join(tmpdir(), `jarvis_mic_${randomUUID()}.wav`);
+
+        const { exec } = await import('child_process');
+
+        return new Promise((resolve) => {
+            const isWindows = process.platform === 'win32';
+            const command = isWindows
+                ? `ffmpeg -f dshow -i audio="Microphone" -t ${durationSeconds} -y "${outputPath}" 2>nul`
+                : `rec -q "${outputPath}" trim 0 ${durationSeconds} 2>/dev/null`;
+
+            logger.tool('listen_microphone', 'Recording', { durationSeconds, outputPath });
+
+            exec(command, { timeout: (durationSeconds + 5) * 1000 }, (error) => {
+                if (error) {
+                    resolve(this.createResult(`Microphone recording failed. Ensure sox (Unix) or ffmpeg (Windows) is installed.`, true));
+                } else {
+                    logger.tool('listen_microphone', 'Recording saved', { path: outputPath });
+                    resolve(this.createResult({ 
+                        audioPath: outputPath, 
+                        durationSeconds,
+                        message: 'Microphone recording saved',
+                    }));
+                }
+            });
+        });
     }
 }
 

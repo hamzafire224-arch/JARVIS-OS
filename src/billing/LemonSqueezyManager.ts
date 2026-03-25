@@ -8,7 +8,7 @@
 
 import crypto from 'crypto';
 import { logger } from '../utils/logger.js';
-import { getSupabaseClient } from '../db/SupabaseClient.js';
+import { getSupabaseAdmin } from '../db/SupabaseClient.js';
 
 export interface SubscriptionStatus {
     isActive: boolean;
@@ -44,7 +44,7 @@ export class LemonSqueezyManager {
      * Looks up natively in the Supabase instance since the LemonSqueezy webhook pushes data there!
      */
     public async checkUserSubscription(userId: string): Promise<SubscriptionStatus> {
-        const supabase = getSupabaseClient();
+        const supabase = getSupabaseAdmin();
         if (!supabase) {
             // If offline, act strictly as free tier or check local fallback if wanted
             return { isActive: false, tier: 'free' };
@@ -52,8 +52,8 @@ export class LemonSqueezyManager {
 
         try {
             const { data, error } = await supabase
-                .from('jarvis_subscriptions')
-                .select('status, tier, renews_at')
+                .from('subscriptions')
+                .select('status, plan, current_period_end')
                 .eq('user_id', userId)
                 .single();
 
@@ -61,10 +61,16 @@ export class LemonSqueezyManager {
                 return { isActive: false, tier: 'free' };
             }
 
+            const tierMap: Record<string, 'free' | 'pro' | 'enterprise'> = {
+                balanced: 'free',
+                productivity: 'pro',
+                enterprise: 'enterprise',
+            };
+
             return {
                 isActive: data.status === 'active',
-                tier: data.tier as 'free' | 'pro' | 'enterprise',
-                renewsAt: data.renews_at
+                tier: tierMap[data.plan] ?? 'free',
+                renewsAt: data.current_period_end
             };
         } catch (err) {
             logger.warn('Failed to verify user subscription', { error: String(err) });

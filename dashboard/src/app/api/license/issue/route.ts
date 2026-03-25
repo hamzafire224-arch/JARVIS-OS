@@ -1,7 +1,8 @@
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { withCors, corsPreflightResponse } from '@/lib/cors';
+import { issueLimiter, getClientIp } from '@/lib/rate-limit';
 
 export async function OPTIONS() {
     return corsPreflightResponse();
@@ -9,13 +10,23 @@ export async function OPTIONS() {
 
 export async function POST(request: Request) {
     try {
+        // Rate limit: 5 requests per minute per IP
+        const ip = getClientIp(request);
+        const { success: rateLimitOk } = issueLimiter.check(ip);
+        if (!rateLimitOk) {
+            return withCors(NextResponse.json(
+                { error: 'Too many requests. Try again in a minute.' },
+                { status: 429, headers: { 'Retry-After': '60' } }
+            ));
+        }
+
         const { user_id } = await request.json();
 
         if (!user_id) {
             return withCors(NextResponse.json({ error: 'user_id required' }, { status: 400 }));
         }
 
-        const supabase = await createClient();
+        const supabase = createAdminClient();
 
         // Verify user exists
         const { data: profile } = await supabase

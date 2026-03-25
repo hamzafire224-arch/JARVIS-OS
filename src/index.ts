@@ -18,6 +18,12 @@ import { getTieredProviderManager } from './providers/index.js';
 import { LicenseManager } from './license/index.js';
 import type { ApprovalRequest, ApprovalResponse } from './agent/types.js';
 import { ConversationHistory } from './context/ConversationHistory.js';
+import { ReasoningEngine, type ProgressCallbacks } from './agent/ReasoningEngine.js';
+import { AgentCollaborator, type CollaborationCallbacks } from './agent/AgentCollaborator.js';
+import { getWorldModel } from './agent/WorldModel.js';
+import { getMCPBridge } from './skills/MCPBridge.js';
+import { getMCPConnectorGallery } from './skills/MCPConnectorGallery.js';
+import { getVoiceService, type VoiceEvent } from './skills/VoiceService.js';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Banner
@@ -170,6 +176,12 @@ async function main() {
 │ /branch NAME - Fork conversation            │
 │ /branches    - List all branches            │
 │ /switch NAME - Switch to branch             │
+│ /auto GOAL   - Autonomous goal execution    │
+│ /collab MSG  - Multi-agent collaboration    │
+│ /alerts      - View proactive suggestions   │
+│ /connect ID  - Connect MCP server           │
+│ /mcp         - List MCP servers/connectors  │
+│ /voice       - Toggle voice mode            │
 │ /exit        - Exit JARVIS                  │
 └─────────────────────────────────────────────┘
 `);
@@ -370,6 +382,175 @@ async function main() {
                                     const active = b.isActive ? ' ← active' : '';
                                     const parent = b.parentBranch ? ` (from ${b.parentBranch})` : '';
                                     console.log(`   ${b.isActive ? '●' : '○'} ${b.name}${parent} — ${b.snapshotCount} snapshots${active}`);
+                                }
+                                break;
+                            }
+
+                            case '/auto': {
+                                if (!cmdArg) {
+                                    console.log('Usage: /auto <goal> — JARVIS autonomously decomposes and executes a complex goal');
+                                    console.log('Example: /auto Create a REST API for a todo app with Express and TypeScript');
+                                    break;
+                                }
+                                console.log('\n🧠 Autonomous Execution Mode');
+                                console.log('━'.repeat(50));
+                                console.log(`🎯 Goal: ${cmdArg}`);
+                                console.log('');
+
+                                const progressCallbacks: ProgressCallbacks = {
+                                    onPlanStart: (goal) => {
+                                        console.log('📋 Planning... Decomposing goal into execution tree...');
+                                    },
+                                    onPlanComplete: (_tree, nodeCount) => {
+                                        console.log(`✅ Plan ready: ${nodeCount} step(s) identified\n`);
+                                    },
+                                    onNodeStart: (node, iteration, max) => {
+                                        console.log(`⚡ [${iteration}/${max}] Executing: ${node.description}`);
+                                    },
+                                    onNodeComplete: (node, success) => {
+                                        if (success) {
+                                            console.log(`   ✅ Success`);
+                                        } else {
+                                            console.log(`   ❌ Failed: ${node.error || 'Verification rejected'}`);
+                                        }
+                                    },
+                                    onReplan: (failed, patch) => {
+                                        console.log(`   🔄 Replanning: ${patch.description}`);
+                                    },
+                                    onComplete: (result, success) => {
+                                        console.log('\n' + '━'.repeat(50));
+                                        console.log(success ? '🎉 Goal completed successfully!' : '⚠️  Goal completed with issues.');
+                                    },
+                                };
+
+                                try {
+                                    const reasoningEngine = new ReasoningEngine(agent as any);
+                                    const autoResult = await reasoningEngine.executeComplexGoal(cmdArg, progressCallbacks);
+                                    console.log('\n📝 Final Output:\n');
+                                    console.log(autoResult);
+                                } catch (autoErr) {
+                                    console.error(`\n❌ Autonomous execution failed: ${autoErr instanceof Error ? autoErr.message : autoErr}`);
+                                }
+                                break;
+                            }
+
+                            case '/collab': {
+                                if (!cmdArg) {
+                                    console.log('Usage: /collab <task> — JARVIS uses multiple agents in parallel for complex tasks');
+                                    console.log('Example: /collab Research best practices for authentication and implement a JWT solution');
+                                    break;
+                                }
+                                console.log('\n🤝 Multi-Agent Collaboration Mode');
+                                console.log('━'.repeat(50));
+                                console.log(`🎯 Task: ${cmdArg}`);
+                                console.log('');
+
+                                const collabCallbacks: CollaborationCallbacks = {
+                                    onPlanCreated: (plan) => {
+                                        console.log(`📋 Plan: ${plan.assignments.length} subtask(s) across ${new Set(plan.assignments.map(a => a.agentName)).size} agent(s)`);
+                                        for (const a of plan.assignments) {
+                                            console.log(`   • ${a.agentName} [${a.mode}]: ${a.subtask.slice(0, 80)}...`);
+                                        }
+                                        console.log('');
+                                    },
+                                    onAgentStart: (agentName, subtask) => {
+                                        console.log(`⚡ ${agentName} starting...`);
+                                    },
+                                    onAgentComplete: (agentName, subtask, success) => {
+                                        console.log(`   ${success ? '✅' : '❌'} ${agentName} ${success ? 'completed' : 'failed'}`);
+                                    },
+                                    onSynthesisStart: () => {
+                                        console.log('\n🔗 Synthesizing results...');
+                                    },
+                                    onComplete: (result, durationMs) => {
+                                        console.log('\n' + '━'.repeat(50));
+                                        console.log(`🎉 Collaboration complete (${(durationMs / 1000).toFixed(1)}s)`);
+                                    },
+                                };
+
+                                try {
+                                    const collaborator = new AgentCollaborator();
+                                    const collabResult = await collaborator.collaborate(cmdArg, agent as any, collabCallbacks);
+                                    console.log('\n📝 Response:\n');
+                                    console.log(collabResult);
+                                } catch (collabErr) {
+                                    console.error(`\n❌ Collaboration failed: ${collabErr instanceof Error ? collabErr.message : collabErr}`);
+                                }
+                                break;
+                            }
+
+                            case '/alerts': {
+                                const worldModel = getWorldModel();
+                                const alerts = worldModel.getPendingAlerts();
+                                if (alerts.length === 0) {
+                                    console.log('\n✨ No pending alerts — everything looks good!');
+                                } else {
+                                    console.log(`\n🔔 Proactive Alerts (${alerts.length}):`);
+                                    for (const alert of alerts) {
+                                        const urgencyIcon = { low: '💡', medium: '📌', high: '⚠️', critical: '🚨' }[alert.urgency];
+                                        console.log(`   ${urgencyIcon} [${alert.source}] ${alert.message}`);
+                                        console.log(`      Action: ${alert.actionSuggestion}`);
+                                    }
+                                }
+                                break;
+                            }
+
+                            case '/connect': {
+                                if (!cmdArg) {
+                                    console.log('Usage: /connect <connector-id> — Connect an MCP server');
+                                    console.log('Example: /connect github');
+                                    console.log('\nRun /mcp to see available connectors.');
+                                    break;
+                                }
+                                console.log(`\n🔌 Connecting to MCP server: ${cmdArg}...`);
+
+                                try {
+                                    const bridge = getMCPBridge();
+                                    const result = await bridge.connectByName(cmdArg);
+                                    if (result.success) {
+                                        console.log(`✅ Connected! ${result.tools} tools now available.`);
+                                    } else {
+                                        console.log(`❌ ${result.error}`);
+                                    }
+                                } catch (err) {
+                                    console.error(`❌ Connection failed: ${err instanceof Error ? err.message : err}`);
+                                }
+                                break;
+                            }
+
+                            case '/mcp': {
+                                const bridge = getMCPBridge();
+                                console.log('\n' + bridge.getConnectedSummary());
+                                console.log('');
+                                const gallery = getMCPConnectorGallery();
+                                console.log(gallery.getSummary());
+                                break;
+                            }
+
+                            case '/voice': {
+                                const voiceService = getVoiceService();
+                                if (voiceService.running) {
+                                    voiceService.stop();
+                                    console.log('\n🔇 Voice mode disabled.');
+                                } else {
+                                    console.log('\n🎙️ Starting voice mode...');
+                                    const started = await voiceService.start();
+                                    if (started) {
+                                        voiceService.on('voice_event', (event: VoiceEvent) => {
+                                            if (event.type === 'wake_word') {
+                                                console.log('\n🗣️ Wake word detected! Listening...');
+                                            } else if (event.type === 'transcription') {
+                                                const text = (event.data as any).text;
+                                                console.log(`\n📝 You said: "${text}"`);
+                                                console.log('Processing...');
+                                            }
+                                        });
+                                        const status = voiceService.getStatus();
+                                        console.log(`✅ Voice mode active (STT: ${status.sttProvider}, TTS: ${status.ttsProvider})`);
+                                        console.log(`   Wake words: ${status.wakeWords.join(', ')}`);
+                                    } else {
+                                        console.log('❌ Could not start voice mode. Check OPENAI_API_KEY and audio tools (sox/ffmpeg).');
+                                    }
                                 }
                                 break;
                             }

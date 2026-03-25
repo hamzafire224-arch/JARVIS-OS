@@ -10,11 +10,13 @@
 export interface LicenseValidationResult {
     valid: boolean;
     variant: 'balanced' | 'productivity';
-    status: 'active' | 'past_due' | 'degraded' | 'cancelled' | 'expired' | 'free';
+    status: 'active' | 'past_due' | 'degraded' | 'cancelled' | 'expired' | 'free' | 'trial' | 'trial_expired';
     warning?: string;
     expires?: string;
     grace_until?: string;
     reason?: string;
+    trial_days_left?: number;
+    trial_expired?: boolean;
 }
 
 const DEFAULT_API_URL = 'https://app.personaljarvis.dev';

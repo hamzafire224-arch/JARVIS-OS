@@ -70,9 +70,146 @@ interface EpisodicStore {
 // Session Compactor (converts conversation to episode)
 // ═══════════════════════════════════════════════════════════════════════════════
 
+/**
+ * LLM-generated session summary structure.
+ * This is the JSON schema we ask the LLM to produce.
+ */
+interface LLMSessionSummary {
+    summary: string;
+    highlights: Array<{ type: EpisodeHighlight['type']; content: string; importance: EpisodeHighlight['importance'] }>;
+    decisions: string[];
+    tasksCompleted: string[];
+    errorsResolved: string[];
+    preferencesLearned: string[];
+    mood: Episode['mood'];
+}
+
+/**
+ * Provider interface for session compaction LLM calls.
+ * Any object with a `generateResponse` method works (matches LLMProvider).
+ */
+export interface CompactorLLMProvider {
+    generateResponse(
+        messages: Array<{ role: string; content: string }>,
+        systemPrompt: string,
+        tools?: unknown[],
+        options?: { maxTokens?: number; temperature?: number }
+    ): Promise<{ content: string }>;
+}
+
 export class SessionCompactor {
+    private llmProvider: CompactorLLMProvider | null = null;
+
     /**
-     * Extract highlights from conversation messages
+     * Set an LLM provider for intelligent summarization.
+     * If not set, falls back to regex-based extraction.
+     */
+    setLLMProvider(provider: CompactorLLMProvider): void {
+        this.llmProvider = provider;
+    }
+
+    /**
+     * Extract highlights from conversation messages.
+     * Uses LLM when available, falls back to regex.
+     */
+    async compactSessionAsync(
+        sessionId: string,
+        messages: Array<{ role: string; content: string; timestamp?: Date }>,
+        metadata?: { duration?: number }
+    ): Promise<Episode> {
+        // Try LLM-powered summarization first
+        if (this.llmProvider && messages.length >= 2) {
+            try {
+                const llmEpisode = await this.compactWithLLM(sessionId, messages, metadata);
+                logger.info('[EPISODIC] Session compacted via LLM', {
+                    sessionId,
+                    highlights: llmEpisode.highlights.length,
+                });
+                return llmEpisode;
+            } catch (err) {
+                logger.warn('[EPISODIC] LLM compaction failed, falling back to regex', {
+                    error: err instanceof Error ? err.message : String(err),
+                });
+            }
+        }
+
+        // Fallback: regex-based extraction (original logic)
+        return this.compactSession(sessionId, messages, metadata);
+    }
+
+    /**
+     * LLM-powered session summarization.
+     * Sends the conversation to the cheapest available LLM with a structured JSON prompt.
+     */
+    private async compactWithLLM(
+        sessionId: string,
+        messages: Array<{ role: string; content: string; timestamp?: Date }>,
+        metadata?: { duration?: number }
+    ): Promise<Episode> {
+        // Build a condensed transcript (limit to last 40 messages to fit context)
+        const truncated = messages.slice(-40);
+        const transcript = truncated
+            .map(m => `[${m.role}]: ${m.content.slice(0, 500)}`)
+            .join('\n\n');
+
+        const systemPrompt = `You are a session summarizer for an AI coding assistant called JARVIS.
+Analyze the conversation transcript and extract structured information.
+Respond with ONLY a valid JSON object (no markdown fences, no extra text) matching this exact schema:
+{
+  "summary": "2-3 sentence summary of what happened in the session",
+  "highlights": [
+    { "type": "task|decision|learning|error|preference", "content": "description", "importance": "low|medium|high" }
+  ],
+  "decisions": ["key decisions made"],
+  "tasksCompleted": ["tasks that were completed"],
+  "errorsResolved": ["errors or bugs that were fixed"],
+  "preferencesLearned": ["user preferences discovered"],
+  "mood": "productive|challenging|exploratory|routine"
+}
+Rules:
+- Keep each string under 100 characters
+- Maximum 10 highlights
+- Be specific and factual, not generic
+- "mood" reflects the overall session character`;
+
+        const response = await this.llmProvider!.generateResponse(
+            [{ role: 'user', content: `Session Transcript:\n\n${transcript}` }],
+            systemPrompt,
+            undefined,
+            { maxTokens: 1024, temperature: 0.3 }
+        );
+
+        // Parse LLM response
+        const cleanedJson = response.content
+            .replace(/```json\s*/g, '')
+            .replace(/```\s*/g, '')
+            .trim();
+
+        const parsed: LLMSessionSummary = JSON.parse(cleanedJson);
+
+        // Validate and build Episode
+        return {
+            id: randomUUID(),
+            sessionId,
+            timestamp: new Date(),
+            summary: parsed.summary || 'Session summary unavailable.',
+            highlights: (parsed.highlights || []).map(h => ({
+                type: h.type || 'task',
+                content: h.content || '',
+                importance: h.importance || 'medium',
+            })),
+            decisions: parsed.decisions || [],
+            tasksCompleted: parsed.tasksCompleted || [],
+            errorsResolved: parsed.errorsResolved || [],
+            preferencesLearned: parsed.preferencesLearned || [],
+            mood: parsed.mood || 'routine',
+            duration: metadata?.duration,
+            messageCount: messages.length,
+        };
+    }
+
+    /**
+     * Regex-based extraction (original logic, used as fallback)
      */
     compactSession(
         sessionId: string,

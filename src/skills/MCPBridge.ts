@@ -384,6 +384,65 @@ export class MCPBridge extends MultiToolSkill {
         }));
     }
 
+    /**
+     * Connect by gallery name (Tier 3 upgrade).
+     * Looks up the connector in MCPConnectorGallery and auto-connects.
+     */
+    async connectByName(connectorId: string): Promise<{ success: boolean; tools: number; error?: string }> {
+        try {
+            const { getMCPConnectorGallery } = await import('./MCPConnectorGallery.js');
+            const gallery = getMCPConnectorGallery();
+            const config = gallery.getConnectionConfig(connectorId);
+
+            if (!config) {
+                return { success: false, tools: 0, error: `Unknown connector: "${connectorId}". Use /mcp to see available connectors.` };
+            }
+
+            // Check required env vars
+            const entry = gallery.getById(connectorId);
+            if (entry?.requiredEnvVars) {
+                const missing = entry.requiredEnvVars.filter(v => !process.env[v]);
+                if (missing.length > 0) {
+                    return {
+                        success: false,
+                        tools: 0,
+                        error: `Missing environment variables: ${missing.join(', ')}. ${entry.setupInstructions ?? ''}`,
+                    };
+                }
+            }
+
+            const tools = await this.connect(config);
+            return { success: true, tools: tools.length };
+        } catch (err) {
+            return {
+                success: false,
+                tools: 0,
+                error: err instanceof Error ? err.message : String(err),
+            };
+        }
+    }
+
+    /**
+     * Get a human-readable summary of connected servers and available connectors.
+     */
+    getConnectedSummary(): string {
+        const status = this.getServerStatus();
+        const lines: string[] = [];
+
+        if (status.length === 0) {
+            lines.push('No MCP servers connected.');
+            lines.push('Use /connect <name> to connect. Use /mcp to see available connectors.');
+        } else {
+            lines.push('Connected MCP Servers:');
+            for (const s of status) {
+                const icon = s.connected ? '🟢' : '🔴';
+                lines.push(`  ${icon} ${s.name} [${s.transport}] — ${s.toolCount} tools`);
+            }
+        }
+
+        return lines.join('\n');
+    }
+
     // ─────────────────────────────────────────────────────────────────────────────
     // JSON-RPC Transport
     // ─────────────────────────────────────────────────────────────────────────────
