@@ -1,233 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About — PersonalJARVIS</title>
-    <meta name="description"
-        content="The story behind PersonalJARVIS: our mission to make AI-assisted development accessible to every developer.">
-    <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/pages.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About — PersonalJARVIS</title>
+  <meta name="description" content="Learn about PersonalJARVIS — our vision, roadmap, and commitment to open source AI development tools.">
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/pages.css">
 </head>
-
 <body class="page-enter">
 
-    <!-- Navigation -->
-    <nav class="nav" id="nav">
-        <div class="nav-inner">
-            <a href="index.html" class="nav-brand">
-                <img src="assets/logo.svg" alt="PersonalJARVIS">
-                <span>PersonalJARVIS</span>
-            </a>
-            <div class="nav-links" id="navLinks">
-                <a href="index.html">Home</a>
-                <a href="features.html">Features</a>
-                <a href="pricing.html">Pricing</a>
-                <a href="about.html" class="active">About</a>
-                <a href="docs.html">Docs</a>
-                <a href="pricing.html" class="btn btn-primary btn-sm">Get Started Free</a>
-            </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
-                <span></span><span></span><span></span>
-            </button>
+  <!-- ═══ Navigation ═══ -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        <img src="assets/logo.svg" alt="PersonalJARVIS">
+        <span>PersonalJARVIS</span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html">Home</a>
+        <a href="features.html">Features</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="about.html">About</a>
+        <a href="docs.html">Docs</a>
+        <a href="docs.html" class="btn btn-primary btn-sm">Get Started Free</a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ═══ Hero ═══ -->
+  <section class="section about-hero" style="padding-top: calc(var(--nav-height) + var(--space-16));">
+    <div class="gradient-mesh">
+      <div class="gradient-orb gradient-orb-1"></div>
+      <div class="gradient-orb gradient-orb-2"></div>
+    </div>
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="badge">About</span>
+        <h1>AI Should Work <span class="text-gradient">For You</span></h1>
+        <p>Not the other way around. We're building the future of personal AI — open, private, and endlessly extensible.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Vision ═══ -->
+  <section class="section" id="vision">
+    <div class="container">
+      <div class="vision-section reveal">
+        <h2 style="margin-bottom: var(--space-6);">Our <span class="text-gradient">Vision</span></h2>
+        <p style="color: var(--text-secondary); font-size: var(--font-size-lg); line-height: 1.8; margin-bottom: var(--space-6);">
+          Most AI coding tools today are <strong style="color: var(--text-primary);">cloud-dependent, vendor-locked, and opaque</strong>. They send your code to external servers, charge monthly fees for basic functionality, and give you zero control over the model or behavior.
+        </p>
+        <p style="color: var(--text-secondary); font-size: var(--font-size-lg); line-height: 1.8; margin-bottom: var(--space-6);">
+          We believe AI assistants should be <strong style="color: var(--text-primary);">personal</strong>. They should run locally when possible, remember your preferences, learn from your coding style, and never compromise your privacy. That's why we built PersonalJARVIS.
+        </p>
+        <p style="color: var(--text-secondary); font-size: var(--font-size-lg); line-height: 1.8;">
+          JARVIS isn't just an autocomplete tool — it's an <strong style="color: var(--text-primary);">AI operating system</strong> that reads files, writes code, runs commands, manages projects, and adapts to how you work. And it's 100% open source.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Principles ═══ -->
+  <section class="section" style="background: var(--bg-secondary);">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="badge">Principles</span>
+        <h2>What We <span class="text-gradient">Believe</span></h2>
+      </div>
+
+      <div class="grid grid-3 stagger-children">
+        <div class="card">
+          <div class="card-icon">🔓</div>
+          <h3>Open Over Closed</h3>
+          <p>Every line of code is MIT-licensed. Fork it, modify it, sell it. We believe the best developer tools are community-driven and transparent.</p>
         </div>
-    </nav>
 
-    <!-- Hero -->
-    <section class="hero" style="min-height: 60vh;">
-        <div class="hero-glow hero-glow-1"></div>
-        <div class="hero-glow hero-glow-2"></div>
-        <div class="hero-content">
-            <div class="hero-badge"><span class="badge">Our Story</span></div>
-            <h1>AI for <span class="text-gradient">Every Developer</span></h1>
-            <p class="hero-subtitle">We believe the best AI assistant is one you own, control, and trust. PersonalJARVIS
-                is built to put the power of AI in your hands — not a corporation's cloud.</p>
+        <div class="card">
+          <div class="card-icon">🏠</div>
+          <h3>Local Over Cloud</h3>
+          <p>Your data stays on your machine. We prioritize local execution with Ollama and only use cloud AI when you explicitly choose to — and when the task demands it.</p>
         </div>
-    </section>
 
-    <!-- Mission -->
-    <section class="section">
-        <div class="container">
-            <div class="grid grid-2 reveal" style="align-items: center; gap: var(--space-16);">
-                <div>
-                    <span class="badge">Mission</span>
-                    <h2 style="margin-top: var(--space-4); margin-bottom: var(--space-6);">Democratize <span
-                            class="text-gradient">AI-Assisted Development</span></h2>
-                    <p style="color: var(--text-secondary); line-height: 1.8; margin-bottom: var(--space-4);">
-                        Most AI coding tools are locked behind expensive subscriptions, send your code to third-party
-                        servers, and give you zero control over how they work.
-                    </p>
-                    <p style="color: var(--text-secondary); line-height: 1.8; margin-bottom: var(--space-4);">
-                        PersonalJARVIS is different. It's <strong style="color: var(--text-primary);">open
-                            source</strong>, <strong style="color: var(--text-primary);">local-first</strong>, and
-                        <strong style="color: var(--text-primary);">fully customizable</strong>. Your code stays on your
-                        machine. Your data stays private. Your AI works for you.
-                    </p>
-                    <p style="color: var(--text-secondary); line-height: 1.8;">
-                        We started this project because we were tired of paying for cloud AI for tasks a local model
-                        handles just fine. The tiered inference engine was born from frustration — and it saves up to
-                        90% on API costs.
-                    </p>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
-                    <div class="card" style="text-align: center;">
-                        <div style="font-size: var(--font-size-4xl); font-weight: 800; margin-bottom: var(--space-2);">
-                            <span class="text-gradient">100%</span></div>
-                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Open Source</div>
-                    </div>
-                    <div class="card" style="text-align: center;">
-                        <div style="font-size: var(--font-size-4xl); font-weight: 800; margin-bottom: var(--space-2);">
-                            <span class="text-gradient">0</span></div>
-                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Data Sent to Us</div>
-                    </div>
-                    <div class="card" style="text-align: center;">
-                        <div style="font-size: var(--font-size-4xl); font-weight: 800; margin-bottom: var(--space-2);">
-                            <span class="text-gradient">5K+</span></div>
-                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Lines of TypeScript
-                        </div>
-                    </div>
-                    <div class="card" style="text-align: center;">
-                        <div style="font-size: var(--font-size-4xl); font-weight: 800; margin-bottom: var(--space-2);">
-                            <span class="text-gradient">MIT</span></div>
-                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">License</div>
-                    </div>
-                </div>
-            </div>
+        <div class="card">
+          <div class="card-icon">🧩</div>
+          <h3>Extensible Over Monolithic</h3>
+          <p>JARVIS is a platform, not a product. Skills, plugins, MCP connectors — extend it to do anything. If we haven't built it, you (or the community) can.</p>
         </div>
-    </section>
 
-    <!-- Values -->
-    <section class="section" style="background: var(--bg-secondary);">
-        <div class="container">
-            <div class="section-header reveal">
-                <span class="badge">Values</span>
-                <h2>What We <span class="text-gradient">Stand For</span></h2>
-            </div>
-
-            <div class="grid grid-3 stagger-children">
-                <div class="card card-glow">
-                    <div class="card-icon">🔒</div>
-                    <h3>Privacy First</h3>
-                    <p>Your code, your data, your machine. PersonalJARVIS never phones home. Analytics are local-only
-                        and anonymized. Memory stays on disk.</p>
-                </div>
-                <div class="card card-glow">
-                    <div class="card-icon">🌍</div>
-                    <h3>Open Source</h3>
-                    <p>MIT licensed. Every line of code is public. Fork it, modify it, contribute back. We believe
-                        transparency builds trust.</p>
-                </div>
-                <div class="card card-glow">
-                    <div class="card-icon">⚡</div>
-                    <h3>Developer Experience</h3>
-                    <p>One-command setup, smart defaults, beautiful CLI output. We obsess over making the developer
-                        experience effortless.</p>
-                </div>
-            </div>
+        <div class="card">
+          <div class="card-icon">🧠</div>
+          <h3>Smart Over Expensive</h3>
+          <p>Tiered inference routes simple tasks to free local models. You only pay for cloud AI when it genuinely matters. Most workflows cost pennies, not dollars.</p>
         </div>
-    </section>
 
-    <!-- Vision / Roadmap -->
-    <section class="section" id="vision">
-        <div class="container">
-            <div class="section-header reveal">
-                <span class="badge">Vision</span>
-                <h2>The <span class="text-gradient">Road Ahead</span></h2>
-                <p>PersonalJARVIS is just getting started. Here's where we're headed.</p>
-            </div>
-
-            <div class="vision-section reveal">
-                <div class="timeline">
-                    <div class="timeline-step" data-step="1">
-                        <h4 style="margin-bottom: var(--space-2); color: var(--accent-1);">Now — Foundation</h4>
-                        <p style="color: var(--text-secondary); font-size: var(--font-size-sm); line-height: 1.7;">
-                            Security framework, tiered inference, hierarchical memory, skill marketplace, and usage
-                            analytics. The core platform is live and production-ready.</p>
-                    </div>
-
-                    <div class="timeline-step" data-step="2">
-                        <h4 style="margin-bottom: var(--space-2); color: var(--accent-1);">Next — Integration</h4>
-                        <p style="color: var(--text-secondary); font-size: var(--font-size-sm); line-height: 1.7;">IDE
-                            plugins (VS Code, JetBrains), streaming responses for local models, real-time collaboration,
-                            and a hosted skill registry with community contributions.</p>
-                    </div>
-
-                    <div class="timeline-step" data-step="3">
-                        <h4 style="margin-bottom: var(--space-2); color: var(--accent-1);">Future — Intelligence</h4>
-                        <p style="color: var(--text-secondary); font-size: var(--font-size-sm); line-height: 1.7;">
-                            Multi-agent orchestration, auto-tuning complexity thresholds via A/B testing, project-aware
-                            context understanding, and an end-to-end visual debugging experience.</p>
-                    </div>
-
-                    <div class="timeline-step" data-step="4">
-                        <h4 style="margin-bottom: var(--space-2); color: var(--accent-1);">Vision — Ecosystem</h4>
-                        <p style="color: var(--text-secondary); font-size: var(--font-size-sm); line-height: 1.7;">A
-                            thriving open-source ecosystem where developers build, share, and monetize AI skills.
-                            PersonalJARVIS becomes the operating system for developer productivity.</p>
-                    </div>
-                </div>
-            </div>
+        <div class="card">
+          <div class="card-icon">🛡️</div>
+          <h3>Safe Over Fast</h3>
+          <p>Security isn't optional. Capability-based permissions, blocked destructive commands, and full audit logging come built-in — not as an afterthought.</p>
         </div>
-    </section>
 
-    <!-- Open Source CTA -->
-    <section class="section final-cta">
-        <div class="cta-glow"></div>
-        <div class="container final-cta-content reveal">
-            <h2>Join the <span class="text-gradient">Community</span></h2>
-            <p>PersonalJARVIS is built by developers, for developers. Star us on GitHub, contribute code, or just say
-                hello.</p>
-            <div style="display: flex; gap: var(--space-4); justify-content: center; flex-wrap: wrap;">
-                <a href="https://github.com/hamzafire224-arch/JARVIS-OS" target="_blank"
-                    class="btn btn-primary btn-lg">⭐ Star on GitHub</a>
-                <a href="docs.html" class="btn btn-secondary btn-lg">Read the Docs →</a>
-            </div>
+        <div class="card">
+          <div class="card-icon">🤝</div>
+          <h3>Honest Over Hype</h3>
+          <p>We don't use dark patterns, hidden fees, or misleading marketing. If something doesn't work yet, we say so. If it's experimental, we label it.</p>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-brand">
-                    <a href="index.html" class="nav-brand">
-                        <img src="assets/logo.svg" alt="PersonalJARVIS" style="width:28px;height:28px;">
-                        <span>PersonalJARVIS</span>
-                    </a>
-                    <p>Your open-source AI operating system. Build faster, debug smarter, automate everything.</p>
-                </div>
-                <div class="footer-col">
-                    <h4>Product</h4>
-                    <a href="features.html">Features</a>
-                    <a href="pricing.html">Pricing</a>
-                    <a href="docs.html">Documentation</a>
-                    <a href="https://github.com/hamzafire224-arch/JARVIS-OS" target="_blank">GitHub</a>
-                </div>
-                <div class="footer-col">
-                    <h4>Resources</h4>
-                    <a href="docs.html#quickstart">Quick Start</a>
-                    <a href="docs.html#providers">Providers</a>
-                    <a href="docs.html#security">Security</a>
-                    <a href="docs.html#skills">Skills</a>
-                </div>
-                <div class="footer-col">
-                    <h4>Company</h4>
-                    <a href="about.html">About</a>
-                    <a href="about.html#vision">Vision</a>
-                    <a href="mailto:contact@personaljarvis.dev">Contact</a>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <span>© 2026 PersonalJARVIS. Open source under MIT License.</span>
-                <span>Built with ❤️ for developers</span>
-            </div>
+  <!-- ═══ Roadmap ═══ -->
+  <section class="section" id="roadmap">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="badge">Roadmap</span>
+        <h2>Where We're <span class="text-gradient">Going</span></h2>
+        <p>The journey from CLI to full AGI operating system.</p>
+      </div>
+
+      <div class="vision-section reveal">
+        <div class="timeline">
+          <div class="timeline-step" data-step="1">
+            <h4 style="margin-bottom: var(--space-2);">Foundation <span style="color: var(--accent-1);">✓ Complete</span></h4>
+            <p style="color: var(--text-secondary); font-size: var(--font-size-sm);">TypeScript REPL, multi-provider support, security framework, setup wizard, working + semantic memory, skill system, CLI interface.</p>
+          </div>
+          <div class="timeline-step" data-step="2">
+            <h4 style="margin-bottom: var(--space-2);">Intelligence <span style="color: var(--accent-1);">✓ Complete</span></h4>
+            <p style="color: var(--text-secondary); font-size: var(--font-size-sm);">Tiered inference, 4-layer memory, episodic recall, preference learning, cost optimization, analytics, Supabase integration, dashboard.</p>
+          </div>
+          <div class="timeline-step" data-step="3">
+            <h4 style="margin-bottom: var(--space-2);">Autonomy <span style="color: var(--accent-2);">→ In Progress</span></h4>
+            <p style="color: var(--text-secondary); font-size: var(--font-size-sm);">Multi-agent collaboration, tool-chain meta-learning, MCP connector gallery, voice interface, federated insights, dynamic skill generation.</p>
+          </div>
+          <div class="timeline-step" data-step="4">
+            <h4 style="margin-bottom: var(--space-2);">AGI Layer <span style="color: var(--text-muted);">→ Planned</span></h4>
+            <p style="color: var(--text-secondary); font-size: var(--font-size-sm);">Proactive task suggestion, world model reasoning, autonomous project management, cross-device sync, team collaboration, reasoning chains.</p>
+          </div>
         </div>
-    </footer>
+      </div>
+    </div>
+  </section>
 
-    <script src="js/main.js"></script>
+  <!-- ═══ Open Source ═══ -->
+  <section class="section" style="background: var(--bg-secondary);">
+    <div class="container">
+      <div class="section-header reveal">
+        <h2>100% <span class="text-gradient">Open Source</span></h2>
+        <p>Every feature, every line. MIT licensed. Star us on GitHub.</p>
+      </div>
+
+      <div style="text-align: center;" class="reveal">
+        <div style="display: inline-flex; gap: var(--space-4); flex-wrap: wrap; justify-content: center;">
+          <a href="https://github.com/hamzafire224-arch/JARVIS-OS" target="_blank" class="btn btn-primary btn-lg">⭐ Star on GitHub</a>
+          <a href="https://github.com/hamzafire224-arch/JARVIS-OS/issues" target="_blank" class="btn btn-secondary btn-lg">Report an Issue</a>
+          <a href="https://github.com/hamzafire224-arch/JARVIS-OS/pulls" target="_blank" class="btn btn-secondary btn-lg">Contribute</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CTA ═══ -->
+  <section class="section final-cta">
+    <div class="cta-glow"></div>
+    <div class="container final-cta-content reveal">
+      <h2>Join the <span class="text-gradient">Movement</span></h2>
+      <p>Help us build the future of personal AI.</p>
+      <div style="display: flex; gap: var(--space-4); justify-content: center; flex-wrap: wrap;">
+        <a href="docs.html" class="btn btn-primary btn-lg">Get Started Free →</a>
+        <a href="mailto:contact@personaljarvis.dev" class="btn btn-secondary btn-lg">Get in Touch</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Footer ═══ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="nav-brand">
+            <img src="assets/logo.svg" alt="PersonalJARVIS" style="width:28px;height:28px;">
+            <span>PersonalJARVIS</span>
+          </a>
+          <p>Your open-source AI operating system. Build faster, debug smarter, automate everything.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="features.html">Features</a>
+          <a href="pricing.html">Pricing</a>
+          <a href="docs.html">Documentation</a>
+          <a href="https://github.com/hamzafire224-arch/JARVIS-OS" target="_blank">GitHub</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="docs.html#quickstart">Quick Start</a>
+          <a href="docs.html#providers">Providers</a>
+          <a href="docs.html#security">Security</a>
+          <a href="docs.html#skills">Skills</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="about.html">About</a>
+          <a href="about.html#vision">Vision</a>
+          <a href="mailto:contact@personaljarvis.dev">Contact</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 PersonalJARVIS. Open source under MIT License.</span>
+        <span>Built with ❤️ for developers</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
 </body>
-
 </html>

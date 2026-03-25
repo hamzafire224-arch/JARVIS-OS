@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PersonalJARVIS — Your AI Operating System</title>
-  <meta name="description" content="The open-source AI assistant that helps you build features faster, debug code instantly, and automate your entire workflow. Free to start.">
+  <meta name="description" content="The open-source AI assistant that helps you build faster, debug instantly, and automate your workflow. Free to start. No credit card required.">
   <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/animations.css">
@@ -20,12 +20,12 @@
         <span>PersonalJARVIS</span>
       </a>
       <div class="nav-links" id="navLinks">
-        <a href="index.html" class="active">Home</a>
+        <a href="index.html">Home</a>
         <a href="features.html">Features</a>
         <a href="pricing.html">Pricing</a>
         <a href="about.html">About</a>
         <a href="docs.html">Docs</a>
-        <a href="pricing.html" class="btn btn-primary btn-sm">Get Started Free</a>
+        <a href="docs.html" class="btn btn-primary btn-sm">Get Started Free</a>
       </div>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
         <span></span><span></span><span></span>
@@ -35,19 +35,21 @@
 
   <!-- ═══ Hero ═══ -->
   <section class="hero" id="hero">
-    <div class="particles-container"></div>
-    <div class="hero-glow hero-glow-1"></div>
-    <div class="hero-glow hero-glow-2"></div>
-    <div class="hero-glow hero-glow-3"></div>
+    <div class="gradient-mesh">
+      <div class="gradient-orb gradient-orb-1"></div>
+      <div class="gradient-orb gradient-orb-2"></div>
+      <div class="gradient-orb gradient-orb-3"></div>
+    </div>
+    <div class="grid-bg"></div>
 
     <div class="hero-content">
       <div class="hero-badge">
-        <span class="badge">✦ Open Source AI Assistant</span>
+        <span class="badge">✦ Open Source · Free to Use</span>
       </div>
 
       <h1>
-        Your AI<br>
-        <span class="text-gradient">Operating System</span>
+        Your Personal<br>
+        <span class="text-gradient">AI Operating System</span>
       </h1>
 
       <p class="hero-subtitle">
@@ -56,7 +58,7 @@
       </p>
 
       <div class="hero-cta">
-        <a href="pricing.html" class="btn btn-primary btn-lg">Get Started Free →</a>
+        <a href="docs.html" class="btn btn-primary btn-lg pulse-ring">Get Started Free →</a>
         <a href="features.html" class="btn btn-secondary btn-lg">Explore Features</a>
       </div>
 
@@ -67,7 +69,8 @@
             <div class="terminal-dot yellow"></div>
             <div class="terminal-dot green"></div>
           </div>
-          <span class="comment">$ npm run setup</span><br>
+          <span class="comment">$ npm install -g personaljarvis</span><br>
+          <span class="comment">$ jarvis setup</span><br>
           <span class="string">🤖 JARVIS Setup Wizard</span><br>
           <span class="comment">  ✓ Provider configured (Gemini)</span><br>
           <span class="comment">  ✓ Security enabled</span><br>
@@ -84,11 +87,7 @@
       <div class="stats-bar reveal">
         <div class="stat-item">
           <div class="stat-number"><span class="count-up" data-target="90" data-suffix="%">0%</span></div>
-          <div class="stat-label">Cost Savings</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number"><span class="count-up" data-target="20" data-suffix="+">0+</span></div>
-          <div class="stat-label">Security Patterns</div>
+          <div class="stat-label">Cost Savings vs Cloud AI</div>
         </div>
         <div class="stat-item">
           <div class="stat-number"><span class="count-up" data-target="4" data-suffix="">0</span></div>
@@ -97,6 +96,10 @@
         <div class="stat-item">
           <div class="stat-number"><span class="count-up" data-target="15" data-suffix="+">0+</span></div>
           <div class="stat-label">Built-in Skills</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number"><span class="count-up" data-target="100" data-suffix="%">0%</span></div>
+          <div class="stat-label">Open Source</div>
         </div>
       </div>
     </div>
@@ -108,44 +111,44 @@
       <div class="section-header reveal">
         <span class="badge">Features</span>
         <h2>Everything You Need to<br><span class="text-gradient">Ship Faster</span></h2>
-        <p>From security to smart routing, PersonalJARVIS handles the complexity so you can focus on building.</p>
+        <p>From enterprise security to intelligent routing, PersonalJARVIS handles the complexity so you can focus on building.</p>
       </div>
 
       <div class="grid grid-3 stagger-children">
-        <div class="card card-glow">
+        <div class="card">
           <div class="card-icon feature-icon-animated">🛡️</div>
           <h3>Security Framework</h3>
-          <p>Capability-based permissions, malware scanning on skills, and full audit logging. Your tools execute safely — always.</p>
+          <p>Capability-based permissions, blocked commands, malware scanning on skills, and full audit logging. Your system stays safe — always.</p>
         </div>
 
-        <div class="card card-glow">
+        <div class="card">
           <div class="card-icon feature-icon-animated">⚡</div>
           <h3>Tiered Inference</h3>
-          <p>Simple questions route to free local models. Complex tasks go to cloud AI. Save up to 90% on API costs automatically.</p>
+          <p>Simple tasks route to free local models. Complex work goes to cloud AI. Save up to 90% on API costs — automatically.</p>
         </div>
 
-        <div class="card card-glow">
+        <div class="card">
           <div class="card-icon feature-icon-animated">🧠</div>
-          <h3>Hierarchical Memory</h3>
-          <p>4-layer memory system: working, episodic, semantic, and vector. JARVIS remembers context across sessions — no more repeating yourself.</p>
+          <h3>4-Layer Memory</h3>
+          <p>Working, episodic, semantic, and vector memory. JARVIS remembers your preferences, past conversations, and learns from mistakes.</p>
         </div>
 
-        <div class="card card-glow">
+        <div class="card">
           <div class="card-icon feature-icon-animated">🏪</div>
           <h3>Skill Marketplace</h3>
-          <p>Browse, install, and share community skills. From Docker management to API testing — extend JARVIS to fit your workflow.</p>
+          <p>Browse, install, and share community skills. Docker, API testing, git workflows — extend JARVIS to match your workflow.</p>
         </div>
 
-        <div class="card card-glow">
-          <div class="card-icon feature-icon-animated">📊</div>
-          <h3>Usage Analytics</h3>
-          <p>Track your productivity gains, cost savings, and tool usage. Private, local-first analytics that respect your data.</p>
+        <div class="card">
+          <div class="card-icon feature-icon-animated">🔌</div>
+          <h3>MCP Integration</h3>
+          <p>Connect to external tools via Model Context Protocol. One <code style="color: var(--accent-1);">/connect</code> command links databases, APIs, and services.</p>
         </div>
 
-        <div class="card card-glow">
-          <div class="card-icon feature-icon-animated">🚀</div>
-          <h3>One-Click Setup</h3>
-          <p>Run one command, answer a few questions, and you're ready. Setup wizard handles providers, security, and configuration.</p>
+        <div class="card">
+          <div class="card-icon feature-icon-animated">🎙️</div>
+          <h3>Voice Interface</h3>
+          <p>Talk to JARVIS naturally. Wake word detection, streaming text-to-speech, and hands-free operation for when you're in the zone.</p>
         </div>
       </div>
 
@@ -160,7 +163,7 @@
     <div class="container">
       <div class="section-header reveal">
         <span class="badge">How It Works</span>
-        <h2>Up and Running in <span class="text-gradient">3 Steps</span></h2>
+        <h2>Ready in <span class="text-gradient">3 Steps</span></h2>
         <p>From zero to your personal AI assistant in under 5 minutes.</p>
       </div>
 
@@ -168,20 +171,117 @@
         <div class="step-card">
           <div class="step-number">1</div>
           <h3>Install</h3>
-          <p>Clone the repo and run <code style="color: var(--accent-1);">npm install</code>. That's it — no complex dependencies or Docker setups required.</p>
+          <p>Run <code style="color: var(--accent-1);">npm install -g personaljarvis</code> — no Docker, no complex dependencies.</p>
         </div>
 
         <div class="step-card">
           <div class="step-number">2</div>
           <h3>Configure</h3>
-          <p>Run <code style="color: var(--accent-1);">npm run setup</code> — the interactive wizard handles providers, API keys, and security preferences.</p>
+          <p>Run <code style="color: var(--accent-1);">jarvis setup</code> — the wizard handles providers, API keys, security, and persona.</p>
         </div>
 
         <div class="step-card">
           <div class="step-number">3</div>
           <h3>Command</h3>
-          <p>Start JARVIS and tell it what to build. It reads files, writes code, runs commands, and adapts to your workflow.</p>
+          <p>Type <code style="color: var(--accent-1);">jarvis</code> and tell it what to build. It reads, writes, executes, and learns.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Why JARVIS vs Others ═══ -->
+  <section class="section" id="comparison">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="badge">Comparison</span>
+        <h2>Why <span class="text-gradient">PersonalJARVIS</span>?</h2>
+        <p>See how JARVIS stacks up against the alternatives.</p>
+      </div>
+
+      <div class="reveal" style="overflow-x: auto;">
+        <table class="competitor-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th class="highlight">PersonalJARVIS</th>
+              <th>GitHub Copilot</th>
+              <th>Claude Code</th>
+              <th>OpenClaw</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Open Source</td>
+              <td class="highlight">✓ MIT License</td>
+              <td>✗ Proprietary</td>
+              <td>✗ Proprietary</td>
+              <td>✓ Open Source</td>
+            </tr>
+            <tr>
+              <td>Free Tier</td>
+              <td class="highlight">✓ Full access</td>
+              <td>Limited</td>
+              <td>Pay-per-use</td>
+              <td>✓ Free</td>
+            </tr>
+            <tr>
+              <td>Local Models (Offline)</td>
+              <td class="highlight">✓ Ollama built-in</td>
+              <td>✗ Cloud only</td>
+              <td>✗ Cloud only</td>
+              <td>Partial</td>
+            </tr>
+            <tr>
+              <td>Multi-Provider</td>
+              <td class="highlight">✓ Gemini, OpenAI, Claude, Ollama</td>
+              <td>GPT only</td>
+              <td>Claude only</td>
+              <td>Multiple</td>
+            </tr>
+            <tr>
+              <td>Persistent Memory</td>
+              <td class="highlight">✓ 4-layer system</td>
+              <td>✗ Per-session</td>
+              <td>✗ Per-session</td>
+              <td>Basic</td>
+            </tr>
+            <tr>
+              <td>Security Framework</td>
+              <td class="highlight">✓ Capability-based + audit</td>
+              <td>Sandbox</td>
+              <td>Sandbox</td>
+              <td>Basic</td>
+            </tr>
+            <tr>
+              <td>Tiered Inference (cost saving)</td>
+              <td class="highlight">✓ Auto-routes local/cloud</td>
+              <td>✗ Fixed model</td>
+              <td>✗ Fixed model</td>
+              <td>✗</td>
+            </tr>
+            <tr>
+              <td>Skill/Plugin System</td>
+              <td class="highlight">✓ Marketplace + custom</td>
+              <td>Extensions</td>
+              <td>Limited tools</td>
+              <td>Plugins</td>
+            </tr>
+            <tr>
+              <td>Voice Interface</td>
+              <td class="highlight">✓ Wake word + TTS</td>
+              <td>✗</td>
+              <td>✗</td>
+              <td>✗</td>
+            </tr>
+            <tr>
+              <td>Your Data</td>
+              <td class="highlight">✓ 100% local</td>
+              <td>Sent to cloud</td>
+              <td>Sent to cloud</td>
+              <td>Local option</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </section>
@@ -191,8 +291,8 @@
     <div class="container">
       <div class="section-header reveal">
         <span class="badge">Pricing</span>
-        <h2>Start Free, <span class="text-gradient">Scale Up</span></h2>
-        <p>No credit card required. Upgrade when you need cloud AI power and advanced features.</p>
+        <h2>Start Free,<br><span class="text-gradient">Scale When Ready</span></h2>
+        <p>No credit card required. Both plans are free during our launch period.</p>
       </div>
 
       <div class="pricing-grid reveal">
@@ -211,7 +311,6 @@
             <div class="pricing-feature"><span class="check">✓</span> Basic security framework</div>
             <div class="pricing-feature"><span class="check">✓</span> Working + semantic memory</div>
             <div class="pricing-feature"><span class="check">✓</span> Skill marketplace (browse)</div>
-            <div class="pricing-feature"><span class="check">✓</span> Basic usage stats</div>
             <div class="pricing-feature"><span class="check">✓</span> Setup wizard</div>
             <div class="pricing-feature"><span class="dash">—</span> Cloud AI providers</div>
             <div class="pricing-feature"><span class="dash">—</span> Priority support</div>
@@ -219,7 +318,7 @@
           <a href="docs.html" class="btn btn-secondary" style="width: 100%;">Get Started Free</a>
         </div>
 
-        <!-- Productivity ($20) -->
+        <!-- Productivity -->
         <div class="pricing-card featured">
           <div class="pricing-tier">Productivity</div>
           <div class="pricing-amount">
@@ -232,12 +331,11 @@
             <div class="pricing-feature"><span class="check">✓</span> Everything in Balanced</div>
             <div class="pricing-feature"><span class="check">✓</span> Gemini + OpenAI + Claude</div>
             <div class="pricing-feature"><span class="check">✓</span> Cloud-priority routing</div>
-            <div class="pricing-feature"><span class="check">✓</span> Full security (audit + scan)</div>
-            <div class="pricing-feature"><span class="check">✓</span> All 4 memory layers</div>
+            <div class="pricing-feature"><span class="check">✓</span> Full 4-layer memory</div>
             <div class="pricing-feature"><span class="check">✓</span> Install + custom skills</div>
-            <div class="pricing-feature"><span class="check">✓</span> Full reports + export</div>
-            <div class="pricing-feature"><span class="check">✓</span> Priority support</div>
-            <div class="pricing-feature"><span class="check">✓</span> Priority updates</div>
+            <div class="pricing-feature"><span class="check">✓</span> Full security + audit logging</div>
+            <div class="pricing-feature"><span class="check">✓</span> Full analytics + export</div>
+            <div class="pricing-feature"><span class="check">✓</span> Priority support & updates</div>
           </div>
           <a href="docs.html" class="btn btn-primary" style="width: 100%;">Start Productivity →</a>
         </div>
@@ -255,7 +353,7 @@
     <div class="container final-cta-content reveal">
       <h2>Ready to Build <span class="text-gradient">Smarter</span>?</h2>
       <p>Join developers who are shipping faster with their own personal AI operating system.</p>
-      <div style="display: flex; gap: var(--space-4); justify-content: center;">
+      <div style="display: flex; gap: var(--space-4); justify-content: center; flex-wrap: wrap;">
         <a href="docs.html" class="btn btn-primary btn-lg pulse-ring">Get Started Free →</a>
         <a href="https://github.com/hamzafire224-arch/JARVIS-OS" target="_blank" class="btn btn-secondary btn-lg">⭐ Star on GitHub</a>
       </div>

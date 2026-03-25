@@ -1,444 +1,332 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Features — PersonalJARVIS</title>
-    <meta name="description"
-        content="Explore PersonalJARVIS features: tiered inference, hierarchical memory, capability-based security, skill marketplace, and usage analytics.">
-    <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/pages.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Features — PersonalJARVIS</title>
+  <meta name="description" content="Explore PersonalJARVIS features: 4-layer memory, tiered inference, security framework, skill marketplace, voice interface, and MCP integration.">
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/pages.css">
 </head>
-
 <body class="page-enter">
 
-    <!-- Navigation -->
-    <nav class="nav" id="nav">
-        <div class="nav-inner">
-            <a href="index.html" class="nav-brand">
-                <img src="assets/logo.svg" alt="PersonalJARVIS">
-                <span>PersonalJARVIS</span>
-            </a>
-            <div class="nav-links" id="navLinks">
-                <a href="index.html">Home</a>
-                <a href="features.html" class="active">Features</a>
-                <a href="pricing.html">Pricing</a>
-                <a href="about.html">About</a>
-                <a href="docs.html">Docs</a>
-                <a href="pricing.html" class="btn btn-primary btn-sm">Get Started Free</a>
-            </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
-                <span></span><span></span><span></span>
-            </button>
-        </div>
-    </nav>
+  <!-- ═══ Navigation ═══ -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        <img src="assets/logo.svg" alt="PersonalJARVIS">
+        <span>PersonalJARVIS</span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html">Home</a>
+        <a href="features.html">Features</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="about.html">About</a>
+        <a href="docs.html">Docs</a>
+        <a href="docs.html" class="btn btn-primary btn-sm">Get Started Free</a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
 
-    <!-- Hero -->
-    <section class="hero" style="min-height: 60vh;">
-        <div class="hero-glow hero-glow-1"></div>
-        <div class="hero-glow hero-glow-2"></div>
-        <div class="hero-content">
-            <div class="hero-badge"><span class="badge">Features</span></div>
-            <h1>Built for <span class="text-gradient">Developers</span></h1>
-            <p class="hero-subtitle">Five integrated systems working together to make you unstoppable. Every feature is
-                designed to save time, reduce costs, and protect your workflow.</p>
-        </div>
-    </section>
+  <!-- ═══ Hero ═══ -->
+  <section class="section" style="padding-top: calc(var(--nav-height) + var(--space-16));">
+    <div class="gradient-mesh">
+      <div class="gradient-orb gradient-orb-1"></div>
+      <div class="gradient-orb gradient-orb-2"></div>
+    </div>
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="badge">Features</span>
+        <h1>Built to Make You<br><span class="text-gradient">Unstoppable</span></h1>
+        <p>Every feature designed to save you time, protect your code, and make AI actually useful in your daily workflow.</p>
+      </div>
+    </div>
+  </section>
 
-    <!-- Feature 1: Security -->
-    <section class="section">
-        <div class="container">
-            <div class="feature-section reveal-left">
-                <div class="feature-text">
-                    <span class="badge">Phase 1</span>
-                    <h3>Capability-Based <span class="text-gradient">Security</span></h3>
-                    <p>Every tool execution goes through a permission system. Dangerous operations require approval.
-                        Sensitive paths are blocked. Every action is logged.</p>
-                    <ul class="feature-list">
-                        <li><span class="icon">✓</span> 4 risk levels: safe, moderate, dangerous, destructive</li>
-                        <li><span class="icon">✓</span> 20+ malware detection patterns in skill scanner</li>
-                        <li><span class="icon">✓</span> Path blocking for ~/.ssh, ~/.aws, ~/.gnupg</li>
-                        <li><span class="icon">✓</span> Command blocking for rm -rf, sudo rm, mkfs</li>
-                        <li><span class="icon">✓</span> Full audit trail persisted to disk</li>
-                        <li><span class="icon">✓</span> 4 presets: strict, balanced, developer, trust</li>
-                    </ul>
-                </div>
-                <div class="feature-visual">
-                    <div class="code-block">
-                        <div class="terminal-header">
-                            <div class="terminal-dot red"></div>
-                            <div class="terminal-dot yellow"></div>
-                            <div class="terminal-dot green"></div>
-                        </div>
-                        <span class="comment">// Security middleware in action</span><br>
-                        <span class="keyword">const</span> <span class="function">result</span> = <span
-                            class="keyword">await</span> security.<span class="function">checkPermission</span>(<br>
-                        &nbsp;&nbsp;<span class="string">'run_command'</span>,<br>
-                        &nbsp;&nbsp;{ command: <span class="string">'rm -rf /'</span> }<br>
-                        );<br><br>
-                        <span class="comment">// → ✗ BLOCKED</span><br>
-                        <span class="comment">// → Reason: Destructive command pattern</span><br>
-                        <span class="comment">// → Audit: logged to security/audit.json</span>
-                    </div>
-                </div>
-            </div>
+  <!-- ═══ Feature 1: Security ═══ -->
+  <section class="section">
+    <div class="container">
+      <div class="feature-section reveal">
+        <div class="feature-text">
+          <span class="badge">Security</span>
+          <h3>Enterprise-Grade Protection</h3>
+          <p>Most AI assistants run commands blindly. JARVIS has a full capability-based security framework that prevents destructive operations, scans installed skills for malware, and logs everything.</p>
+          <ul class="feature-list">
+            <li><span class="icon">✓</span> Capability-based tool permissions</li>
+            <li><span class="icon">✓</span> Blocked paths (~/.ssh, ~/.aws, system dirs)</li>
+            <li><span class="icon">✓</span> Blocked commands (rm -rf, sudo rm, format)</li>
+            <li><span class="icon">✓</span> Skill sandboxing with malware scan</li>
+            <li><span class="icon">✓</span> Full audit trail with log export</li>
+          </ul>
         </div>
-    </section>
-
-    <!-- Feature 2: Tiered Inference -->
-    <section class="section" style="background: var(--bg-secondary);">
-        <div class="container">
-            <div class="feature-section reverse reveal-right">
-                <div class="feature-text">
-                    <span class="badge">Phase 2</span>
-                    <h3>Tiered <span class="text-gradient">Inference Engine</span></h3>
-                    <p>Stop paying for cloud API calls you don't need. PersonalJARVIS classifies every message and
-                        routes simple requests to free local models — automatically.</p>
-                    <ul class="feature-list">
-                        <li><span class="icon">✓</span> Automatic complexity classification (simple / moderate /
-                            complex)</li>
-                        <li><span class="icon">✓</span> Simple tasks → Ollama (free, local, private)</li>
-                        <li><span class="icon">✓</span> Complex tasks → Cloud AI (Gemini, GPT, Claude)</li>
-                        <li><span class="icon">✓</span> Tool calls always route to cloud for reliability</li>
-                        <li><span class="icon">✓</span> Real-time cost tracking and savings estimates</li>
-                        <li><span class="icon">✓</span> Up to 90% reduction in API costs</li>
-                    </ul>
-                </div>
-                <div class="feature-visual">
-                    <div style="text-align: center; padding: var(--space-4);">
-                        <div
-                            style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--space-4); margin-bottom: var(--space-6);">
-                            <div
-                                style="padding: var(--space-4); background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: var(--radius-md);">
-                                <div style="font-size: 24px; margin-bottom: var(--space-2);">💬</div>
-                                <div style="font-size: var(--font-size-xs); color: var(--text-secondary);">"Hello!"
-                                </div>
-                                <div style="font-size: var(--font-size-xs); color: var(--success); font-weight: 600;">→
-                                    Local (Free)</div>
-                            </div>
-                            <div style="font-size: var(--font-size-2xl); color: var(--text-muted);">⟷</div>
-                            <div
-                                style="padding: var(--space-4); background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: var(--radius-md);">
-                                <div style="font-size: 24px; margin-bottom: var(--space-2);">🧠</div>
-                                <div style="font-size: var(--font-size-xs); color: var(--text-secondary);">"Write a
-                                    React app"</div>
-                                <div style="font-size: var(--font-size-xs); color: var(--accent-1); font-weight: 600;">→
-                                    Cloud (Smart)</div>
-                            </div>
-                        </div>
-                        <div
-                            style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-4);">
-                            <div
-                                style="display: flex; justify-content: space-between; font-size: var(--font-size-xs); color: var(--text-muted); margin-bottom: var(--space-2);">
-                                <span>Cost savings today</span>
-                                <span style="color: var(--success); font-weight: 600;">$4.23 saved</span>
-                            </div>
-                            <div
-                                style="height: 6px; background: var(--bg-tertiary); border-radius: 3px; overflow: hidden;">
-                                <div
-                                    style="height: 100%; width: 87%; background: var(--accent-gradient); border-radius: 3px;">
-                                </div>
-                            </div>
-                            <div
-                                style="font-size: var(--font-size-xs); color: var(--text-muted); margin-top: var(--space-2); text-align: right;">
-                                87% routed locally</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="feature-visual">
+          <div class="code-block">
+            <span class="comment"># JARVIS Security in action</span><br>
+            <span class="keyword">You:</span> <span class="string">Delete the .ssh folder</span><br><br>
+            <span class="keyword">JARVIS:</span> 🛡️ Operation blocked<br>
+            <span class="comment">  Path ~/.ssh is in the protected list.</span><br>
+            <span class="comment">  This directory contains SSH keys and</span><br>
+            <span class="comment">  credentials. I can't modify it.</span><br><br>
+            <span class="comment">  → Logged to audit trail</span>
+          </div>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <!-- Feature 3: Memory -->
-    <section class="section">
-        <div class="container">
-            <div class="feature-section reveal-left">
-                <div class="feature-text">
-                    <span class="badge">Phase 3</span>
-                    <h3>Hierarchical <span class="text-gradient">Memory System</span></h3>
-                    <p>Four layers of memory work together so JARVIS remembers your preferences, past sessions, and
-                        project context — across conversations.</p>
-                    <ul class="feature-list">
-                        <li><span class="icon">✓</span> Layer 1: Working memory — current conversation</li>
-                        <li><span class="icon">✓</span> Layer 2: Episodic memory — session summaries with highlights
-                        </li>
-                        <li><span class="icon">✓</span> Layer 3: Semantic memory — facts, preferences, project context
-                        </li>
-                        <li><span class="icon">✓</span> Layer 4: Vector store — similarity search with reranking</li>
-                        <li><span class="icon">✓</span> Automatic compaction and retention policies</li>
-                        <li><span class="icon">✓</span> Unified multi-layer retrieval API</li>
-                    </ul>
-                </div>
-                <div class="feature-visual">
-                    <div style="display: flex; flex-direction: column; gap: var(--space-3);">
-                        <div
-                            style="padding: var(--space-4); background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: var(--radius-md); display: flex; align-items: center; gap: var(--space-3);">
-                            <span style="font-size: 20px;">⚡</span>
-                            <div>
-                                <div style="font-size: var(--font-size-sm); font-weight: 600;">Working Memory</div>
-                                <div style="font-size: var(--font-size-xs); color: var(--text-muted);">Current
-                                    conversation · In-memory · Fast</div>
-                            </div>
-                        </div>
-                        <div
-                            style="padding: var(--space-4); background: rgba(139, 92, 246, 0.12); border: 1px solid rgba(139, 92, 246, 0.25); border-radius: var(--radius-md); display: flex; align-items: center; gap: var(--space-3);">
-                            <span style="font-size: 20px;">📝</span>
-                            <div>
-                                <div style="font-size: var(--font-size-sm); font-weight: 600;">Episodic Memory</div>
-                                <div style="font-size: var(--font-size-xs); color: var(--text-muted);">Session summaries
-                                    · 30-day retention</div>
-                            </div>
-                        </div>
-                        <div
-                            style="padding: var(--space-4); background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.18); border-radius: var(--radius-md); display: flex; align-items: center; gap: var(--space-3);">
-                            <span style="font-size: 20px;">🧠</span>
-                            <div>
-                                <div style="font-size: var(--font-size-sm); font-weight: 600;">Semantic Memory</div>
-                                <div style="font-size: var(--font-size-xs); color: var(--text-muted);">Facts &
-                                    preferences · Permanent</div>
-                            </div>
-                        </div>
-                        <div
-                            style="padding: var(--space-4); background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.12); border-radius: var(--radius-md); display: flex; align-items: center; gap: var(--space-3);">
-                            <span style="font-size: 20px;">🔍</span>
-                            <div>
-                                <div style="font-size: var(--font-size-sm); font-weight: 600;">Vector Store</div>
-                                <div style="font-size: var(--font-size-xs); color: var(--text-muted);">Similarity search
-                                    · Reranking · Permanent</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <!-- ═══ Feature 2: Tiered Inference ═══ -->
+  <section class="section" style="background: var(--bg-secondary);">
+    <div class="container">
+      <div class="feature-section reverse reveal">
+        <div class="feature-text">
+          <span class="badge">Intelligence</span>
+          <h3>Smart Cost Optimization</h3>
+          <p>Why pay cloud prices for "hello world"? JARVIS automatically classifies task complexity and routes simple questions to free local models (Ollama), while sending genuinely complex reasoning to cloud providers.</p>
+          <ul class="feature-list">
+            <li><span class="icon">✓</span> Auto-classifies task complexity</li>
+            <li><span class="icon">✓</span> Free local models for simple tasks</li>
+            <li><span class="icon">✓</span> Cloud AI only when needed</li>
+            <li><span class="icon">✓</span> Up to 90% cost reduction</li>
+            <li><span class="icon">✓</span> Transparent routing decisions</li>
+          </ul>
         </div>
-    </section>
-
-    <!-- Feature 4: Marketplace -->
-    <section class="section" style="background: var(--bg-secondary);">
-        <div class="container">
-            <div class="feature-section reverse reveal-right">
-                <div class="feature-text">
-                    <span class="badge">Phase 4</span>
-                    <h3>Skill <span class="text-gradient">Marketplace</span></h3>
-                    <p>Browse and install community-built skills to extend JARVIS. From Docker management to Slack
-                        integration — one command to install.</p>
-                    <ul class="feature-list">
-                        <li><span class="icon">✓</span> Browse by category: dev, automation, integration</li>
-                        <li><span class="icon">✓</span> Security scan before every install</li>
-                        <li><span class="icon">✓</span> One-command install, uninstall, and update</li>
-                        <li><span class="icon">✓</span> Verified badge for trusted publishers</li>
-                        <li><span class="icon">✓</span> Community ratings and download metrics</li>
-                        <li><span class="icon">✓</span> Build and share your own skills</li>
-                    </ul>
-                </div>
-                <div class="feature-visual">
-                    <div
-                        style="font-size: var(--font-size-xs); color: var(--text-muted); margin-bottom: var(--space-3); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;">
-                        Featured Skills</div>
-                    <div style="display: flex; flex-direction: column; gap: var(--space-3);">
-                        <div
-                            style="display: flex; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-4); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);">
-                            <div style="display: flex; align-items: center; gap: var(--space-3);">
-                                <span style="font-size: 18px;">🐙</span>
-                                <div>
-                                    <div style="font-size: var(--font-size-sm); font-weight: 600;">Git Advanced</div>
-                                    <div style="font-size: var(--font-size-xs); color: var(--text-muted);">v2.1.0 · ⭐
-                                        4.8 · 15.2k downloads</div>
-                                </div>
-                            </div>
-                            <span
-                                style="font-size: var(--font-size-xs); color: var(--success); background: rgba(34, 197, 94, 0.1); padding: 2px 8px; border-radius: 4px;">✓
-                                Verified</span>
-                        </div>
-                        <div
-                            style="display: flex; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-4); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);">
-                            <div style="display: flex; align-items: center; gap: var(--space-3);">
-                                <span style="font-size: 18px;">🐳</span>
-                                <div>
-                                    <div style="font-size: var(--font-size-sm); font-weight: 600;">Docker Manager</div>
-                                    <div style="font-size: var(--font-size-xs); color: var(--text-muted);">v1.5.0 · ⭐
-                                        4.6 · 12.8k downloads</div>
-                                </div>
-                            </div>
-                            <span
-                                style="font-size: var(--font-size-xs); color: var(--success); background: rgba(34, 197, 94, 0.1); padding: 2px 8px; border-radius: 4px;">✓
-                                Verified</span>
-                        </div>
-                        <div
-                            style="display: flex; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-4); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);">
-                            <div style="display: flex; align-items: center; gap: var(--space-3);">
-                                <span style="font-size: 18px;">🔌</span>
-                                <div>
-                                    <div style="font-size: var(--font-size-sm); font-weight: 600;">API Tester</div>
-                                    <div style="font-size: var(--font-size-xs); color: var(--text-muted);">v1.2.0 · ⭐
-                                        4.5 · 8.5k downloads</div>
-                                </div>
-                            </div>
-                            <span
-                                style="font-size: var(--font-size-xs); color: var(--success); background: rgba(34, 197, 94, 0.1); padding: 2px 8px; border-radius: 4px;">✓
-                                Verified</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="feature-visual">
+          <div class="code-block">
+            <span class="comment"># Cost-saving routing</span><br><br>
+            <span class="keyword">Simple:</span> <span class="string">"What's the Node version?"</span><br>
+            <span class="comment">  → Ollama (local, free) · 0.2s</span><br><br>
+            <span class="keyword">Complex:</span> <span class="string">"Refactor auth to use JWT"</span><br>
+            <span class="comment">  → Gemini Pro (cloud) · 3.1s</span><br><br>
+            <span class="keyword">API costs this month:</span> <span class="string">$1.40</span><br>
+            <span class="comment">  vs $14.00 without tiered routing</span>
+          </div>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <!-- Feature 5: Analytics -->
-    <section class="section">
-        <div class="container">
-            <div class="feature-section reveal-left">
-                <div class="feature-text">
-                    <span class="badge">Phase 5</span>
-                    <h3>Usage <span class="text-gradient">Analytics</span></h3>
-                    <p>Understand how you work. Track productivity gains, cost savings, and tool usage — all locally,
-                        all private.</p>
-                    <ul class="feature-list">
-                        <li><span class="icon">✓</span> Local-first, privacy-preserving tracking</li>
-                        <li><span class="icon">✓</span> Daily stats: sessions, messages, tool calls</li>
-                        <li><span class="icon">✓</span> Weekly productivity reports</li>
-                        <li><span class="icon">✓</span> Cost savings from local model routing</li>
-                        <li><span class="icon">✓</span> Most-used tools and patterns leaderboard</li>
-                        <li><span class="icon">✓</span> Automatic data anonymization</li>
-                    </ul>
-                </div>
-                <div class="feature-visual">
-                    <div style="padding: var(--space-4);">
-                        <div
-                            style="font-size: var(--font-size-xs); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-bottom: var(--space-4);">
-                            Weekly Report</div>
-                        <div
-                            style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-bottom: var(--space-4);">
-                            <div
-                                style="padding: var(--space-3); background: var(--surface); border-radius: var(--radius-sm); text-align: center;">
-                                <div style="font-size: var(--font-size-2xl); font-weight: 700; color: var(--accent-1);">
-                                    142</div>
-                                <div style="font-size: var(--font-size-xs); color: var(--text-muted);">Messages</div>
-                            </div>
-                            <div
-                                style="padding: var(--space-3); background: var(--surface); border-radius: var(--radius-sm); text-align: center;">
-                                <div style="font-size: var(--font-size-2xl); font-weight: 700; color: var(--success);">
-                                    $28.40</div>
-                                <div style="font-size: var(--font-size-xs); color: var(--text-muted);">Saved</div>
-                            </div>
-                            <div
-                                style="padding: var(--space-3); background: var(--surface); border-radius: var(--radius-sm); text-align: center;">
-                                <div style="font-size: var(--font-size-2xl); font-weight: 700; color: var(--accent-2);">
-                                    89%</div>
-                                <div style="font-size: var(--font-size-xs); color: var(--text-muted);">Local Routing
-                                </div>
-                            </div>
-                            <div
-                                style="padding: var(--space-3); background: var(--surface); border-radius: var(--radius-sm); text-align: center;">
-                                <div style="font-size: var(--font-size-2xl); font-weight: 700; color: var(--warning);">
-                                    8.5</div>
-                                <div style="font-size: var(--font-size-xs); color: var(--text-muted);">Productivity
-                                    Score</div>
-                            </div>
-                        </div>
-                        <div
-                            style="font-size: var(--font-size-xs); color: var(--text-muted); margin-bottom: var(--space-2);">
-                            Top Tools</div>
-                        <div style="display: flex; flex-direction: column; gap: var(--space-2);">
-                            <div style="display: flex; align-items: center; gap: var(--space-3);">
-                                <div style="font-size: var(--font-size-xs); color: var(--text-secondary); width: 80px;">
-                                    read_file</div>
-                                <div
-                                    style="flex: 1; height: 6px; background: var(--bg-tertiary); border-radius: 3px; overflow: hidden;">
-                                    <div
-                                        style="height: 100%; width: 85%; background: var(--accent-gradient); border-radius: 3px;">
-                                    </div>
-                                </div>
-                                <div style="font-size: var(--font-size-xs); color: var(--text-muted); width: 20px;">42
-                                </div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: var(--space-3);">
-                                <div style="font-size: var(--font-size-xs); color: var(--text-secondary); width: 80px;">
-                                    run_command</div>
-                                <div
-                                    style="flex: 1; height: 6px; background: var(--bg-tertiary); border-radius: 3px; overflow: hidden;">
-                                    <div
-                                        style="height: 100%; width: 60%; background: var(--accent-gradient); border-radius: 3px;">
-                                    </div>
-                                </div>
-                                <div style="font-size: var(--font-size-xs); color: var(--text-muted); width: 20px;">31
-                                </div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: var(--space-3);">
-                                <div style="font-size: var(--font-size-xs); color: var(--text-secondary); width: 80px;">
-                                    write_file</div>
-                                <div
-                                    style="flex: 1; height: 6px; background: var(--bg-tertiary); border-radius: 3px; overflow: hidden;">
-                                    <div
-                                        style="height: 100%; width: 45%; background: var(--accent-gradient); border-radius: 3px;">
-                                    </div>
-                                </div>
-                                <div style="font-size: var(--font-size-xs); color: var(--text-muted); width: 20px;">22
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <!-- ═══ Feature 3: Memory ═══ -->
+  <section class="section">
+    <div class="container">
+      <div class="feature-section reveal">
+        <div class="feature-text">
+          <span class="badge">Memory</span>
+          <h3>It Actually Remembers</h3>
+          <p>JARVIS has a 4-layer hierarchical memory system. It remembers your coding style, past conversations, lessons learned from mistakes, and builds up knowledge about your project over time.</p>
+          <ul class="feature-list">
+            <li><span class="icon">✓</span> Working memory (current session)</li>
+            <li><span class="icon">✓</span> Episodic memory (past conversations)</li>
+            <li><span class="icon">✓</span> Semantic memory (facts & knowledge)</li>
+            <li><span class="icon">✓</span> Vector memory (similarity search)</li>
+            <li><span class="icon">✓</span> Preference learning (adapts to you)</li>
+          </ul>
         </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="section final-cta">
-        <div class="cta-glow"></div>
-        <div class="container final-cta-content reveal">
-            <h2>Ready to <span class="text-gradient">Get Started</span>?</h2>
-            <p>All features available today. Start with the free Balanced plan and upgrade whenever you're ready.</p>
-            <div style="display: flex; gap: var(--space-4); justify-content: center;">
-                <a href="pricing.html" class="btn btn-primary btn-lg">See Pricing →</a>
-                <a href="docs.html" class="btn btn-secondary btn-lg">Read the Docs</a>
-            </div>
+        <div class="feature-visual">
+          <div class="code-block">
+            <span class="comment"># Week 1</span><br>
+            <span class="keyword">You:</span> <span class="string">Use 2 spaces for indentation</span><br>
+            <span class="comment">  JARVIS: ✓ Preference saved</span><br><br>
+            <span class="comment"># Week 3 — you never mention it again</span><br>
+            <span class="keyword">You:</span> <span class="string">Create a React component</span><br>
+            <span class="comment">  JARVIS: Creates with 2-space indent,</span><br>
+            <span class="comment">  your preferred naming convention,</span><br>
+            <span class="comment">  and your usual test structure.</span>
+          </div>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-brand">
-                    <a href="index.html" class="nav-brand">
-                        <img src="assets/logo.svg" alt="PersonalJARVIS" style="width:28px;height:28px;">
-                        <span>PersonalJARVIS</span>
-                    </a>
-                    <p>Your open-source AI operating system. Build faster, debug smarter, automate everything.</p>
-                </div>
-                <div class="footer-col">
-                    <h4>Product</h4>
-                    <a href="features.html">Features</a>
-                    <a href="pricing.html">Pricing</a>
-                    <a href="docs.html">Documentation</a>
-                    <a href="https://github.com/hamzafire224-arch/JARVIS-OS" target="_blank">GitHub</a>
-                </div>
-                <div class="footer-col">
-                    <h4>Resources</h4>
-                    <a href="docs.html#quickstart">Quick Start</a>
-                    <a href="docs.html#providers">Providers</a>
-                    <a href="docs.html#security">Security</a>
-                    <a href="docs.html#skills">Skills</a>
-                </div>
-                <div class="footer-col">
-                    <h4>Company</h4>
-                    <a href="about.html">About</a>
-                    <a href="about.html#vision">Vision</a>
-                    <a href="mailto:contact@personaljarvis.dev">Contact</a>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <span>© 2026 PersonalJARVIS. Open source under MIT License.</span>
-                <span>Built with ❤️ for developers</span>
-            </div>
+  <!-- ═══ Feature 4: Skills ═══ -->
+  <section class="section" style="background: var(--bg-secondary);">
+    <div class="container">
+      <div class="feature-section reverse reveal">
+        <div class="feature-text">
+          <span class="badge">Extensibility</span>
+          <h3>Infinite Possibilities</h3>
+          <p>JARVIS's skill system lets you extend it to do anything. Browse the marketplace, install community skills, or build your own. Every skill is sandboxed and malware-scanned for safety.</p>
+          <ul class="feature-list">
+            <li><span class="icon">✓</span> Community skill marketplace</li>
+            <li><span class="icon">✓</span> Docker, Git, API testing skills</li>
+            <li><span class="icon">✓</span> Custom skill builder</li>
+            <li><span class="icon">✓</span> MCP protocol integration</li>
+            <li><span class="icon">✓</span> Sandboxed execution</li>
+          </ul>
         </div>
-    </footer>
+        <div class="feature-visual">
+          <div class="code-block">
+            <span class="comment"># Install a skill</span><br>
+            <span class="keyword">You:</span> <span class="string">/install docker-manager</span><br>
+            <span class="comment">  ✓ Downloaded · ✓ Scanned · ✓ Installed</span><br><br>
+            <span class="comment"># Use it immediately</span><br>
+            <span class="keyword">You:</span> <span class="string">Show running containers</span><br>
+            <span class="comment">  JARVIS: 3 containers running:</span><br>
+            <span class="comment">  ● postgres (healthy) — port 5432</span><br>
+            <span class="comment">  ● redis (healthy) — port 6379</span><br>
+            <span class="comment">  ● app (building) — port 3000</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <script src="js/main.js"></script>
+  <!-- ═══ Feature 5: Multi-Agent ═══ -->
+  <section class="section">
+    <div class="container">
+      <div class="feature-section reveal">
+        <div class="feature-text">
+          <span class="badge">Collaboration</span>
+          <h3>Multi-Agent System</h3>
+          <p>For complex tasks, JARVIS spawns specialized sub-agents that work together. A code agent writes, a review agent catches bugs, and a test agent validates — all coordinated automatically.</p>
+          <ul class="feature-list">
+            <li><span class="icon">✓</span> Spawns specialized sub-agents</li>
+            <li><span class="icon">✓</span> Automatic task decomposition</li>
+            <li><span class="icon">✓</span> Code review agent</li>
+            <li><span class="icon">✓</span> Test generation agent</li>
+            <li><span class="icon">✓</span> Coordinated workflow</li>
+          </ul>
+        </div>
+        <div class="feature-visual">
+          <div class="code-block">
+            <span class="keyword">You:</span> <span class="string">Build a REST API for users</span><br><br>
+            <span class="comment">  Agent 1 (Architect):</span><br>
+            <span class="comment">    → Designed schema & routes</span><br><br>
+            <span class="comment">  Agent 2 (Builder):</span><br>
+            <span class="comment">    → Writing controller, model, routes</span><br><br>
+            <span class="comment">  Agent 3 (Reviewer):</span><br>
+            <span class="comment">    → Found missing error handler</span><br>
+            <span class="comment">    → Agent 2 fixing...</span><br><br>
+            <span class="comment">  Agent 4 (Tester):</span><br>
+            <span class="comment">    → Generated 12 test cases ✓</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Feature 6: Voice ═══ -->
+  <section class="section" style="background: var(--bg-secondary);">
+    <div class="container">
+      <div class="feature-section reverse reveal">
+        <div class="feature-text">
+          <span class="badge">Voice</span>
+          <h3>Hands-Free Operation</h3>
+          <p>Talk to JARVIS like a real assistant. Wake word detection listens in the background, streaming text-to-speech reads responses, and you can code without touching the keyboard.</p>
+          <ul class="feature-list">
+            <li><span class="icon">✓</span> "Hey JARVIS" wake word</li>
+            <li><span class="icon">✓</span> Real-time speech-to-text</li>
+            <li><span class="icon">✓</span> Natural text-to-speech</li>
+            <li><span class="icon">✓</span> Background listening mode</li>
+            <li><span class="icon">✓</span> Works alongside your editor</li>
+          </ul>
+        </div>
+        <div class="feature-visual">
+          <div class="code-block">
+            <span class="comment"># Voice interaction</span><br><br>
+            <span class="keyword">🎙️ You:</span> <span class="string">"Hey JARVIS, what broke the build?"</span><br><br>
+            <span class="keyword">🔊 JARVIS:</span><br>
+            <span class="comment">  "The build failed because of a</span><br>
+            <span class="comment">   missing import in UserService.ts</span><br>
+            <span class="comment">   on line 42. Want me to fix it?"</span><br><br>
+            <span class="keyword">🎙️ You:</span> <span class="string">"Yes, fix it."</span><br>
+            <span class="comment">  ✓ Fixed · ✓ Build passing</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Technical Specs ═══ -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="badge">Technical</span>
+        <h2>Under the Hood</h2>
+        <p>Built with TypeScript, designed for reliability.</p>
+      </div>
+
+      <div class="grid grid-4 stagger-children">
+        <div class="card" style="text-align: center;">
+          <div class="card-icon feature-icon-animated" style="margin: 0 auto var(--space-4);">📦</div>
+          <h4>TypeScript</h4>
+          <p>Fully typed, Zod-validated config, zero runtime type errors.</p>
+        </div>
+        <div class="card" style="text-align: center;">
+          <div class="card-icon feature-icon-animated" style="margin: 0 auto var(--space-4);">🔒</div>
+          <h4>Local-First</h4>
+          <p>All data stored on your machine. Nothing leaves without consent.</p>
+        </div>
+        <div class="card" style="text-align: center;">
+          <div class="card-icon feature-icon-animated" style="margin: 0 auto var(--space-4);">🔌</div>
+          <h4>MCP Protocol</h4>
+          <p>Standard Model Context Protocol for tool integration.</p>
+        </div>
+        <div class="card" style="text-align: center;">
+          <div class="card-icon feature-icon-animated" style="margin: 0 auto var(--space-4);">🌐</div>
+          <h4>WebSocket Gateway</h4>
+          <p>Real-time communication for dashboard and remote access.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CTA ═══ -->
+  <section class="section final-cta">
+    <div class="cta-glow"></div>
+    <div class="container final-cta-content reveal">
+      <h2>Ready to Try <span class="text-gradient">Every Feature</span>?</h2>
+      <p>Get started free — no credit card, no time limits on the Balanced plan.</p>
+      <div style="display: flex; gap: var(--space-4); justify-content: center; flex-wrap: wrap;">
+        <a href="docs.html" class="btn btn-primary btn-lg">Get Started Free →</a>
+        <a href="pricing.html" class="btn btn-secondary btn-lg">See Pricing</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Footer ═══ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="nav-brand">
+            <img src="assets/logo.svg" alt="PersonalJARVIS" style="width:28px;height:28px;">
+            <span>PersonalJARVIS</span>
+          </a>
+          <p>Your open-source AI operating system. Build faster, debug smarter, automate everything.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="features.html">Features</a>
+          <a href="pricing.html">Pricing</a>
+          <a href="docs.html">Documentation</a>
+          <a href="https://github.com/hamzafire224-arch/JARVIS-OS" target="_blank">GitHub</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="docs.html#quickstart">Quick Start</a>
+          <a href="docs.html#providers">Providers</a>
+          <a href="docs.html#security">Security</a>
+          <a href="docs.html#skills">Skills</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="about.html">About</a>
+          <a href="about.html#vision">Vision</a>
+          <a href="mailto:contact@personaljarvis.dev">Contact</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 PersonalJARVIS. Open source under MIT License.</span>
+        <span>Built with ❤️ for developers</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
 </body>
-
 </html>
