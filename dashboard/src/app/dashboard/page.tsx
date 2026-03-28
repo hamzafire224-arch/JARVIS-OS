@@ -1,17 +1,16 @@
 import { createClient } from '@/lib/supabase/server';
+import Link from 'next/link';
 
 export default async function DashboardPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Fetch subscription
     const { data: subscription } = await supabase
         .from('subscriptions')
         .select('*')
         .eq('user_id', user!.id)
         .single();
 
-    // Fetch license
     const { data: license } = await supabase
         .from('licenses')
         .select('*')
@@ -25,6 +24,33 @@ export default async function DashboardPage() {
         year: 'numeric',
     });
 
+    // Calculate days remaining for free period
+    const trialEnd = subscription?.trial_ends_at ? new Date(subscription.trial_ends_at) : null;
+    const daysLeft = trialEnd ? Math.max(0, Math.ceil((trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : null;
+
+    // Determine status display
+    const getStatusDisplay = () => {
+        const status = subscription?.status;
+        if (status === 'active') return { text: '✓ Active', color: 'var(--success)' };
+        if (status === 'trial') return { text: '✓ Active (Free)', color: 'var(--success)' };
+        if (status === 'past_due') return { text: '⚠ Past Due', color: 'var(--warning)' };
+        if (status === 'cancelled') return { text: '✗ Cancelled', color: 'var(--error)' };
+        return { text: '✓ Free Tier', color: 'var(--text-secondary)' };
+    };
+
+    const statusDisplay = getStatusDisplay();
+
+    // Mock usage data for charts (will connect to real data later)
+    const weeklyUsage = [35, 52, 28, 64, 45, 71, 38];
+    const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const maxUsage = Math.max(...weeklyUsage);
+
+    const recentActivity = [
+        { title: 'Setup wizard completed', time: 'Just now', type: 'setup' },
+        { title: 'License key generated', time: '2 min ago', type: 'license' },
+        { title: 'Account created', time: '5 min ago', type: 'account' },
+    ];
+
     return (
         <>
             <div className="dashboard-header">
@@ -33,69 +59,165 @@ export default async function DashboardPage() {
             </div>
 
             <div className="dashboard-content">
-                {/* Stats */}
+                {/* Stats Grid */}
                 <div className="stats-grid">
                     <div className="stat-card">
+                        <div className="stat-icon">⚡</div>
                         <div className="stat-label">Current Plan</div>
-                        <div className="stat-value" style={{ fontSize: '1.25rem', marginTop: '0.5rem' }}>
+                        <div style={{ marginTop: '0.5rem' }}>
                             <span className={`plan-badge ${plan === 'productivity' ? 'pro' : 'free'}`}>
                                 {plan === 'productivity' ? '⚡ Productivity' : 'Balanced'}
                             </span>
                         </div>
                     </div>
                     <div className="stat-card">
+                        <div className="stat-icon">📅</div>
                         <div className="stat-label">Member Since</div>
                         <div className="stat-value" style={{ fontSize: '1.25rem' }}>{memberSince}</div>
                     </div>
                     <div className="stat-card">
-                        <div className="stat-label">License Status</div>
-                        <div className="stat-value" style={{ fontSize: '1.25rem', color: license ? '#059669' : '#6b7280' }}>
+                        <div className="stat-icon">🔑</div>
+                        <div className="stat-label">License</div>
+                        <div className="stat-value" style={{
+                            fontSize: '1.25rem',
+                            color: license ? 'var(--success)' : 'var(--text-tertiary)',
+                        }}>
                             {license ? '✓ Active' : 'Not Generated'}
                         </div>
                     </div>
                     <div className="stat-card">
-                        <div className="stat-label">Subscription</div>
-                        <div className="stat-value" style={{ fontSize: '1.25rem', color: '#059669' }}>
-                            {subscription?.status === 'active' ? '✓ Active' : subscription?.status || 'Free Tier'}
+                        <div className="stat-icon">🟢</div>
+                        <div className="stat-label">Status</div>
+                        <div className="stat-value" style={{
+                            fontSize: '1.25rem',
+                            color: statusDisplay.color,
+                        }}>
+                            {statusDisplay.text}
                         </div>
+                    </div>
+                </div>
+
+                {/* Free Period Banner */}
+                {daysLeft !== null && daysLeft > 0 && plan === 'productivity' && (
+                    <div className="card" style={{ marginBottom: '1.5rem', borderColor: 'var(--accent-border)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+                            <div>
+                                <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
+                                    🎉 Free Productivity Access
+                                </div>
+                                <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                                    {daysLeft} days remaining · Full access to all features
+                                </div>
+                            </div>
+                            <div style={{
+                                background: 'var(--accent-bg)',
+                                padding: '0.5rem 1rem',
+                                borderRadius: 'var(--radius-md)',
+                                fontSize: '0.85rem',
+                                fontWeight: 600,
+                                color: 'var(--accent-1)',
+                            }}>
+                                {daysLeft} days left
+                            </div>
+                        </div>
+                        {/* Progress bar */}
+                        <div style={{
+                            marginTop: '0.75rem',
+                            height: 4,
+                            background: 'var(--bg-tertiary)',
+                            borderRadius: 2,
+                            overflow: 'hidden',
+                        }}>
+                            <div style={{
+                                width: `${Math.max(5, ((60 - daysLeft) / 60) * 100)}%`,
+                                height: '100%',
+                                background: 'var(--accent-gradient)',
+                                borderRadius: 2,
+                                transition: 'width 0.5s ease',
+                            }} />
+                        </div>
+                    </div>
+                )}
+
+                {/* Two Column Layout */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                    {/* Usage Chart */}
+                    <div className="card">
+                        <div className="card-header">
+                            <h3 className="card-title">Weekly Activity</h3>
+                            <Link href="/dashboard/usage" style={{ fontSize: '0.8rem', color: 'var(--accent-1)' }}>View All →</Link>
+                        </div>
+                        <div className="chart-bar-container">
+                            {weeklyUsage.map((val, i) => (
+                                <div key={i} className="chart-bar" style={{ height: `${(val / maxUsage) * 100}%` }} />
+                            ))}
+                        </div>
+                        <div className="chart-labels">
+                            {weekDays.map((d) => (<span key={d}>{d}</span>))}
+                        </div>
+                    </div>
+
+                    {/* Recent Activity */}
+                    <div className="card">
+                        <div className="card-header">
+                            <h3 className="card-title">Recent Activity</h3>
+                            <Link href="/dashboard/activity" style={{ fontSize: '0.8rem', color: 'var(--accent-1)' }}>View All →</Link>
+                        </div>
+                        <div className="timeline">
+                            {recentActivity.map((item, i) => (
+                                <div key={i} className="timeline-item">
+                                    <div className={`timeline-dot ${i === recentActivity.length - 1 ? '' : 'completed'}`} />
+                                    <div className="timeline-content">
+                                        <div className="timeline-title">{item.title}</div>
+                                        <div className="timeline-meta">{item.time}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="card" style={{ marginBottom: '1.5rem' }}>
+                    <div className="card-header">
+                        <h3 className="card-title">Quick Actions</h3>
+                    </div>
+                    <div className="quick-actions">
+                        <Link href="/dashboard/license" className="quick-action">
+                            <span className="quick-action-icon">🔑</span>
+                            {license ? 'View License Key' : 'Generate License'}
+                        </Link>
+                        <Link href="/dashboard/usage" className="quick-action">
+                            <span className="quick-action-icon">📊</span>
+                            View Analytics
+                        </Link>
+                        <Link href="/dashboard/settings" className="quick-action">
+                            <span className="quick-action-icon">🎨</span>
+                            Change Theme
+                        </Link>
+                        <Link href="/dashboard/billing" className="quick-action">
+                            <span className="quick-action-icon">💳</span>
+                            Manage Billing
+                        </Link>
                     </div>
                 </div>
 
                 {/* Quick Start */}
-                <div className="card" style={{ marginBottom: '1.5rem' }}>
+                <div className="card">
                     <div className="card-header">
                         <h3 className="card-title">🚀 Quick Start</h3>
                     </div>
-                    <div style={{ background: '#1e1e2e', borderRadius: 8, padding: '1.25rem', fontFamily: 'monospace', color: '#e8e8f0', fontSize: '0.85rem', lineHeight: 1.8 }}>
-                        <div style={{ color: '#6b7280' }}># Install PersonalJARVIS globally</div>
-                        <div><span style={{ color: '#a855f7' }}>$</span> npm install -g personaljarvis</div>
+                    <div className="code-block">
+                        <div className="comment"># Install PersonalJARVIS globally</div>
+                        <div><span className="prompt">$</span> npm install -g personaljarvis</div>
                         <br />
-                        <div style={{ color: '#6b7280' }}># Run the setup wizard</div>
-                        <div><span style={{ color: '#a855f7' }}>$</span> jarvis setup</div>
+                        <div className="comment"># Run the setup wizard</div>
+                        <div><span className="prompt">$</span> jarvis setup</div>
                         <br />
-                        <div style={{ color: '#6b7280' }}># Start JARVIS</div>
-                        <div><span style={{ color: '#a855f7' }}>$</span> jarvis</div>
+                        <div className="comment"># Start JARVIS</div>
+                        <div><span className="prompt">$</span> jarvis</div>
                     </div>
                 </div>
-
-                {/* Upgrade CTA for free users */}
-                {plan === 'balanced' && (
-                    <div className="card" style={{
-                        background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.04), rgba(168, 85, 247, 0.04))',
-                        border: '1px solid rgba(139, 92, 246, 0.15)',
-                    }}>
-                        <div className="card-header">
-                            <h3 className="card-title">⚡ Upgrade to Productivity</h3>
-                        </div>
-                        <p className="card-description" style={{ marginBottom: '1rem' }}>
-                            Unlock cloud AI providers (Gemini, OpenAI, Claude), full 4-layer memory, browser automation,
-                            advanced analytics, and priority support for <strong>$20/month</strong>.
-                        </p>
-                        <a href="/dashboard/billing">
-                            <button className="btn-primary" style={{ maxWidth: 220 }}>Upgrade Now →</button>
-                        </a>
-                    </div>
-                )}
             </div>
         </>
     );

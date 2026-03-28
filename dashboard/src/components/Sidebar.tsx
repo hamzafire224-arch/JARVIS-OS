@@ -24,7 +24,7 @@ export function Sidebar({ user }: SidebarProps) {
         router.refresh();
     };
 
-    const links = [
+    const mainLinks = [
         {
             href: '/dashboard',
             label: 'Overview',
@@ -32,6 +32,36 @@ export function Sidebar({ user }: SidebarProps) {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
                     <rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
+                </svg>
+            ),
+        },
+        {
+            href: '/dashboard/usage',
+            label: 'Usage Analytics',
+            icon: (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" />
+                </svg>
+            ),
+        },
+        {
+            href: '/dashboard/activity',
+            label: 'Activity',
+            icon: (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                </svg>
+            ),
+        },
+    ];
+
+    const accountLinks = [
+        {
+            href: '/dashboard/license',
+            label: 'License Key',
+            icon: (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
                 </svg>
             ),
         },
@@ -45,25 +75,21 @@ export function Sidebar({ user }: SidebarProps) {
             ),
         },
         {
-            href: '/dashboard/license',
-            label: 'License Key',
-            icon: (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
-                </svg>
-            ),
-        },
-        {
             href: '/dashboard/settings',
             label: 'Settings',
             icon: (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="3" />
-                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
                 </svg>
             ),
         },
     ];
+
+    const isActive = (href: string) => {
+        if (href === '/dashboard') return pathname === '/dashboard';
+        return pathname.startsWith(href);
+    };
 
     const initials = user.fullName
         .split(' ')
@@ -77,14 +103,9 @@ export function Sidebar({ user }: SidebarProps) {
             {/* Brand */}
             <Link href="/dashboard" className="sidebar-brand">
                 <div style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 8,
-                    background: 'linear-gradient(135deg, #6366f1, #a855f7)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
+                    width: 32, height: 32, borderRadius: 8,
+                    background: 'var(--accent-gradient)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                 }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 2L2 7l10 5 10-5-10-5z" />
@@ -95,13 +116,26 @@ export function Sidebar({ user }: SidebarProps) {
                 <span>PersonalJARVIS</span>
             </Link>
 
-            {/* Navigation */}
+            {/* Main Navigation */}
             <nav className="sidebar-nav">
-                {links.map((link) => (
+                <div className="sidebar-section-label">Dashboard</div>
+                {mainLinks.map((link) => (
                     <Link
                         key={link.href}
                         href={link.href}
-                        className={`sidebar-link ${pathname === link.href ? 'active' : ''}`}
+                        className={`sidebar-link ${isActive(link.href) ? 'active' : ''}`}
+                    >
+                        {link.icon}
+                        {link.label}
+                    </Link>
+                ))}
+
+                <div className="sidebar-section-label" style={{ marginTop: '0.5rem' }}>Account</div>
+                {accountLinks.map((link) => (
+                    <Link
+                        key={link.href}
+                        href={link.href}
+                        className={`sidebar-link ${isActive(link.href) ? 'active' : ''}`}
                     >
                         {link.icon}
                         {link.label}
@@ -117,25 +151,12 @@ export function Sidebar({ user }: SidebarProps) {
                         <div className="sidebar-user-name">{user.fullName}</div>
                         <div className="sidebar-user-plan">
                             <span className={`plan-badge ${user.plan === 'productivity' ? 'pro' : 'free'}`}>
-                                {user.plan === 'productivity' ? 'Productivity' : 'Balanced'}
+                                {user.plan === 'productivity' ? '⚡ Productivity' : 'Balanced'}
                             </span>
                         </div>
                     </div>
                 </div>
-                <button
-                    onClick={handleSignOut}
-                    style={{
-                        marginTop: '0.75rem',
-                        width: '100%',
-                        padding: '0.5rem',
-                        background: 'transparent',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: 8,
-                        color: '#6b7280',
-                        fontSize: '0.8rem',
-                        cursor: 'pointer',
-                    }}
-                >
+                <button onClick={handleSignOut} className="btn-ghost" style={{ width: '100%', marginTop: '0.75rem' }}>
                     Sign Out
                 </button>
             </div>

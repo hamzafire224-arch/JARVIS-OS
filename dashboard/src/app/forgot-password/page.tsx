@@ -32,20 +32,11 @@ export default function ForgotPasswordPage() {
 
     if (success) {
         return (
-            <div style={{
-                minHeight: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'linear-gradient(135deg, #f8f9fc 0%, #eef0f7 100%)',
-                padding: '1rem',
-            }}>
+            <div className="auth-page">
                 <div className="auth-card" style={{ textAlign: 'center' }}>
                     <div style={{
-                        width: 64,
-                        height: 64,
-                        borderRadius: '50%',
-                        background: '#f0fdf4',
+                        width: 64, height: 64, borderRadius: '50%',
+                        background: 'var(--success-bg)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -68,26 +59,10 @@ export default function ForgotPasswordPage() {
     }
 
     return (
-        <div style={{
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'linear-gradient(135deg, #f8f9fc 0%, #eef0f7 100%)',
-            padding: '1rem',
-        }}>
+        <div className="auth-page">
             <div className="auth-card">
                 <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                    <div style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 12,
-                        background: 'linear-gradient(135deg, #6366f1, #a855f7)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        margin: '0 auto 0.75rem',
-                    }}>
+                    <div className="auth-logo">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
@@ -121,10 +96,10 @@ export default function ForgotPasswordPage() {
                 <p style={{
                     textAlign: 'center',
                     marginTop: '1.5rem',
-                    color: '#6b7280',
+                    color: 'var(--text-tertiary)',
                     fontSize: '0.875rem',
                 }}>
-                    <Link href="/login" style={{ color: '#8b5cf6', fontWeight: 600 }}>
+                    <Link href="/login" style={{ fontWeight: 600 }}>
                         ← Back to Sign In
                     </Link>
                 </p>
