@@ -7,7 +7,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  */
 const ALLOWED_ORIGINS = (
     process.env.ALLOWED_ORIGINS ??
-    'https://app.personaljarvis.dev,http://localhost:3000,http://localhost:3001'
+    'https://app.letjarvis.com,http://localhost:3000,http://localhost:3001'
 ).split(',').map(o => o.trim());
 
 function getCorsOrigin(request: NextRequest | Request): string {

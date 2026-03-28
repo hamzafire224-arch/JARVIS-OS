@@ -193,7 +193,7 @@ export class LicenseManager {
         const magenta = '\x1b[35m';
         const cyan = '\x1b[36m';
         const dim = '\x1b[2m';
-        const billingUrl = 'https://app.personaljarvis.dev/dashboard/billing';
+        const billingUrl = 'https://app.letjarvis.com/dashboard/billing';
 
         // Free Productivity period notifications
         if (status.status === 'trial' && status.trialDaysLeft != null) {

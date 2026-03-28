@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     }
 
     // Build LemonSqueezy checkout URL
-    const checkoutUrl = new URL(`https://personaljarvis.lemonsqueezy.com/checkout/buy/${variantId}`);
+    const checkoutUrl = new URL(`https://letjarvis.lemonsqueezy.com/checkout/buy/${variantId}`);
 
     // Pass user metadata so webhook can link payment → user
     checkoutUrl.searchParams.set('checkout[custom][user_id]', userId);

@@ -65,7 +65,7 @@
     <tr>
       <td style="padding:20px 32px;border-top:1px solid #f0f0f0;text-align:center;">
         <p style="margin:0;color:#9ca3af;font-size:12px;">
-          © PersonalJARVIS · You received this because you signed up at app.personaljarvis.dev
+          © PersonalJARVIS · You received this because you signed up at app.letjarvis.com
         </p>
       </td>
     </tr>

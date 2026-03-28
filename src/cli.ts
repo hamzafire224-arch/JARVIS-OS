@@ -59,7 +59,7 @@ Usage:
   jarvis --version    Show version number
   jarvis --help       Show this help message
 
-Dashboard: https://app.personaljarvis.dev
+Dashboard: https://app.letjarvis.com
 Docs:      https://github.com/personaljarvis/jarvis#readme
 `);
             break;

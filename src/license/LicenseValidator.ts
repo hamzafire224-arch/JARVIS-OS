@@ -19,7 +19,7 @@ export interface LicenseValidationResult {
     trial_expired?: boolean;
 }
 
-const DEFAULT_API_URL = 'https://app.personaljarvis.dev';
+const DEFAULT_API_URL = 'https://app.letjarvis.com';
 
 export class LicenseValidator {
     private apiUrl: string;

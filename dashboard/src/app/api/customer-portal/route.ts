@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 
     // LemonSqueezy customer portal URL
     const storeId = process.env.LEMONSQUEEZY_STORE_ID;
-    const portalUrl = `https://personaljarvis.lemonsqueezy.com/billing?customer_id=${subscription.lemon_customer_id}`;
+    const portalUrl = `https://letjarvis.lemonsqueezy.com/billing?customer_id=${subscription.lemon_customer_id}`;
 
     return NextResponse.redirect(portalUrl);
 }

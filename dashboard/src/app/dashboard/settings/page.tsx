@@ -319,7 +319,7 @@ export default function SettingsPage() {
                         }}
                         onClick={() => {
                             if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
-                                alert('Account deletion is handled via support. Please email support@personaljarvis.dev');
+                                alert('Account deletion is handled via support. Please email support@letjarvis.com');
                             }
                         }}
                     >

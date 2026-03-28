@@ -37,7 +37,7 @@ interface SetupConfig {
     accountEmail?: string;
 }
 
-const DASHBOARD_URL = process.env.JARVIS_DASHBOARD_URL || 'https://app.personaljarvis.dev';
+const DASHBOARD_URL = process.env.JARVIS_DASHBOARD_URL || 'https://app.letjarvis.com';
 const API_URL = process.env.JARVIS_API_URL || DASHBOARD_URL;
 
 interface ProviderInfo {

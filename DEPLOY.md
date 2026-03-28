@@ -38,7 +38,7 @@ Step-by-step deployment instructions. Follow in order.
 3. Go to [github.com/settings/developers](https://github.com/settings/developers)
 4. Click **"New OAuth App"**
    - **Application name:** `PersonalJARVIS`
-   - **Homepage URL:** `https://app.personaljarvis.dev`
+   - **Homepage URL:** `https://app.letjarvis.com`
    - **Authorization callback URL:** `https://<your-supabase-id>.supabase.co/auth/v1/callback`
 5. Click **"Register application"**
 6. Copy **Client ID** and **Client Secret**
@@ -77,7 +77,7 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...
 ### 2.3 Configure Webhook
 1. Go to **"Settings"** → **"Webhooks"**
 2. Click **"+"** to add a webhook
-3. **URL:** `https://app.personaljarvis.dev/api/webhook/lemonsqueezy`
+3. **URL:** `https://app.letjarvis.com/api/webhook/lemonsqueezy`
 4. **Secret:** Generate a random string (save it!)
 5. **Events:** Check ALL subscription events:
    - `subscription_created`
@@ -128,7 +128,7 @@ git push origin main
 | `NEXT_PUBLIC_SUPABASE_URL` | from Step 1.5 |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | from Step 1.5 |
 | `SUPABASE_SERVICE_ROLE_KEY` | from Step 1.5 |
-| `NEXT_PUBLIC_APP_URL` | `https://app.personaljarvis.dev` |
+| `NEXT_PUBLIC_APP_URL` | `https://app.letjarvis.com` |
 | `LEMONSQUEEZY_API_KEY` | from Step 2.4 |
 | `LEMONSQUEEZY_WEBHOOK_SECRET` | from Step 2.4 |
 | `LEMONSQUEEZY_STORE_ID` | from Step 2.4 |
@@ -138,13 +138,13 @@ git push origin main
 
 ### 3.3 Custom Domain
 1. In Vercel project settings → **"Domains"**
-2. Add: `app.personaljarvis.dev`
+2. Add: `app.letjarvis.com`
 3. Follow DNS instructions (add CNAME or A record at your domain registrar)
 4. Wait for SSL certificate (usually < 5 minutes)
 
 ### 3.4 Verify
-- [ ] `app.personaljarvis.dev/login` loads
-- [ ] `app.personaljarvis.dev/signup` loads
+- [ ] `app.letjarvis.com/login` loads
+- [ ] `app.letjarvis.com/signup` loads
 - [ ] Can create account with email
 - [ ] Can login with GitHub
 - [ ] Dashboard loads after login
@@ -153,27 +153,36 @@ git push origin main
 
 ---
 
-## Step 4: Website (Static Hosting)
+## Step 4: Website (Static Hosting — Vercel)
 
-### Option A: Vercel
-1. Create another project on Vercel
-2. Import same JARVIS-OS repo
-3. **Root Directory:** `website`
-4. **Framework:** Other (static site)
-5. Deploy
-6. Add domain: `personaljarvis.dev`
+> ⚠️ This is a **second, separate** Vercel project. Don't use the same project as the dashboard.
 
-### Option B: GitHub Pages
-```bash
-# From repo root
-git subtree push --prefix website origin gh-pages
-```
-Then enable GitHub Pages in repo settings → Source: `gh-pages` branch.
+1. Go to **[vercel.com/new](https://vercel.com/new)**
+2. Click **\"Import\"** on the **JARVIS-OS** repository (same repo as dashboard)
+3. **Project Name:** `letjarvis-website` (or similar — just for your reference)
+4. **Root Directory:** Click **\"Edit\"** → you will see a folder picker showing folders like `JARVIS-OS (root)`, `dashboard`, `memory`, etc.
+   - **Do NOT select `JARVIS-OS (root)`** — that's the whole repo
+   - **Select `website`** from the list (or type `website` in the text field)
+   - This tells Vercel to only build/serve the `website/` folder
+5. **Framework Preset:** Select **\"Other\"** (it's a static HTML site, not Next.js)
+6. **Build Command:** Leave empty (no build step needed — it's plain HTML)
+7. **Output Directory:** Leave as `.` (default)
+8. Click **\"Deploy\"**
 
-### Option C: Netlify
-1. Go to [netlify.com](https://netlify.com)
-2. Drag and drop the `website/` folder
-3. Add custom domain: `personaljarvis.dev`
+### 4.1 Custom Domain
+1. Once deployed, go to **Project Settings** → **"Domains"**
+2. Add: `letjarvis.com`
+3. Also add: `www.letjarvis.com` (redirect to `letjarvis.com`)
+4. **DNS Setup** at your domain registrar:
+   - Add a **CNAME** record: `@` → `cname.vercel-dns.com`
+   - Add a **CNAME** record: `www` → `cname.vercel-dns.com`
+5. Wait for SSL (usually < 5 minutes)
+
+### 4.2 Also Add Dashboard Subdomain
+1. Go back to the **first** Vercel project (the dashboard)
+2. Go to **Settings** → **"Domains"**
+3. Add: `app.letjarvis.com`
+4. **DNS Setup:** Add a **CNAME** record: `app` → `cname.vercel-dns.com`
 
 ### Verify
 - [ ] All 5 pages load (index, features, pricing, about, docs)
@@ -216,7 +225,7 @@ jarvis --help
 
 Run through the full user journey:
 
-1. Visit `personaljarvis.dev` → website loads
+1. Visit `letjarvis.com` → website loads
 2. `npm install -g personaljarvis` → installs
 3. `jarvis setup` → wizard starts
 4. Choose "Create account" → opens dashboard signup
@@ -238,7 +247,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
 
 # App
-NEXT_PUBLIC_APP_URL=https://app.personaljarvis.dev
+NEXT_PUBLIC_APP_URL=https://app.letjarvis.com
 
 # LemonSqueezy
 LEMONSQUEEZY_API_KEY=...
