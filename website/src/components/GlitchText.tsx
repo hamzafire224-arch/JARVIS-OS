@@ -54,7 +54,7 @@ export default function GlitchText({ verb, isActive }: GlitchTextProps) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -30 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight text-center leading-none"
+        className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-center leading-none"
       >
         <span className="text-text-primary">LET JARVIS </span>
         <span

@@ -57,7 +57,7 @@ export default function Header() {
           </a>
           <a
             href="https://app.letjarvis.com/signup"
-            className="text-sm font-semibold bg-accent hover:bg-accent-bright text-white px-5 py-2 rounded-lg transition-all hover:shadow-lg hover:shadow-accent-glow"
+            className="text-sm font-semibold bg-accent hover:bg-accent-bright text-white px-6 py-2.5 rounded-full transition-all hover:shadow-lg hover:shadow-accent-glow whitespace-nowrap"
           >
             Get Started Free
           </a>

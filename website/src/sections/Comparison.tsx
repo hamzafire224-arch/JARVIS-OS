@@ -44,7 +44,7 @@ const competitors: CompetitorData[] = [
       Deployment: 'Manual',
       Research: 'Partial',
       'Local AI': false,
-      Price: '$30/mo',
+      Price: 'Open Source',
     },
   },
   {
@@ -56,12 +56,12 @@ const competitors: CompetitorData[] = [
       Deployment: 'None',
       Research: 'Partial',
       'Local AI': false,
-      Price: '$20/mo',
+      Price: 'Open Source',
     },
   },
 ]
 
-function CellValue({ value }: { value: string | boolean }) {
+function CellValue({ value, isHighlight }: { value: string | boolean; isHighlight?: boolean }) {
   if (typeof value === 'boolean') {
     return value ? (
       <span className="text-success text-lg">✓</span>
@@ -77,8 +77,8 @@ export default function Comparison() {
   const isInView = useInView(ref, { once: true, margin: '-100px' })
 
   return (
-    <section id="compare" ref={ref} className="py-24 md:py-32 px-6">
-      <div className="max-w-5xl mx-auto">
+    <section id="compare" ref={ref} className="py-28 md:py-36 px-6">
+      <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -97,48 +97,52 @@ export default function Comparison() {
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="overflow-x-auto"
+          className="bg-surface-2 border border-border rounded-2xl overflow-hidden"
         >
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-4 px-4 text-text-tertiary font-medium">Feature</th>
-                {competitors.map((c) => (
-                  <th
-                    key={c.name}
-                    className={`py-4 px-4 font-semibold text-center ${
-                      c.highlight ? 'text-accent' : 'text-text-secondary'
-                    }`}
-                  >
-                    {c.name}
-                    {c.highlight && (
-                      <div className="text-[10px] font-normal text-accent/60 mt-0.5">★ Recommended</div>
-                    )}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {categories.map((cat) => (
-                <tr key={cat} className="border-b border-border/50 hover:bg-surface-2/50 transition-colors">
-                  <td className="py-3.5 px-4 text-text-secondary font-medium">{cat}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm md:text-base">
+              <thead>
+                <tr className="border-b border-border bg-surface-3/50">
+                  <th className="text-left py-4 px-6 text-text-tertiary font-medium w-40">Feature</th>
                   {competitors.map((c) => (
-                    <td
+                    <th
                       key={c.name}
-                      className={`py-3.5 px-4 text-center ${
-                        c.highlight
-                          ? 'text-text-primary font-medium bg-accent/[0.03]'
-                          : 'text-text-tertiary'
+                      className={`py-4 px-6 font-semibold text-center ${
+                        c.highlight ? 'text-accent bg-accent/[0.05]' : 'text-text-secondary'
                       }`}
                     >
-                      <CellValue value={c.values[cat]} />
-                    </td>
+                      {c.name}
+                      {c.highlight && (
+                        <div className="text-[10px] font-normal text-accent/60 mt-0.5">★ Recommended</div>
+                      )}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="text-text-tertiary text-xs mt-4">* Free during launch period. $20/mo after.</p>
+              </thead>
+              <tbody>
+                {categories.map((cat) => (
+                  <tr key={cat} className="border-b border-border/50 hover:bg-surface-3/30 transition-colors">
+                    <td className="py-4 px-6 text-text-secondary font-medium">{cat}</td>
+                    {competitors.map((c) => (
+                      <td
+                        key={c.name}
+                        className={`py-4 px-6 text-center ${
+                          c.highlight
+                            ? 'text-text-primary font-medium bg-accent/[0.03]'
+                            : 'text-text-tertiary'
+                        }`}
+                      >
+                        <CellValue value={c.values[cat]} isHighlight={c.highlight} />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-6 py-3 bg-surface-3/30 border-t border-border/30">
+            <p className="text-text-tertiary text-xs">* Free during launch period. $20/mo after.</p>
+          </div>
         </motion.div>
       </div>
     </section>

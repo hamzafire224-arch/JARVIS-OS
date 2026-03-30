@@ -2,11 +2,11 @@ import { motion } from 'framer-motion'
 import GlitchText from '../components/GlitchText'
 
 const nodes = [
-  { x: '15%', y: '25%', label: 'Research', delay: 0.2 },
-  { x: '75%', y: '20%', label: 'Analyze', delay: 0.4 },
-  { x: '25%', y: '65%', label: 'Plan', delay: 0.6 },
-  { x: '70%', y: '70%', label: 'Execute', delay: 0.8 },
-  { x: '50%', y: '45%', label: 'Orchestrate', delay: 0.3 },
+  { x: '12%', y: '30%', label: 'Research', delay: 0.2 },
+  { x: '85%', y: '25%', label: 'Analyze', delay: 0.4 },
+  { x: '18%', y: '72%', label: 'Plan', delay: 0.6 },
+  { x: '82%', y: '75%', label: 'Execute', delay: 0.8 },
+  { x: '50%', y: '50%', label: 'Orchestrate', delay: 0.3 },
 ]
 
 const connections = [
@@ -61,7 +61,7 @@ export default function Logic({ isActive }: { isActive: boolean }) {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center gap-6 px-6">
+      <div className="relative z-10 flex flex-col items-center justify-center h-full gap-6 px-6 pt-16">
         <GlitchText verb="HANDLE" isActive={isActive} />
         <motion.p
           initial={{ opacity: 0, y: 20 }}

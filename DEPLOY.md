@@ -153,20 +153,20 @@ git push origin main
 
 ---
 
-## Step 4: Website (Static Hosting — Vercel)
+## Step 4: Website (Vite React App — Vercel)
 
 > ⚠️ This is a **second, separate** Vercel project. Don't use the same project as the dashboard.
 
 1. Go to **[vercel.com/new](https://vercel.com/new)**
 2. Click **"Import"** on the **JARVIS-OS** repository (same repo as dashboard)
-3. **Project Name:** `letjarvis-website` (or similar — just for your reference)
+3. **Project Name:** `letjarvis-website`
 4. **Root Directory:** Click **"Edit"** → Select **`JARVIS-OS (root)`** → click **Continue**
-5. **Framework Preset:** Select **"Other"**
+5. **Framework Preset:** Select **"Vite"**
 6. Expand **"Build and Output Settings"**:
-   - **Build Command:** leave empty (toggle the override switch ON, then leave the field blank)
-   - **Output Directory:** type `website`
-   - **Install Command:** leave empty
-7. No environment variables needed for the website
+   - **Build Command** (toggle override ON): `cd website && npm install && npm run build`
+   - **Output Directory** (toggle override ON): `website/dist`
+   - **Install Command** (toggle override ON): leave **blank**
+7. No environment variables needed
 8. Click **"Deploy"**
 
 ### 4.1 Custom Domain
@@ -185,10 +185,11 @@ git push origin main
 4. **DNS Setup:** Add a **CNAME** record: `app` → `cname.vercel-dns.com`
 
 ### Verify
-- [ ] All 5 pages load (index, features, pricing, about, docs)
+- [ ] Homepage loads with cinematic scroll
+- [ ] Snap-scroll works (sections 1-4)
+- [ ] Normal scroll works (sections 5-8)
 - [ ] Mobile responsive
-- [ ] All links work
-- [ ] Animations load
+- [ ] All links work (Login → app.letjarvis.com)
 
 ---
 
