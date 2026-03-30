@@ -158,16 +158,16 @@ git push origin main
 > ⚠️ This is a **second, separate** Vercel project. Don't use the same project as the dashboard.
 
 1. Go to **[vercel.com/new](https://vercel.com/new)**
-2. Click **\"Import\"** on the **JARVIS-OS** repository (same repo as dashboard)
+2. Click **"Import"** on the **JARVIS-OS** repository (same repo as dashboard)
 3. **Project Name:** `letjarvis-website` (or similar — just for your reference)
-4. **Root Directory:** Click **\"Edit\"** → you will see a folder picker showing folders like `JARVIS-OS (root)`, `dashboard`, `memory`, etc.
-   - **Do NOT select `JARVIS-OS (root)`** — that's the whole repo
-   - **Select `website`** from the list (or type `website` in the text field)
-   - This tells Vercel to only build/serve the `website/` folder
-5. **Framework Preset:** Select **\"Other\"** (it's a static HTML site, not Next.js)
-6. **Build Command:** Leave empty (no build step needed — it's plain HTML)
-7. **Output Directory:** Leave as `.` (default)
-8. Click **\"Deploy\"**
+4. **Root Directory:** Click **"Edit"** → Select **`JARVIS-OS (root)`** → click **Continue**
+5. **Framework Preset:** Select **"Other"**
+6. Expand **"Build and Output Settings"**:
+   - **Build Command:** leave empty (toggle the override switch ON, then leave the field blank)
+   - **Output Directory:** type `website`
+   - **Install Command:** leave empty
+7. No environment variables needed for the website
+8. Click **"Deploy"**
 
 ### 4.1 Custom Domain
 1. Once deployed, go to **Project Settings** → **"Domains"**
