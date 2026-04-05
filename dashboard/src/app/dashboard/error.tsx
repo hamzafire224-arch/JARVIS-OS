@@ -15,21 +15,18 @@ export default function DashboardError({
             minHeight: '60vh',
             padding: '2rem',
         }}>
-            <div style={{
-                background: 'white',
-                border: '1px solid #e5e7eb',
-                borderRadius: 16,
-                padding: '2.5rem',
+            <div className="card card-glass" style={{
                 maxWidth: 480,
                 width: '100%',
                 textAlign: 'center',
+                padding: '2.5rem',
             }}>
                 {/* Error Icon */}
                 <div style={{
                     width: 64,
                     height: 64,
                     borderRadius: '50%',
-                    background: '#fef2f2',
+                    background: 'rgba(239, 68, 68, 0.1)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -42,14 +39,14 @@ export default function DashboardError({
                 <h2 style={{
                     fontSize: '1.25rem',
                     fontWeight: 700,
-                    color: '#111827',
+                    color: 'var(--text-primary)',
                     marginBottom: '0.5rem',
                 }}>
                     Something went wrong
                 </h2>
 
                 <p style={{
-                    color: '#6b7280',
+                    color: 'var(--text-secondary)',
                     fontSize: '0.9rem',
                     marginBottom: '1.5rem',
                     lineHeight: 1.6,
@@ -59,10 +56,10 @@ export default function DashboardError({
                         <span style={{
                             display: 'block',
                             marginTop: '0.75rem',
-                            fontFamily: 'monospace',
+                            fontFamily: "'JetBrains Mono', monospace",
                             fontSize: '0.8rem',
-                            color: '#b91c1c',
-                            background: '#fef2f2',
+                            color: 'var(--error)',
+                            background: 'rgba(239, 68, 68, 0.08)',
                             padding: '0.5rem 0.75rem',
                             borderRadius: 8,
                             wordBreak: 'break-all',

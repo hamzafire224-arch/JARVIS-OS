@@ -16,9 +16,9 @@ export default function Header() {
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-surface/80 border-b border-border/50"
+      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-surface/80 border-b border-border/50 overflow-visible"
     >
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
         <a href="/" className="flex items-center gap-2.5 group">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent-bright flex items-center justify-center">
@@ -48,7 +48,7 @@ export default function Header() {
         </nav>
 
         {/* Desktop CTA */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-4 flex-shrink-0">
           <a
             href="https://app.letjarvis.com/login"
             className="text-sm text-text-secondary hover:text-text-primary transition-colors px-4 py-2"
@@ -57,7 +57,7 @@ export default function Header() {
           </a>
           <a
             href="https://app.letjarvis.com/signup"
-            className="text-sm font-semibold bg-accent hover:bg-accent-bright text-white px-6 py-2.5 rounded-full transition-all hover:shadow-lg hover:shadow-accent-glow whitespace-nowrap"
+            className="text-sm font-semibold bg-accent hover:bg-accent-bright text-white px-7 py-3 rounded-full transition-all hover:shadow-lg hover:shadow-accent-glow whitespace-nowrap border-none outline-none ring-0 inline-flex items-center justify-center"
           >
             Get Started Free
           </a>

@@ -1,13 +1,18 @@
 import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 
 export default async function BillingPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    if (!user) {
+        redirect('/login');
+    }
+
     const { data: subscription } = await supabase
         .from('subscriptions')
         .select('*')
-        .eq('user_id', user!.id)
+        .eq('user_id', user.id)
         .single();
 
     const plan = subscription?.plan || 'balanced';
@@ -24,7 +29,7 @@ export default async function BillingPage() {
         })
         : null;
 
-    const checkoutUrl = `/api/checkout?user_id=${user!.id}&email=${user!.email}`;
+    const checkoutUrl = `/api/checkout?user_id=${user.id}&email=${user.email}`;
 
     return (
         <>

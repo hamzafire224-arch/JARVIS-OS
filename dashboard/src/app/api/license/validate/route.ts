@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 import { withCors, corsPreflightResponse } from '@/lib/cors';
 import { validateLimiter, getClientIp } from '@/lib/rate-limit';
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
             return withCors(NextResponse.json({ valid: false, reason: 'license_key required' }, { status: 400 }));
         }
 
-        const supabase = await createClient();
+        const supabase = createAdminClient();
 
         // Look up license
         const { data: license, error: licenseError } = await supabase

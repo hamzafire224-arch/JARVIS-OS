@@ -15,12 +15,18 @@ export async function POST(request: Request) {
         const signature = request.headers.get('x-signature') || '';
         const webhookSecret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET || '';
 
-        // Verify webhook signature
-        if (webhookSecret && signature) {
-            if (!verifySignature(rawBody, signature, webhookSecret)) {
-                console.error('Invalid webhook signature');
-                return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
-            }
+        // SECURITY: Always require valid signature in production
+        if (!webhookSecret) {
+            console.error('[Webhook] LEMONSQUEEZY_WEBHOOK_SECRET is not configured!');
+            return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
+        }
+        if (!signature) {
+            console.error('[Webhook] Missing x-signature header');
+            return NextResponse.json({ error: 'Missing signature' }, { status: 401 });
+        }
+        if (!verifySignature(rawBody, signature, webhookSecret)) {
+            console.error('[Webhook] Invalid webhook signature');
+            return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
         }
 
         const payload = JSON.parse(rawBody);

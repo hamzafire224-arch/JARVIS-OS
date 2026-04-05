@@ -114,6 +114,7 @@ export function Sidebar({ user }: SidebarProps) {
                     </svg>
                 </div>
                 <span>PersonalJARVIS</span>
+                <div className="pulse-live" style={{ marginLeft: '-0.25rem' }} />
             </Link>
 
             {/* Main Navigation */}

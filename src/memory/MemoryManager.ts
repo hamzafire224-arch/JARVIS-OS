@@ -63,7 +63,15 @@ export class MemoryManager {
         const supabase = getSupabaseClient();
         if (supabase) {
             try {
-                const { data, error } = await supabase.from('memory_vectors').select('*');
+                const { data, error } = await supabase
+                    .from('memory_vectors')
+                    .select('*')
+                    // TODO: Pass userId from LicenseManager into MemoryManager and add
+                    // .eq('user_id', userId) for explicit filtering.
+                    // Currently safe because: the anon key + RLS blocks all rows
+                    // when no auth session exists. If using service_role key, this
+                    // MUST have a user_id filter to prevent cross-user data leakage.
+                    .limit(1000);
                 if (!error && data) {
                     const cloudEntries: MemoryEntry[] = data.map((row: any) => ({
                         id: row.id,

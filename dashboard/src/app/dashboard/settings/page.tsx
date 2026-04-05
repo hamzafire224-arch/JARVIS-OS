@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useTheme } from '@/components/ThemeProvider';
+import { useToast } from '@/components/ToastNotification';
+import { PasswordStrength } from '@/components/PasswordStrength';
 
 const themes = [
     { id: 'dark', name: 'Dark', preview: 'linear-gradient(135deg, #0a0b10, #161822)' },
@@ -14,6 +16,7 @@ const themes = [
 
 export default function SettingsPage() {
     const { theme, setTheme } = useTheme();
+    const { toast } = useToast();
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
@@ -67,6 +70,7 @@ export default function SettingsPage() {
         setSaved(false);
         const supabase = createClient();
         await supabase.auth.updateUser({ data: { full_name: fullName } });
+        toast('Profile saved successfully!', 'success');
         setSaved(true);
         setLoading(false);
         setTimeout(() => setSaved(false), 3000);
@@ -98,6 +102,7 @@ export default function SettingsPage() {
             return;
         }
 
+        toast('Password updated successfully!', 'success');
         setPasswordSaved(true);
         setNewPassword('');
         setConfirmPassword('');
@@ -114,7 +119,7 @@ export default function SettingsPage() {
 
             <div className="dashboard-content">
                 {/* Theme */}
-                <div className="card" style={{ marginBottom: '1.5rem' }}>
+                <div className="card card-glass animate-in" style={{ marginBottom: '1.5rem' }}>
                     <div className="card-header">
                         <h3 className="card-title">🎨 Appearance</h3>
                     </div>
@@ -136,7 +141,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* JARVIS Preferences */}
-                <div className="card" style={{ marginBottom: '1.5rem' }}>
+                <div className="card card-glass animate-in" style={{ marginBottom: '1.5rem' }}>
                     <div className="card-header">
                         <h3 className="card-title">⚙️ JARVIS Preferences</h3>
                     </div>
@@ -176,7 +181,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Notifications */}
-                <div className="card" style={{ marginBottom: '1.5rem' }}>
+                <div className="card card-glass animate-in" style={{ marginBottom: '1.5rem' }}>
                     <div className="card-header">
                         <h3 className="card-title">🔔 Notifications</h3>
                     </div>
@@ -225,7 +230,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Profile */}
-                <div className="card" style={{ marginBottom: '1.5rem' }}>
+                <div className="card card-glass animate-in" style={{ marginBottom: '1.5rem' }}>
                     <div className="card-header">
                         <h3 className="card-title">👤 Profile</h3>
                     </div>
@@ -262,7 +267,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Change Password */}
-                <div className="card" style={{ marginBottom: '1.5rem' }}>
+                <div className="card card-glass animate-in" style={{ marginBottom: '1.5rem' }}>
                     <div className="card-header">
                         <h3 className="card-title">🔒 Change Password</h3>
                     </div>
@@ -281,6 +286,7 @@ export default function SettingsPage() {
                                 style={{ maxWidth: 400 }}
                                 minLength={8}
                             />
+                            <PasswordStrength password={newPassword} />
                         </div>
                         <div className="form-group">
                             <label htmlFor="confirm-password">Confirm Password</label>
@@ -302,7 +308,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Danger Zone */}
-                <div className="card" style={{ borderColor: 'rgba(239, 68, 68, 0.3)' }}>
+                <div className="card card-glass animate-in" style={{ borderColor: 'rgba(239, 68, 68, 0.3)' }}>
                     <div className="card-header">
                         <h3 className="card-title" style={{ color: 'var(--error)' }}>⚠️ Danger Zone</h3>
                     </div>

@@ -77,7 +77,7 @@ export default function Comparison() {
   const isInView = useInView(ref, { once: true, margin: '-100px' })
 
   return (
-    <section id="compare" ref={ref} className="py-28 md:py-36 px-6">
+    <section id="compare" ref={ref} className="pt-32 md:pt-44 pb-32 md:pb-44 px-6">
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

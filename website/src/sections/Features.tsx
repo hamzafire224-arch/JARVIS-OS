@@ -54,7 +54,7 @@ export default function Features() {
   const isInView = useInView(ref, { once: true, margin: '-80px' })
 
   return (
-    <section id="features" ref={ref} className="py-28 md:py-36 px-6">
+    <section id="features" ref={ref} className="py-32 md:py-44 px-6">
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

@@ -82,6 +82,8 @@ export class Gateway extends EventEmitter {
     private handlers: Map<string, MessageHandler> = new Map();
     private config: Required<GatewayConfig>;
     private heartbeatTimer?: NodeJS.Timeout;
+    /** Per-session rate limiting: sessionId → timestamps of recent messages */
+    private rateLimitBuckets: Map<string, number[]> = new Map();
 
     constructor(config: GatewayConfig) {
         super();
@@ -272,6 +274,7 @@ export class Gateway extends EventEmitter {
             // Handle close
             ws.on('close', (code, reason) => {
                 this.sessions.delete(sessionId);
+                this.rateLimitBuckets.delete(sessionId);
                 logger.agent('Client disconnected', {
                     sessionId,
                     code,
@@ -294,6 +297,19 @@ export class Gateway extends EventEmitter {
 
     private async handleMessage(session: GatewaySession, data: RawData): Promise<void> {
         session.lastActivity = new Date();
+
+        // ── Per-session rate limiting (60 msgs/min) ──────────────────────
+        const now = Date.now();
+        const windowMs = 60_000;
+        const maxMessages = 60;
+        let timestamps = this.rateLimitBuckets.get(session.id) ?? [];
+        timestamps = timestamps.filter(t => now - t < windowMs);
+        if (timestamps.length >= maxMessages) {
+            this.sendError(session, undefined, ErrorCodes.RATE_LIMITED, 'Rate limit exceeded. Max 60 messages per minute.');
+            return;
+        }
+        timestamps.push(now);
+        this.rateLimitBuckets.set(session.id, timestamps);
 
         let message: GatewayMessage;
 
@@ -514,42 +530,10 @@ export class Gateway extends EventEmitter {
         });
 
         // ─────────────────────────────────────────────────────────────────
-        // Chat handler — bridges dashboard/clients to the agent
+        // NOTE: The 'chat' handler is registered by JarvisHandlers.ts
+        // (registerJarvisHandlers), NOT here. This avoids silent overrides
+        // and keeps agent session management in one place.
         // ─────────────────────────────────────────────────────────────────
-        this.registerHandler('chat', async (session, params) => {
-            const message = params['message'] as string;
-            const conversationId = (params['conversationId'] as string) ?? session.id;
-
-            if (!message || typeof message !== 'string') {
-                throw new Error('Invalid params: "message" (string) is required');
-            }
-
-            // Emit event for the host application to handle agent routing
-            // The host calls gateway.onChatRequest(handler) to register
-            return new Promise<unknown>((resolve, reject) => {
-                const timeout = setTimeout(() => {
-                    reject(new Error('Chat request timed out (no handler registered or agent unresponsive)'));
-                }, 120_000); // 2 minute timeout for agent processing
-
-                this.emit('chat_request', {
-                    sessionId: session.id,
-                    userId: session.userId,
-                    message,
-                    conversationId,
-                    resolve: (response: unknown) => {
-                        clearTimeout(timeout);
-                        resolve(response);
-                    },
-                    reject: (error: Error) => {
-                        clearTimeout(timeout);
-                        reject(error);
-                    },
-                    sendStream: (chunk: StreamChunk) => {
-                        this.sendStreamChunk(session.id, chunk);
-                    },
-                });
-            });
-        });
 
         // ─────────────────────────────────────────────────────────────────
         // Fire-and-forget message with streaming response

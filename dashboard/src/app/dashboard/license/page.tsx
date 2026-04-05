@@ -1,15 +1,20 @@
 import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 import { LicenseKeyCard } from '@/components/LicenseKeyCard';
 
 export default async function LicensePage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    if (!user) {
+        redirect('/login');
+    }
+
     // Fetch license
     const { data: license } = await supabase
         .from('licenses')
         .select('*')
-        .eq('user_id', user!.id)
+        .eq('user_id', user.id)
         .eq('is_active', true)
         .single();
 
@@ -17,7 +22,7 @@ export default async function LicensePage() {
     const { data: subscription } = await supabase
         .from('subscriptions')
         .select('plan')
-        .eq('user_id', user!.id)
+        .eq('user_id', user.id)
         .single();
 
     const plan = subscription?.plan || 'balanced';

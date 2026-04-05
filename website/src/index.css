@@ -29,7 +29,6 @@ html {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  scroll-behavior: smooth;
 }
 
 body { overflow-x: hidden; }
@@ -39,27 +38,70 @@ body { overflow-x: hidden; }
   color: white;
 }
 
-/* --- Scrollbar --- */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-border-light); border-radius: 3px; }
+/* --- App Root --- */
+.app-root {
+  background: var(--color-surface);
+  min-height: 100vh;
+}
 
-/* --- Snap Container --- */
-.snap-container {
+/* During snap phase: no scrollbar, no body scroll */
+.app-root.snap-active {
   height: 100vh;
+  overflow: hidden;
+}
+
+/* During normal scroll phase: scrollable with nice scrollbar */
+.app-root.scroll-active {
+  height: auto;
   overflow-y: auto;
-  scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
+}
+
+/* --- Scrollbar (only visible in scroll phase) --- */
+.app-root.scroll-active::-webkit-scrollbar { width: 6px; }
+.app-root.scroll-active::-webkit-scrollbar-track { background: transparent; }
+.app-root.scroll-active::-webkit-scrollbar-thumb {
+  background: var(--color-border-light);
+  border-radius: 3px;
+}
+.app-root.scroll-active::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent-dim);
+}
+
+/* Hide all scrollbars during snap phase */
+.app-root.snap-active::-webkit-scrollbar { width: 0; display: none; }
+html:has(.snap-active) { overflow: hidden; }
+html:has(.snap-active) body { overflow: hidden; }
+
+/* --- Snap Viewport --- */
+.snap-viewport {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.snap-track {
+  transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+  will-change: transform;
 }
 
 .snap-section {
   height: 100vh;
-  scroll-snap-align: start;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
+}
+
+/* --- Normal Sections --- */
+.normal-sections {
+  position: relative;
+  z-index: 1;
 }
 
 /* --- Glitch Text --- */
@@ -196,3 +238,18 @@ body { overflow-x: hidden; }
 
 .cta-glow:hover::before { opacity: 1; }
 .cta-glow:hover { box-shadow: 0 0 30px var(--color-accent-glow); }
+
+/* --- Section dividers --- */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-border) 20%,
+    var(--color-accent-glow) 50%,
+    var(--color-border) 80%,
+    transparent 100%
+  );
+  margin: 2rem auto;
+  max-width: 60%;
+}
