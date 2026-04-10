@@ -1,151 +1,125 @@
-export default function UsageAnalyticsPage() {
-    // Mock data — connects to real telemetry once CLI reports usage
-    const weeklyData = [
-        { day: 'Mon', tasks: 12, cost: 0.04 },
-        { day: 'Tue', tasks: 18, cost: 0.06 },
-        { day: 'Wed', tasks: 8, cost: 0.02 },
-        { day: 'Thu', tasks: 24, cost: 0.08 },
-        { day: 'Fri', tasks: 15, cost: 0.05 },
-        { day: 'Sat', tasks: 6, cost: 0.01 },
-        { day: 'Sun', tasks: 10, cost: 0.03 },
-    ];
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import { EmptyState } from '@/components/EmptyState';
 
-    const maxTasks = Math.max(...weeklyData.map(d => d.tasks));
+export default async function UsageAnalyticsPage() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    const providerBreakdown = [
-        { name: 'Ollama (Local)', pct: 65, color: 'var(--accent-1)' },
-        { name: 'Gemini', pct: 22, color: 'var(--accent-2)' },
-        { name: 'OpenAI', pct: 8, color: 'var(--warning)' },
-        { name: 'Claude', pct: 5, color: 'var(--info)' },
-    ];
+    if (!user) {
+        redirect('/login');
+    }
 
-    const topSkills = [
-        { name: 'filesystem', uses: 45 },
-        { name: 'terminal', uses: 38 },
-        { name: 'code-analysis', uses: 22 },
-        { name: 'git', uses: 18 },
-        { name: 'browser', uses: 12 },
-    ];
-    const maxSkill = Math.max(...topSkills.map(s => s.uses));
+    // Check if user has any telemetry data
+    const { count: telemetryCount } = await supabase
+        .from('telemetry_events')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id);
 
-    const memoryStats = [
-        { layer: 'Working', items: 24, capacity: 50 },
-        { layer: 'Semantic', items: 156, capacity: 500 },
-        { layer: 'Episodic', items: 89, capacity: 1000 },
-        { layer: 'Vector', items: 312, capacity: 5000 },
-    ];
+    const hasData = (telemetryCount ?? 0) > 0;
+
+    // If there IS data, fetch aggregated stats
+    let stats = { sessions: 0, tasks: 0, tools: 0, savings: 0 };
+
+    if (hasData) {
+        const { count: sessionCount } = await supabase
+            .from('telemetry_events')
+            .select('id', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('event_type', 'session_start');
+
+        const { count: taskCount } = await supabase
+            .from('telemetry_events')
+            .select('id', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('event_type', 'task_completed');
+
+        const { count: toolCount } = await supabase
+            .from('telemetry_events')
+            .select('id', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('event_type', 'tool_used');
+
+        stats = {
+            sessions: sessionCount ?? 0,
+            tasks: taskCount ?? 0,
+            tools: toolCount ?? 0,
+            savings: 0,
+        };
+    }
 
     return (
         <>
             <div className="dashboard-header">
                 <h1>Usage Analytics</h1>
-                <p>Track your JARVIS activity, costs, and performance metrics.</p>
+                <p>Track your PersonalJARVIS usage and productivity insights.</p>
             </div>
 
             <div className="dashboard-content">
-                {/* Top Stats */}
-                <div className="stats-grid">
+                {/* Summary Stats */}
+                <div className="stats-grid" style={{ marginBottom: '2rem' }}>
                     <div className="stat-card">
                         <div className="stat-icon">💬</div>
                         <div className="stat-label">Total Sessions</div>
-                        <div className="stat-value">47</div>
-                        <div className="stat-change positive">↑ 12% vs last week</div>
+                        <div className="stat-value">{stats.sessions}</div>
                     </div>
                     <div className="stat-card">
                         <div className="stat-icon">✅</div>
                         <div className="stat-label">Tasks Completed</div>
-                        <div className="stat-value">93</div>
-                        <div className="stat-change positive">↑ 8% vs last week</div>
+                        <div className="stat-value">{stats.tasks}</div>
                     </div>
                     <div className="stat-card">
-                        <div className="stat-icon">🧠</div>
-                        <div className="stat-label">Memory Items</div>
-                        <div className="stat-value">581</div>
-                        <div className="stat-change positive">+23 this week</div>
+                        <div className="stat-icon">⚡</div>
+                        <div className="stat-label">Tools Executed</div>
+                        <div className="stat-value">{stats.tools}</div>
                     </div>
                     <div className="stat-card">
                         <div className="stat-icon">💰</div>
-                        <div className="stat-label">Cost Saved</div>
-                        <div className="stat-value" style={{ color: 'var(--success)' }}>$18.40</div>
-                        <div className="stat-change positive">90% via local routing</div>
+                        <div className="stat-label">Est. Savings</div>
+                        <div className="stat-value">$0</div>
                     </div>
                 </div>
 
-                {/* Charts Row */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-                    {/* Weekly Activity Chart */}
-                    <div className="card">
-                        <div className="card-header">
-                            <h3 className="card-title">Tasks This Week</h3>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>Total: {weeklyData.reduce((a, b) => a + b.tasks, 0)}</span>
-                        </div>
-                        <div className="chart-bar-container">
-                            {weeklyData.map((d, i) => (
-                                <div key={i} className="chart-bar" style={{ height: `${(d.tasks / maxTasks) * 100}%` }} title={`${d.tasks} tasks`} />
-                            ))}
-                        </div>
-                        <div className="chart-labels">
-                            {weeklyData.map((d) => (<span key={d.day}>{d.day}</span>))}
-                        </div>
+                {!hasData ? (
+                    <div className="card" style={{ marginBottom: '1.5rem' }}>
+                        <EmptyState
+                            icon="📊"
+                            title="No usage data yet"
+                            description="Install and run PersonalJARVIS to see your usage analytics, cost savings, and productivity insights here."
+                            actionLabel="Get Started"
+                            actionHref="/dashboard/license"
+                        />
                     </div>
-
-                    {/* Provider Breakdown */}
-                    <div className="card">
-                        <div className="card-header">
-                            <h3 className="card-title">Provider Usage</h3>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>This week</span>
-                        </div>
-                        <div>
-                            {providerBreakdown.map((p) => (
-                                <div className="hbar" key={p.name}>
-                                    <div className="hbar-label">{p.name}</div>
-                                    <div className="hbar-track">
-                                        <div className="hbar-fill" style={{ width: `${p.pct}%`, background: p.color }} />
-                                    </div>
-                                    <div className="hbar-value">{p.pct}%</div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Bottom Row */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                    {/* Top Skills */}
-                    <div className="card">
-                        <div className="card-header">
-                            <h3 className="card-title">Top Skills Used</h3>
-                        </div>
-                        {topSkills.map((s, i) => (
-                            <div className="hbar" key={s.name}>
-                                <div className="hbar-label" style={{ width: 120 }}>
-                                    <span style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{s.name}</span>
-                                </div>
-                                <div className="hbar-track">
-                                    <div className="hbar-fill" style={{ width: `${(s.uses / maxSkill) * 100}%` }} />
-                                </div>
-                                <div className="hbar-value">{s.uses}</div>
+                ) : (
+                    <>
+                        {/* Analytics cards will be populated here as telemetry flows in */}
+                        <div className="card" style={{ marginBottom: '1.5rem' }}>
+                            <div className="card-header">
+                                <h3 className="card-title">Activity Overview</h3>
                             </div>
-                        ))}
-                    </div>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', padding: '1rem 0' }}>
+                                Detailed charts and breakdowns will appear as you accumulate more usage data.
+                            </p>
+                        </div>
+                    </>
+                )}
 
-                    {/* Memory Usage */}
-                    <div className="card">
-                        <div className="card-header">
-                            <h3 className="card-title">Memory Layers</h3>
-                        </div>
-                        {memoryStats.map((m) => (
-                            <div className="hbar" key={m.layer}>
-                                <div className="hbar-label">{m.layer}</div>
-                                <div className="hbar-track">
-                                    <div className="hbar-fill" style={{ width: `${(m.items / m.capacity) * 100}%` }} />
-                                </div>
-                                <div className="hbar-value">{m.items}</div>
-                            </div>
-                        ))}
-                        <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--text-tertiary)', textAlign: 'right' }}>
-                            581 total items across 4 layers
-                        </div>
+                {/* Info Card */}
+                <div className="card">
+                    <div className="card-header">
+                        <h3 className="card-title">How Analytics Work</h3>
+                    </div>
+                    <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+                        <p><strong>What&apos;s tracked?</strong><br />
+                            Session count, task completions, tool executions, model requests, and memory growth.
+                            All data is tied to your account via your license key.</p>
+                        <br />
+                        <p><strong>Where is data stored?</strong><br />
+                            Analytics are stored securely in your Supabase account. Only you can see your data.
+                            JARVIS never shares individual usage metrics.</p>
+                        <br />
+                        <p><strong>Is this real-time?</strong><br />
+                            Data syncs periodically from your local CLI to the cloud. Dashboard reflects the latest sync.</p>
                     </div>
                 </div>
             </div>

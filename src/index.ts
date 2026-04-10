@@ -24,6 +24,10 @@ import { getWorldModel } from './agent/WorldModel.js';
 import { getMCPBridge } from './skills/MCPBridge.js';
 import { getMCPConnectorGallery } from './skills/MCPConnectorGallery.js';
 import { getVoiceService, type VoiceEvent } from './skills/VoiceService.js';
+import { getSessionPersistence } from './memory/SessionPersistence.js';
+import { getProactiveAnalyzer } from './agent/ProactiveAnalyzer.js';
+import { getSelfHealingEngine } from './agent/SelfHealingEngine.js';
+import { initTelemetrySync, getTelemetrySync } from './telemetry/TelemetrySyncService.js';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Banner
@@ -117,6 +121,20 @@ async function main() {
     analytics.track('session_start', { variant: config.variant });
     console.log('   ✓ Usage analytics active');
 
+    // Initialize cloud telemetry sync
+    const licenseKey = licenseManager.getLicenseKey?.() ?? '';
+    if (licenseKey) {
+        const telemetry = initTelemetrySync({
+            licenseKey,
+            apiUrl: 'https://letjarvis.com/api/telemetry',
+            syncIntervalMs: 60_000,
+            enabled: true,
+        });
+        telemetry.trackEvent('session_start', { variant: effectiveVariant, provider: config.providerPriority[0] });
+        telemetry.start();
+        console.log('   ✓ Cloud telemetry active');
+    }
+
     // Initialize skills registry (must happen before agent creation)
     console.log('🛠️  Initializing skills...');
     initializeSkills({
@@ -182,6 +200,11 @@ async function main() {
 │ /connect ID  - Connect MCP server           │
 │ /mcp         - List MCP servers/connectors  │
 │ /voice       - Toggle voice mode            │
+│ /save        - Save current session         │
+│ /resume      - Resume last session          │
+│ /sessions    - List saved sessions          │
+│ /insights    - Run proactive analysis       │
+│ /healing     - Self-healing engine stats    │
 │ /exit        - Exit JARVIS                  │
 └─────────────────────────────────────────────┘
 `);
@@ -299,6 +322,15 @@ async function main() {
                     case '/exit':
                     case '/quit':
                         analytics.track('session_end', {});
+                        // Save session before exit
+                        try {
+                            const sessionPersistence = getSessionPersistence();
+                            const ctx = agent.getContext();
+                            if (ctx.messages.length > 0) {
+                                const sessionId = await sessionPersistence.saveSession(ctx.messages, { variant: config.variant });
+                                console.log(`💾 Session saved: ${sessionId.slice(0, 8)}...`);
+                            }
+                        } catch { /* ignore */ }
                         if (isProductivityVariant()) {
                             try {
                                 const episodic = getEpisodicMemory();
@@ -555,6 +587,101 @@ async function main() {
                                 break;
                             }
 
+                            // ── AGI Feature 1.3: Session Persistence ─────────────────
+                            case '/save': {
+                                try {
+                                    const sessionPersistence = getSessionPersistence();
+                                    const ctx = agent.getContext();
+                                    const sessionId = await sessionPersistence.saveSession(ctx.messages, { variant: config.variant });
+                                    console.log(`\n💾 Session saved: ${sessionId.slice(0, 8)}...`);
+                                    console.log('   Use /resume to continue this session later.');
+                                } catch (err) {
+                                    console.error(`\n❌ Failed to save: ${err instanceof Error ? err.message : err}`);
+                                }
+                                break;
+                            }
+
+                            case '/resume': {
+                                try {
+                                    const sessionPersistence = getSessionPersistence();
+                                    const lastSession = await sessionPersistence.getLastSession();
+                                    if (!lastSession) {
+                                        console.log('\n📭 No saved sessions found.');
+                                        break;
+                                    }
+                                    agent.clearHistory();
+                                    for (const msg of lastSession.messages) {
+                                        agent.getContext().messages.push(msg);
+                                    }
+                                    console.log(`\n✅ Resumed session: "${lastSession.title}"`);
+                                    console.log(`   ${lastSession.metadata.messageCount} messages restored.`);
+                                } catch (err) {
+                                    console.error(`\n❌ Failed to resume: ${err instanceof Error ? err.message : err}`);
+                                }
+                                break;
+                            }
+
+                            case '/sessions': {
+                                try {
+                                    const sessionPersistence = getSessionPersistence();
+                                    const sessions = await sessionPersistence.listSessions();
+                                    if (sessions.length === 0) {
+                                        console.log('\n📭 No saved sessions.');
+                                        break;
+                                    }
+                                    console.log(`\n📋 Saved Sessions (${sessions.length}):`);
+                                    for (const s of sessions.slice(0, 10)) {
+                                        const time = new Date(s.lastActivityAt).toLocaleString();
+                                        console.log(`   • ${s.title.slice(0, 50)} (${s.messageCount} msgs, ${time})`);
+                                    }
+                                } catch (err) {
+                                    console.error(`\n❌ ${err instanceof Error ? err.message : err}`);
+                                }
+                                break;
+                            }
+
+                            // ── AGI Feature 2.1: Proactive Intelligence ──────────────
+                            case '/insights': {
+                                console.log('\n🔍 Running proactive analysis...');
+                                try {
+                                    const analyzer = getProactiveAnalyzer();
+                                    const summary = await analyzer.runFullAnalysis();
+                                    if (summary.totalInsights === 0) {
+                                        console.log('✨ Everything looks good — no issues detected!');
+                                    } else {
+                                        console.log(`\n🔔 Found ${summary.totalInsights} insight(s):`);
+                                        for (const insight of summary.insights) {
+                                            const icon = insight.severity === 'critical' ? '🔴' : insight.severity === 'warning' ? '🟡' : '🔵';
+                                            console.log(`   ${icon} ${insight.title}`);
+                                            if (insight.suggestedAction) {
+                                                console.log(`      → ${insight.suggestedAction}`);
+                                            }
+                                        }
+                                    }
+                                } catch (err) {
+                                    console.error(`\n❌ Analysis failed: ${err instanceof Error ? err.message : err}`);
+                                }
+                                break;
+                            }
+
+                            // ── AGI Feature 3.2: Self-Healing Stats ──────────────────
+                            case '/healing': {
+                                const healingEngine = getSelfHealingEngine();
+                                const healStats = healingEngine.getRecoveryStats();
+                                console.log('\n🩺 Self-Healing Engine Statistics:');
+                                console.log(`   Total recovery attempts: ${healStats.totalAttempts}`);
+                                console.log(`   Successes: ${healStats.successes}`);
+                                console.log(`   Failures: ${healStats.failures}`);
+                                console.log(`   Success rate: ${(healStats.successRate * 100).toFixed(1)}%`);
+                                if (healStats.topStrategies.length > 0) {
+                                    console.log('   Top strategies:');
+                                    for (const s of healStats.topStrategies) {
+                                        console.log(`     • ${s.strategy}: ${s.count} uses`);
+                                    }
+                                }
+                                break;
+                            }
+
                             default:
                                 console.log(`❓ Unknown command: ${command}. Type /help for available commands.`);
                         }
@@ -621,13 +748,23 @@ async function main() {
     };
 
     // Handle graceful shutdown
-    rl.on('close', () => {
+    const shutdown = async () => {
+        const telemetry = getTelemetrySync();
+        if (telemetry) {
+            telemetry.trackEvent('session_end', { variant: effectiveVariant });
+            await telemetry.stop();
+        }
+    };
+
+    rl.on('close', async () => {
         console.log('\n👋 Goodbye!\n');
+        await shutdown();
         process.exit(0);
     });
 
-    process.on('SIGINT', () => {
+    process.on('SIGINT', async () => {
         console.log('\n\n👋 Interrupted. Goodbye!\n');
+        await shutdown();
         rl.close();
         process.exit(0);
     });

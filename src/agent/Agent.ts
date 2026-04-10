@@ -33,6 +33,10 @@ import { getConfig, isProductivityVariant } from '../config/index.js';
 import { randomUUID } from 'crypto';
 import { getCapabilityManager, type CapabilityManager } from '../security/index.js';
 import { getLessonMemory } from '../memory/LessonMemory.js';
+import { getToolChainMemory, type ToolChainStep } from '../memory/ToolChainMemory.js';
+import { getPreferenceLearner } from '../memory/PreferenceLearner.js';
+import { getSelfHealingEngine } from './SelfHealingEngine.js';
+import { getTelemetrySync } from '../telemetry/TelemetrySyncService.js';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Agent Options
@@ -123,6 +127,39 @@ export abstract class Agent {
 
         logger.agent(`${this.name} executing`, { messageLength: userMessage.length });
 
+        // ── AGI Feature 2.3: ToolChain Memory ──────────────────────────────
+        // Query for proven tool sequences before planning
+        let chainAugmentation = '';
+        try {
+            const toolChainMemory = getToolChainMemory();
+            chainAugmentation = await toolChainMemory.getChainAugmentation(userMessage);
+            if (chainAugmentation) {
+                logger.agent('ToolChainMemory: injecting remembered approach');
+            }
+        } catch {
+            // Non-critical — proceed without chain suggestion
+        }
+
+        // ── AGI Feature 2.2: Preference Learning ───────────────────────────
+        // Inject user style preferences into context
+        let preferenceModifier = '';
+        try {
+            const userId = process.env['USER_ID'] ?? 'default';
+            const preferenceLearner = getPreferenceLearner();
+            preferenceModifier = await preferenceLearner.getSystemPromptModifier(userId);
+        } catch {
+            // Non-critical — proceed without preferences
+        }
+
+        // Inject augmentations into context if available
+        if (chainAugmentation || preferenceModifier) {
+            const augmentation = [chainAugmentation, preferenceModifier].filter(Boolean).join('\n');
+            this.contextManager.addMessage({
+                role: 'system',
+                content: augmentation,
+            });
+        }
+
         // Add user message to context
         this.contextManager.addMessage({
             role: 'user',
@@ -132,6 +169,7 @@ export abstract class Agent {
         let iteration = 0;
         let finalContent = '';
         const allToolResults: ToolResult[] = [];
+        const allToolCalls: ToolCall[] = []; // Track tool names for chain memory
 
         // Agent loop: Think → Decide → Act → Observe
         while (iteration < this.maxIterations) {
@@ -146,6 +184,7 @@ export abstract class Agent {
                 // Act: Execute tools
                 const toolResults = await this.act(response.toolCalls);
                 allToolResults.push(...toolResults);
+                allToolCalls.push(...response.toolCalls);
 
                 // Observe: Add results to context and continue loop
                 this.observe(response, toolResults);
@@ -166,6 +205,37 @@ export abstract class Agent {
         if (iteration >= this.maxIterations) {
             logger.warn(`${this.name} reached max iterations`);
             finalContent = finalContent || 'I apologize, but I was unable to complete the task within the allowed iterations.';
+        }
+
+        // ── AGI Feature 2.3: Record successful tool chains ─────────────
+        if (allToolCalls.length >= 2) {
+            try {
+                const toolChainMemory = getToolChainMemory();
+                const steps: ToolChainStep[] = allToolCalls.map(tc => ({
+                    toolName: tc.name,
+                    description: `Executed ${tc.name}`,
+                    typicalArgs: Object.keys(tc.arguments ?? {}),
+                }));
+                const keywords = userMessage.toLowerCase().split(/\s+/).filter(w => w.length > 3).slice(0, 10);
+                const taskType = keywords.slice(0, 3).join('_') || 'general_task';
+                await toolChainMemory.recordChain(taskType, keywords, steps, Date.now());
+            } catch {
+                // Non-critical
+            }
+        }
+
+        // ── AGI Feature 2.2: Learn from interaction ─────────────────────
+        try {
+            const userId = process.env['USER_ID'] ?? 'default';
+            const preferenceLearner = getPreferenceLearner();
+            await preferenceLearner.learnFromInteraction(userId, {
+                userMessage,
+                assistantMessage: finalContent,
+                toolsUsed: allToolCalls.map(tc => tc.name),
+                wasHelpful: true,
+            });
+        } catch {
+            // Non-critical
         }
 
         return {
@@ -399,6 +469,7 @@ export abstract class Agent {
      */
     protected async act(toolCalls: ToolCall[]): Promise<ToolResult[]> {
         const results: ToolResult[] = [];
+        const selfHealer = getSelfHealingEngine();
 
         for (const toolCall of toolCalls) {
             logger.tool(toolCall.name, 'Executing', { args: toolCall.arguments });
@@ -407,8 +478,16 @@ export abstract class Agent {
                 // Check if approval is required
                 await this.checkToolApproval(toolCall);
 
-                // Execute the tool
-                const result = await this.executeTool(toolCall);
+                // Execute the tool with self-healing recovery
+                const { result, recovered, attempts } = await selfHealer.executeWithRecovery(
+                    toolCall.name,
+                    toolCall.arguments,
+                    async (args) => this.executeTool({ ...toolCall, arguments: args })
+                );
+
+                if (recovered) {
+                    logger.agent(`[SELF-HEAL] ${toolCall.name} recovered after ${attempts} attempts`);
+                }
 
                 results.push({
                     toolCallId: toolCall.id,
@@ -418,10 +497,13 @@ export abstract class Agent {
                 logger.tool(toolCall.name, 'Completed', {
                     resultType: typeof result,
                     resultLength: typeof result === 'string' ? result.length : undefined,
+                    selfHealed: recovered,
+                    attempts,
                 });
                 
                 // Track tool execution success telemetry
                 getLessonMemory().recordToolUsage(toolCall.name, true).catch(() => {});
+                getTelemetrySync()?.trackEvent('tool_used', { toolName: toolCall.name, durationMs: Date.now(), selfHealed: recovered });
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : String(error);
 

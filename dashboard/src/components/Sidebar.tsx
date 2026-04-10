@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 interface SidebarProps {
     user: {
@@ -16,6 +17,21 @@ interface SidebarProps {
 export function Sidebar({ user }: SidebarProps) {
     const pathname = usePathname();
     const router = useRouter();
+    const [isOpen, setIsOpen] = useState(false);
+
+    // Close sidebar on route change (mobile)
+    useEffect(() => {
+        setIsOpen(false);
+    }, [pathname]);
+
+    // Close sidebar on escape key
+    useEffect(() => {
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setIsOpen(false);
+        };
+        window.addEventListener('keydown', handleEsc);
+        return () => window.removeEventListener('keydown', handleEsc);
+    }, []);
 
     const handleSignOut = async () => {
         const supabase = createClient();
@@ -50,6 +66,16 @@ export function Sidebar({ user }: SidebarProps) {
             icon: (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                </svg>
+            ),
+        },
+        {
+            href: '/dashboard/terminal',
+            label: 'Terminal',
+            icon: (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="4 17 10 11 4 5" />
+                    <line x1="12" y1="19" x2="20" y2="19" />
                 </svg>
             ),
         },
@@ -99,68 +125,86 @@ export function Sidebar({ user }: SidebarProps) {
         .slice(0, 2);
 
     return (
-        <aside className="sidebar">
-            {/* Brand */}
-            <Link href="/dashboard" className="sidebar-brand">
-                <div style={{
-                    width: 32, height: 32, borderRadius: 8,
-                    background: 'var(--accent-gradient)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                        <path d="M2 17l10 5 10-5" />
-                        <path d="M2 12l10 5 10-5" />
-                    </svg>
-                </div>
-                <span>PersonalJARVIS</span>
-                <div className="pulse-live" style={{ marginLeft: '-0.25rem' }} />
-            </Link>
+        <>
+            {/* Mobile Hamburger */}
+            <button
+                className="mobile-menu-btn"
+                onClick={() => setIsOpen(!isOpen)}
+                aria-label="Toggle menu"
+            >
+                {isOpen ? '✕' : '☰'}
+            </button>
 
-            {/* Main Navigation */}
-            <nav className="sidebar-nav">
-                <div className="sidebar-section-label">Dashboard</div>
-                {mainLinks.map((link) => (
-                    <Link
-                        key={link.href}
-                        href={link.href}
-                        className={`sidebar-link ${isActive(link.href) ? 'active' : ''}`}
-                    >
-                        {link.icon}
-                        {link.label}
-                    </Link>
-                ))}
+            {/* Mobile Backdrop */}
+            {isOpen && (
+                <div
+                    className="sidebar-backdrop active"
+                    onClick={() => setIsOpen(false)}
+                />
+            )}
 
-                <div className="sidebar-section-label" style={{ marginTop: '0.5rem' }}>Account</div>
-                {accountLinks.map((link) => (
-                    <Link
-                        key={link.href}
-                        href={link.href}
-                        className={`sidebar-link ${isActive(link.href) ? 'active' : ''}`}
-                    >
-                        {link.icon}
-                        {link.label}
-                    </Link>
-                ))}
-            </nav>
+            <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+                {/* Brand */}
+                <Link href="/dashboard" className="sidebar-brand">
+                    <div style={{
+                        width: 32, height: 32, borderRadius: 8,
+                        background: 'var(--accent-gradient)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                            <path d="M2 17l10 5 10-5" />
+                            <path d="M2 12l10 5 10-5" />
+                        </svg>
+                    </div>
+                    <span>PersonalJARVIS</span>
+                </Link>
 
-            {/* User + Logout */}
-            <div className="sidebar-footer">
-                <div className="sidebar-user">
-                    <div className="sidebar-avatar">{initials}</div>
-                    <div className="sidebar-user-info">
-                        <div className="sidebar-user-name">{user.fullName}</div>
-                        <div className="sidebar-user-plan">
-                            <span className={`plan-badge ${user.plan === 'productivity' ? 'pro' : 'free'}`}>
-                                {user.plan === 'productivity' ? '⚡ Productivity' : 'Balanced'}
-                            </span>
+                {/* Main Navigation */}
+                <nav className="sidebar-nav">
+                    <div className="sidebar-section-label">Dashboard</div>
+                    {mainLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            className={`sidebar-link ${isActive(link.href) ? 'active' : ''}`}
+                        >
+                            {link.icon}
+                            {link.label}
+                        </Link>
+                    ))}
+
+                    <div className="sidebar-section-label" style={{ marginTop: '0.5rem' }}>Account</div>
+                    {accountLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            className={`sidebar-link ${isActive(link.href) ? 'active' : ''}`}
+                        >
+                            {link.icon}
+                            {link.label}
+                        </Link>
+                    ))}
+                </nav>
+
+                {/* User + Logout */}
+                <div className="sidebar-footer">
+                    <div className="sidebar-user">
+                        <div className="sidebar-avatar">{initials}</div>
+                        <div className="sidebar-user-info">
+                            <div className="sidebar-user-name">{user.fullName}</div>
+                            <div className="sidebar-user-plan">
+                                <span className={`plan-badge ${user.plan === 'productivity' ? 'pro' : 'free'}`}>
+                                    {user.plan === 'productivity' ? '⚡ Productivity' : 'Balanced'}
+                                </span>
+                            </div>
                         </div>
                     </div>
+                    <button onClick={handleSignOut} className="btn-ghost" style={{ width: '100%', marginTop: '0.75rem' }}>
+                        Sign Out
+                    </button>
                 </div>
-                <button onClick={handleSignOut} className="btn-ghost" style={{ width: '100%', marginTop: '0.75rem' }}>
-                    Sign Out
-                </button>
-            </div>
-        </aside>
+            </aside>
+        </>
     );
 }

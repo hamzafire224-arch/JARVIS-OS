@@ -18,11 +18,6 @@ export default async function BillingPage() {
     const plan = subscription?.plan || 'balanced';
     const status = subscription?.status || 'free';
 
-    // Calculate free period
-    const trialEnd = subscription?.trial_ends_at ? new Date(subscription.trial_ends_at) : null;
-    const daysLeft = trialEnd ? Math.max(0, Math.ceil((trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : null;
-    const isInFreePeriod = status === 'trial' && daysLeft !== null && daysLeft > 0;
-
     const periodEnd = subscription?.current_period_end
         ? new Date(subscription.current_period_end).toLocaleDateString('en-US', {
             month: 'long', day: 'numeric', year: 'numeric',
@@ -48,8 +43,8 @@ export default async function BillingPage() {
                         </span>
                     </div>
 
-                    {isInFreePeriod ? (
-                        /* Free Period Active */
+                    {status === 'active' && plan === 'productivity' && !subscription?.lemon_subscription_id ? (
+                        /* Free Launch Period Active */
                         <div>
                             <div style={{
                                 background: 'var(--accent-bg)',
@@ -59,42 +54,16 @@ export default async function BillingPage() {
                                 marginBottom: '1.5rem',
                             }}>
                                 <div style={{ fontWeight: 600, color: 'var(--accent-1)', marginBottom: '0.5rem', fontSize: '1.1rem' }}>
-                                    🎉 Free Productivity Access
+                                    🎉 Full Productivity Access — Free During Launch
                                 </div>
                                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.75rem' }}>
-                                    You have <strong style={{ color: 'var(--text-primary)' }}>{daysLeft} days</strong> remaining
-                                    of free Productivity access. All features are fully unlocked — no credit card required.
+                                    You have <strong style={{ color: 'var(--text-primary)' }}>full access</strong> to
+                                    every Productivity feature. No credit card required during the launch period.
                                 </p>
                                 <p style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>
-                                    After the free period, Productivity will cost $20/month. You&apos;ll be notified before any changes.
+                                    After the launch period, Productivity will cost $20/month. We&apos;ll notify you well in advance.
                                     The Balanced plan stays free forever.
                                 </p>
-
-                                {/* Progress bar */}
-                                <div style={{
-                                    marginTop: '1rem',
-                                    height: 6,
-                                    background: 'var(--bg-tertiary)',
-                                    borderRadius: 3,
-                                    overflow: 'hidden',
-                                }}>
-                                    <div style={{
-                                        width: `${Math.max(5, ((60 - daysLeft) / 60) * 100)}%`,
-                                        height: '100%',
-                                        background: 'var(--accent-gradient)',
-                                        borderRadius: 3,
-                                    }} />
-                                </div>
-                                <div style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    marginTop: '0.5rem',
-                                    fontSize: '0.75rem',
-                                    color: 'var(--text-tertiary)',
-                                }}>
-                                    <span>Day {60 - daysLeft} of 60</span>
-                                    <span>{daysLeft} days left</span>
-                                </div>
                             </div>
 
                             {/* Plan Features */}

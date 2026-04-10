@@ -484,8 +484,110 @@ export async function registerJarvisHandlers(
             nextRun: task?.nextRun?.toISOString(),
         };
     });
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Terminal Handlers — Remote shell access (opt-in)
+    // ─────────────────────────────────────────────────────────────────────────────
 
-    logger.agent('JARVIS handlers registered (including heartbeat)');
+    const terminalSessions: Map<string, { process: import('child_process').ChildProcess; active: boolean }> = new Map();
+    const remoteTerminalEnabled = process.env['JARVIS_REMOTE_TERMINAL'] === 'true';
+
+    gateway.registerHandler('terminal.start', async (session) => {
+        if (!remoteTerminalEnabled) {
+            throw new Error('Remote terminal is disabled. Set JARVIS_REMOTE_TERMINAL=true in your environment to enable it.');
+        }
+
+        if (!session.authenticated && gateway.getConfig?.()?.authToken) {
+            throw new Error('Authentication required for terminal access');
+        }
+
+        // Clean up existing session
+        const existing = terminalSessions.get(session.id);
+        if (existing?.process) {
+            existing.process.kill();
+            terminalSessions.delete(session.id);
+        }
+
+        const { spawn } = await import('child_process');
+        const shell = process.platform === 'win32' ? 'powershell.exe' : process.env['SHELL'] || '/bin/bash';
+
+        const proc = spawn(shell, [], {
+            cwd: defaultWorkspaceDir,
+            env: { ...process.env, TERM: 'xterm-256color' },
+            stdio: ['pipe', 'pipe', 'pipe'],
+        });
+
+        terminalSessions.set(session.id, { process: proc, active: true });
+
+        // Stream stdout to client
+        proc.stdout?.on('data', (data: Buffer) => {
+            try {
+                gateway.sendToSession(session.id, {
+                    jsonrpc: '2.0',
+                    method: 'terminal.output',
+                    params: { data: data.toString('utf-8') },
+                });
+            } catch { /* session may have disconnected */ }
+        });
+
+        // Stream stderr to client
+        proc.stderr?.on('data', (data: Buffer) => {
+            try {
+                gateway.sendToSession(session.id, {
+                    jsonrpc: '2.0',
+                    method: 'terminal.output',
+                    params: { data: data.toString('utf-8') },
+                });
+            } catch { /* session may have disconnected */ }
+        });
+
+        proc.on('exit', (code) => {
+            terminalSessions.delete(session.id);
+            try {
+                gateway.sendToSession(session.id, {
+                    jsonrpc: '2.0',
+                    method: 'terminal.output',
+                    params: { data: `\r\n[Process exited with code ${code}]\r\n` },
+                });
+            } catch { /* session may have disconnected */ }
+        });
+
+        logger.gateway('Terminal session started', { sessionId: session.id, shell });
+
+        return { success: true, shell, cwd: defaultWorkspaceDir };
+    });
+
+    gateway.registerHandler('terminal.input', async (session, params) => {
+        const data = params['data'] as string;
+        if (!data) throw new Error('data is required');
+
+        const termSession = terminalSessions.get(session.id);
+        if (!termSession?.active) {
+            throw new Error('No active terminal session. Call terminal.start first.');
+        }
+
+        termSession.process.stdin?.write(data);
+        return { success: true };
+    });
+
+    gateway.registerHandler('terminal.stop', async (session) => {
+        const termSession = terminalSessions.get(session.id);
+        if (termSession?.process) {
+            termSession.process.kill();
+            terminalSessions.delete(session.id);
+        }
+        return { success: true };
+    });
+
+    // Clean up terminal sessions on disconnect
+    gateway.on('disconnected', (disconnectedSession: GatewaySession) => {
+        const termSession = terminalSessions.get(disconnectedSession.id);
+        if (termSession?.process) {
+            termSession.process.kill();
+            terminalSessions.delete(disconnectedSession.id);
+        }
+    });
+
+    logger.agent('JARVIS handlers registered (including heartbeat + terminal)');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

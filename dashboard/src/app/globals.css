@@ -174,6 +174,19 @@ body {
 a { color: var(--accent-1); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
+/* Custom Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-secondary) transparent;
+}
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: 3px;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
 /* ═══════════════════════════════════════════════════════════════════════════════
    Text Gradient
    ═══════════════════════════════════════════════════════════════════════════════ */
@@ -1612,6 +1625,58 @@ a:hover { text-decoration: underline; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
+   Mobile Menu Button
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 51;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  backdrop-filter: blur(12px);
+  transition: all 0.2s;
+}
+
+.mobile-menu-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent-1);
+}
+
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 39;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Content Max-Width
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.dashboard-content {
+  max-width: 1200px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
    Responsive
    ═══════════════════════════════════════════════════════════════════════════════ */
 
@@ -1621,12 +1686,20 @@ a:hover { text-decoration: underline; }
 }
 
 @media (max-width: 768px) {
+  .mobile-menu-btn { display: flex; }
+  .sidebar-backdrop.active { display: block; }
   .sidebar {
     transform: translateX(-100%);
     transition: transform 0.3s ease;
+    width: 280px;
+    box-shadow: none;
   }
-  .sidebar.open { transform: translateX(0); }
-  .dashboard-main { margin-left: 0; }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-lg);
+  }
+  .dashboard-main { margin-left: 0; padding-top: 3.5rem; }
+  .dashboard-header { padding-top: 0.5rem; }
   .auth-card { margin: 1rem; padding: 1.5rem; }
   .stats-grid { grid-template-columns: 1fr 1fr !important; }
   .quick-actions { grid-template-columns: 1fr; }

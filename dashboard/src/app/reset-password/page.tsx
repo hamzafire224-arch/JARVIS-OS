@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { PasswordStrength } from '@/components/PasswordStrength';
 
 export default function ResetPasswordPage() {
     const [password, setPassword] = useState('');
@@ -74,6 +75,7 @@ export default function ResetPasswordPage() {
                             required
                             minLength={8}
                         />
+                        <PasswordStrength password={password} />
                     </div>
 
                     <div className="form-group">
