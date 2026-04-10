@@ -19,7 +19,6 @@ function AnimatedNum({ value, suffix, prefix }: { value: number; suffix: string;
           counted.current = true
           const start = performance.now()
           const duration = 1500
-          const isDecimal = value % 1 !== 0
 
           const step = (now: number) => {
             const elapsed = now - start
@@ -53,17 +52,14 @@ function AnimatedNum({ value, suffix, prefix }: { value: number; suffix: string;
 
 export default function SocialProof() {
   return (
-    <section style={{
-      padding: '5rem 2rem',
-      textAlign: 'center',
-    }}>
+    <section style={{ padding: '6rem 1.5rem', textAlign: 'center' }}>
       <p style={{
         fontSize: '0.8rem',
         fontWeight: 600,
         textTransform: 'uppercase',
         letterSpacing: '0.15em',
         color: '#10b981',
-        marginBottom: '1rem',
+        marginBottom: '2.5rem',
       }}>
         Trusted by developers worldwide
       </p>
@@ -71,9 +67,10 @@ export default function SocialProof() {
       <div style={{
         display: 'flex',
         justifyContent: 'center',
-        gap: '3rem',
+        gap: '5rem',
         flexWrap: 'wrap',
-        maxWidth: 900,
+        maxWidth: 1100,
+        width: '100%',
         margin: '0 auto',
       }}>
         {stats.map((s, i) => (
@@ -81,10 +78,10 @@ export default function SocialProof() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            minWidth: 160,
+            minWidth: 140,
           }}>
             <span style={{
-              fontSize: '2.5rem',
+              fontSize: '3rem',
               fontWeight: 800,
               background: 'linear-gradient(135deg, #10b981, #06b6d4)',
               WebkitBackgroundClip: 'text',
@@ -94,9 +91,9 @@ export default function SocialProof() {
               <AnimatedNum value={s.value} suffix={s.suffix} prefix={s.prefix} />
             </span>
             <span style={{
-              fontSize: '0.875rem',
+              fontSize: '0.95rem',
               color: '#94a3b8',
-              marginTop: '0.25rem',
+              marginTop: '0.5rem',
               fontWeight: 500,
             }}>
               {s.label}

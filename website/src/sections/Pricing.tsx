@@ -2,40 +2,40 @@ const plans = [
   {
     name: 'Balanced',
     price: 'Free',
-    pricePer: '',
-    description: 'Perfect for getting started with JARVIS.',
+    priceSub: 'Forever',
+    description: 'Run JARVIS locally with Ollama. Your data stays on your machine.',
     badge: null,
     features: [
-      { text: 'Ollama (local) — unlimited', included: true },
+      { text: 'Ollama (local AI) — unlimited', included: true },
       { text: 'Core tools (filesystem, terminal, git)', included: true },
       { text: 'Working memory (24 items)', included: true },
       { text: 'Community support', included: true },
-      { text: 'Cloud AI providers (Gemini, GPT-4, Claude)', included: false },
+      { text: 'Cloud AI providers', included: false },
       { text: 'Full 4-layer memory system', included: false },
       { text: 'Multi-step autonomous execution', included: false },
       { text: 'Priority support', included: false },
     ],
-    cta: 'Get Started Free',
+    cta: 'Download Free',
     ctaHref: 'https://letjarvis.com/signup',
     highlight: false,
   },
   {
     name: 'Productivity',
-    price: '$20',
-    pricePer: '/ month',
-    description: 'Full power. Unlimited potential. Zero friction.',
-    badge: 'MOST POPULAR',
+    price: 'Free',
+    priceSub: 'Open Source',
+    description: 'Full power. All 25+ tools, cloud AI, 4-layer memory. Everything unlocked.',
+    badge: 'RECOMMENDED',
     features: [
-      { text: 'All local providers — unlimited', included: true },
-      { text: 'All 25+ tools & skills', included: true },
-      { text: 'Full 4-layer memory system', included: true },
+      { text: 'Everything in Balanced', included: true },
       { text: 'Cloud AI (Gemini, GPT-4, Claude)', included: true },
+      { text: 'Full 4-layer memory system', included: true },
       { text: 'Multi-step autonomous execution', included: true },
       { text: 'Screen Use & browser control', included: true },
       { text: 'Workflow builder & MCP bridge', included: true },
+      { text: 'Skill Marketplace access', included: true },
       { text: 'Priority support & updates', included: true },
     ],
-    cta: 'Start Free Trial',
+    cta: 'Get Started Free',
     ctaHref: 'https://letjarvis.com/signup',
     highlight: true,
   },
@@ -43,8 +43,8 @@ const plans = [
 
 export default function Pricing() {
   return (
-    <section style={{ padding: '5rem 2rem' }}>
-      <div style={{ width: '100%', maxWidth: '85vw', margin: '0 auto', textAlign: 'center' }}>
+    <section style={{ padding: '8rem 1.5rem' }}>
+      <div style={{ maxWidth: 1100, width: '100%', margin: '0 auto', textAlign: 'center' }}>
         <p style={{
           fontSize: '0.8rem',
           fontWeight: 600,
@@ -56,29 +56,29 @@ export default function Pricing() {
           Pricing
         </p>
         <h2 style={{
-          fontSize: '2.25rem',
+          fontSize: 'clamp(2rem, 5vw, 2.75rem)',
           fontWeight: 800,
           color: '#f1f5f9',
           marginBottom: '0.75rem',
         }}>
-          Choose your plan
+          Free & Open Source
         </h2>
         <p style={{
           color: '#94a3b8',
-          fontSize: '1.05rem',
-          marginBottom: '3rem',
-          maxWidth: 480,
-          margin: '0 auto 3rem',
-          lineHeight: 1.6,
+          fontSize: '1.1rem',
+          marginBottom: '3.5rem',
+          maxWidth: 520,
+          margin: '0 auto 3.5rem',
+          lineHeight: 1.7,
         }}>
-          Start free with Balanced. Upgrade anytime for the full JARVIS experience.
+          No hidden costs. No credit card. JARVIS is free to use — choose the plan that fits your workflow.
         </p>
 
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: '3rem',
-          maxWidth: 1200,
+          gap: '2.5rem',
+          maxWidth: 900,
           margin: '0 auto',
         }}>
           {plans.map((plan, i) => (
@@ -86,23 +86,23 @@ export default function Pricing() {
               key={i}
               style={{
                 background: plan.highlight
-                  ? 'linear-gradient(145deg, rgba(16, 185, 129, 0.05), rgba(6, 182, 212, 0.05))'
-                  : 'rgba(22, 24, 34, 0.6)',
+                  ? 'linear-gradient(145deg, rgba(0, 168, 255, 0.06), rgba(16, 185, 129, 0.04))'
+                  : 'rgba(10, 10, 16, 0.6)',
                 border: plan.highlight
-                  ? '1.5px solid rgba(16, 185, 129, 0.35)'
+                  ? '1.5px solid rgba(0, 168, 255, 0.3)'
                   : '1px solid rgba(255, 255, 255, 0.06)',
-                borderRadius: 16,
-                padding: '2rem',
+                borderRadius: 20,
+                padding: '2.5rem 2rem',
                 textAlign: 'left',
                 position: 'relative',
                 backdropFilter: 'blur(12px)',
                 transition: 'transform 0.3s, box-shadow 0.3s',
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)';
+                (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-6px)';
                 (e.currentTarget as HTMLDivElement).style.boxShadow = plan.highlight
-                  ? '0 16px 48px rgba(16, 185, 129, 0.15)'
-                  : '0 8px 32px rgba(0, 0, 0, 0.3)';
+                  ? '0 20px 60px rgba(0, 168, 255, 0.15)'
+                  : '0 12px 40px rgba(0, 0, 0, 0.4)';
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
@@ -112,60 +112,61 @@ export default function Pricing() {
               {plan.badge && (
                 <span style={{
                   position: 'absolute',
-                  top: -12,
+                  top: -14,
                   left: '50%',
                   transform: 'translateX(-50%)',
-                  background: 'linear-gradient(135deg, #10b981, #06b6d4)',
+                  background: 'linear-gradient(135deg, #00a8ff, #00e87b)',
                   color: '#022c22',
                   fontSize: '0.65rem',
                   fontWeight: 800,
-                  padding: '0.3rem 0.9rem',
+                  padding: '0.35rem 1rem',
                   borderRadius: 999,
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
                 }}>
                   {plan.badge}
                 </span>
               )}
 
               <h3 style={{
-                fontSize: '1.25rem',
+                fontSize: '1.3rem',
                 fontWeight: 700,
                 color: '#f1f5f9',
-                marginBottom: '0.5rem',
+                marginBottom: '0.75rem',
               }}>
                 {plan.name}
               </h3>
 
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', marginBottom: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '0.25rem' }}>
                 <span style={{
-                  fontSize: '2.5rem',
+                  fontSize: '3rem',
                   fontWeight: 800,
-                  background: plan.highlight ? 'linear-gradient(135deg, #10b981, #06b6d4)' : 'none',
+                  background: plan.highlight ? 'linear-gradient(135deg, #00a8ff, #00e87b)' : 'none',
                   color: plan.highlight ? 'transparent' : '#f1f5f9',
                   WebkitBackgroundClip: plan.highlight ? 'text' : undefined,
                   WebkitTextFillColor: plan.highlight ? 'transparent' : undefined,
                 }}>
                   {plan.price}
                 </span>
-                {plan.pricePer && (
-                  <span style={{ fontSize: '0.9rem', color: '#64748b' }}>{plan.pricePer}</span>
-                )}
               </div>
+              <p style={{ fontSize: '0.85rem', color: '#00a8ff', fontWeight: 600, marginBottom: '1rem' }}>
+                {plan.priceSub}
+              </p>
 
-              <p style={{ fontSize: '0.875rem', color: '#94a3b8', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+              <p style={{ fontSize: '0.9rem', color: '#94a3b8', marginBottom: '2rem', lineHeight: 1.6 }}>
                 {plan.description}
               </p>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.75rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem', marginBottom: '2rem' }}>
                 {plan.features.map((f, fi) => (
-                  <div key={fi} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                  <div key={fi} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9rem' }}>
                     <span style={{
-                      width: 18, height: 18, borderRadius: '50%',
-                      background: f.included ? 'rgba(16, 185, 129, 0.15)' : 'rgba(100, 116, 139, 0.1)',
-                      color: f.included ? '#10b981' : '#475569',
+                      width: 20, height: 20, borderRadius: '50%',
+                      background: f.included ? 'rgba(0, 232, 123, 0.12)' : 'rgba(100, 116, 139, 0.1)',
+                      color: f.included ? '#00e87b' : '#475569',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '0.65rem', fontWeight: 700, flexShrink: 0,
+                      fontSize: '0.7rem', fontWeight: 700, flexShrink: 0,
                     }}>
                       {f.included ? '✓' : '—'}
                     </span>
@@ -180,13 +181,13 @@ export default function Pricing() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  padding: '0.825rem 1.5rem',
-                  background: plan.highlight ? 'linear-gradient(135deg, #10b981, #06b6d4)' : 'rgba(255, 255, 255, 0.05)',
+                  padding: '0.9rem 1.5rem',
+                  background: plan.highlight ? 'linear-gradient(135deg, #00a8ff, #00e87b)' : 'rgba(255, 255, 255, 0.05)',
                   color: plan.highlight ? '#022c22' : '#f1f5f9',
                   fontWeight: 700,
-                  fontSize: '0.95rem',
+                  fontSize: '1rem',
                   border: plan.highlight ? 'none' : '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: 10,
+                  borderRadius: 12,
                   textDecoration: 'none',
                   transition: 'transform 0.2s, box-shadow 0.2s',
                 }}

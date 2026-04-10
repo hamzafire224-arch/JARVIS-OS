@@ -54,35 +54,43 @@ export default function Features() {
   const isInView = useInView(ref, { once: true, margin: '-80px' })
 
   return (
-    <section id="features" ref={ref} className="py-32 md:py-44 px-6">
-      <div className="w-full px-4 lg:px-16 mx-auto">
+    <section id="features" ref={ref} style={{ padding: '8rem 1.5rem' }}>
+      <div style={{ maxWidth: 1300, width: '100%', margin: '0 auto' }}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          style={{ textAlign: 'center', marginBottom: '4rem' }}
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3.25rem)', fontWeight: 800, marginBottom: '1rem', color: '#f0f0f5' }}>
             Built for <span className="text-accent">Serious</span> Work
           </h2>
-          <p className="text-text-secondary text-lg max-w-xl mx-auto">
+          <p style={{ color: '#8888a0', fontSize: '1.125rem', maxWidth: 600, margin: '0 auto', lineHeight: 1.7 }}>
             Not a toy. A production-grade autonomous agent with enterprise capabilities.
           </p>
         </motion.div>
 
-        {/* 4-column grid for extra large screens, 3 for lg, 2 for sm */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gap: '1.5rem',
+        }}>
           {features.map((feature, i) => (
             <motion.div
               key={feature.title}
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.08 * i }}
-              className="bento-card bg-surface-2 rounded-2xl p-6"
+              className="bento-card"
+              style={{
+                background: 'rgba(10, 10, 16, 0.6)',
+                borderRadius: 16,
+                padding: '1.75rem',
+              }}
             >
-              <div className="text-3xl mb-4">{feature.icon}</div>
-              <h3 className="text-base font-semibold text-text-primary mb-2">{feature.title}</h3>
-              <p className="text-sm text-text-secondary leading-relaxed">{feature.description}</p>
+              <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>{feature.icon}</div>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#f0f0f5', marginBottom: '0.5rem' }}>{feature.title}</h3>
+              <p style={{ fontSize: '0.875rem', color: '#8888a0', lineHeight: 1.6 }}>{feature.description}</p>
             </motion.div>
           ))}
         </div>

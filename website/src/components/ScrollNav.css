@@ -1,76 +1,158 @@
-.scroll-nav-btn {
-  width: 50px;
-  height: 50px;
+/* ── ScrollNav Container ── */
+.scroll-nav-container {
+  position: fixed;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ── Dot Indicators ── */
+.scroll-nav-dots {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.scroll-nav-dot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.4);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
   background: transparent;
-  backdrop-filter: blur(8px);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+}
+
+.scroll-nav-dot.active {
+  background: #00a8ff;
+  border-color: #00a8ff;
+  box-shadow: 0 0 8px rgba(0, 168, 255, 0.5);
+  transform: scale(1.3);
+}
+
+.scroll-nav-dot:hover:not(.active) {
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
+}
+
+/* ── Main Button ── */
+.scroll-nav-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  background: rgba(5, 5, 8, 0.5);
+  backdrop-filter: blur(12px);
   position: relative;
   overflow: hidden;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   color: white;
+  padding: 0;
 }
 
 .scroll-nav-btn:hover {
-  transform: scale(1.1);
+  transform: scale(1.15);
   border-color: #00a8ff;
-  box-shadow: 0 0 20px rgba(0, 168, 255, 0.4);
+  box-shadow:
+    0 0 20px rgba(0, 168, 255, 0.3),
+    0 0 40px rgba(0, 168, 255, 0.1);
 }
 
+/* ── Water Fill ── */
 .scroll-nav-water {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
   height: 0%;
-  background: #00a8ff;
-  transition: height 0.4s ease-out;
+  background: linear-gradient(0deg, #0070b0, #00a8ff);
+  transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 0;
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
-/* Water wave effect using pseudo elements */
-.scroll-nav-water::before,
+/* Water surface wave */
+.scroll-nav-water::before {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -150%;
+  left: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 40%;
+  transform: translateX(-50%);
+  animation: scroll-nav-wave 3s linear infinite;
+}
+
 .scroll-nav-water::after {
   content: '';
   position: absolute;
   width: 200%;
   height: 200%;
-  top: -100%;
+  top: -150%;
   left: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 40%;
-  transform: translateX(-50%);
-  animation: wave 4s linear infinite;
-}
-.scroll-nav-water::after {
-  background: rgba(0, 168, 255, 0.4);
+  background: rgba(0, 168, 255, 0.2);
   border-radius: 45%;
-  animation: wave 5s linear infinite;
+  transform: translateX(-50%);
+  animation: scroll-nav-wave 4s linear infinite reverse;
 }
 
-@keyframes wave {
+@keyframes scroll-nav-wave {
   0% { transform: translateX(-50%) rotate(0deg); }
   100% { transform: translateX(-50%) rotate(360deg); }
 }
 
+/* Fill on hover */
 .scroll-nav-btn:hover .scroll-nav-water {
   height: 100%;
 }
 
+/* Drain variant (for up-arrow state) */
+.scroll-nav-water.drain {
+  bottom: auto;
+  top: 0;
+}
+
+.scroll-nav-btn:hover .scroll-nav-water.drain {
+  height: 100%;
+}
+
+/* ── Arrow ── */
 .scroll-nav-arrow {
   position: relative;
   z-index: 1;
   transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .scroll-nav-arrow.is-up {
   transform: rotate(180deg);
 }
 
-/* The path arrow-head should adapt so it always points 'forward', 
-   but rotating the whole svg 180deg handles it beautifully */
+/* ── Mobile: hide dots, shrink button ── */
+@media (max-width: 768px) {
+  .scroll-nav-container {
+    left: 12px;
+  }
+  .scroll-nav-btn {
+    width: 38px;
+    height: 38px;
+  }
+  .scroll-nav-dots {
+    display: none;
+  }
+}

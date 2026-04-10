@@ -250,6 +250,6 @@ html:has(.snap-active) body { overflow: hidden; }
     var(--color-border) 80%,
     transparent 100%
   );
-  margin: 2rem auto;
-  max-width: 60%;
+  margin: 0 auto;
+  max-width: 50%;
 }

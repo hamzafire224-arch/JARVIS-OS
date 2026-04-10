@@ -7,10 +7,6 @@ const faqs = [
     a: 'Absolutely. JARVIS runs locally on your machine. With Ollama, your data never leaves your computer. Even with cloud providers, we use encrypted connections and never store your code or prompts. The built-in security framework sandboxes all operations and maintains full audit logs.',
   },
   {
-    q: 'How much does it cost?',
-    a: 'JARVIS is completely free during our launch period — including the full Productivity plan. After the launch period, the Balanced plan stays free forever (local AI via Ollama). The Productivity plan (cloud AI + full memory + priority support) will be $20/month.',
-  },
-  {
     q: 'What AI models does it support?',
     a: 'JARVIS supports Gemini 2.5 Pro, GPT-4, Claude, and any Ollama-compatible local model (Llama, Mistral, CodeLlama, etc.). You can switch providers per task or set a default. Local models mean zero API costs.',
   },
@@ -26,6 +22,10 @@ const faqs = [
     q: 'Does it work offline?',
     a: 'Yes. With Ollama and a local model, JARVIS works completely offline with zero internet dependency. The only features that require internet are cloud AI providers and license validation (checked weekly).',
   },
+  {
+    q: 'Is JARVIS really free?',
+    a: 'Yes. JARVIS is free and open source. The Balanced plan is free forever using local AI via Ollama. The Productivity plan (cloud AI + full memory + all skills) is also free to get started — just sign up and start building.',
+  },
 ]
 
 function FAQItem({ faq, index }: { faq: typeof faqs[0]; index: number }) {
@@ -36,19 +36,30 @@ function FAQItem({ faq, index }: { faq: typeof faqs[0]; index: number }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.08 }}
-      className="border-b border-border"
+      style={{ borderBottom: '1px solid rgba(30, 30, 46, 0.6)' }}
     >
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between py-5 text-left group"
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '1.5rem 0',
+          textAlign: 'left',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          color: '#f0f0f5',
+        }}
       >
-        <span className="text-base md:text-lg font-medium text-text-primary group-hover:text-accent transition-colors pr-4">
+        <span style={{ fontSize: '1.1rem', fontWeight: 500, paddingRight: '1rem', transition: 'color 0.2s' }}>
           {faq.q}
         </span>
         <motion.span
           animate={{ rotate: open ? 45 : 0 }}
           transition={{ duration: 0.2 }}
-          className="text-xl text-text-tertiary flex-shrink-0"
+          style={{ fontSize: '1.5rem', color: '#55556a', flexShrink: 0 }}
         >
           +
         </motion.span>
@@ -60,9 +71,9 @@ function FAQItem({ faq, index }: { faq: typeof faqs[0]; index: number }) {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden"
+            style={{ overflow: 'hidden' }}
           >
-            <p className="text-text-secondary text-sm md:text-base leading-relaxed pb-5">
+            <p style={{ color: '#8888a0', fontSize: '1rem', lineHeight: 1.7, paddingBottom: '1.5rem' }}>
               {faq.a}
             </p>
           </motion.div>
@@ -77,15 +88,15 @@ export default function FAQ() {
   const isInView = useInView(ref, { once: true, margin: '-80px' })
 
   return (
-    <section id="faq" ref={ref} className="py-32 md:py-44 px-6">
-      <div className="w-full lg:max-w-[75vw] mx-auto">
+    <section id="faq" ref={ref} style={{ padding: '8rem 1.5rem' }}>
+      <div style={{ maxWidth: 900, width: '100%', margin: '0 auto' }}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          style={{ textAlign: 'center', marginBottom: '4rem' }}
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3.25rem)', fontWeight: 800, marginBottom: '1rem', color: '#f0f0f5' }}>
             Questions? <span className="text-accent">Answered.</span>
           </h2>
         </motion.div>

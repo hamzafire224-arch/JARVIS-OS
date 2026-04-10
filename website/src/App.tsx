@@ -16,13 +16,14 @@ const TOTAL_SNAP_SECTIONS = 4
 
 export default function App() {
   const [activeSection, setActiveSection] = useState(0)
-  const [snapPhase, setSnapPhase] = useState(true) // true = in full-screen snap phase
+  const [snapPhase, setSnapPhase] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
+  const footerRef = useRef<HTMLElement>(null)
   const isTransitioning = useRef(false)
 
   // Handle wheel events during snap phase
   const handleWheel = useCallback((e: WheelEvent) => {
-    if (!snapPhase) return // let normal scroll happen
+    if (!snapPhase) return
     if (isTransitioning.current) {
       e.preventDefault()
       return
@@ -36,17 +37,14 @@ export default function App() {
     e.preventDefault()
 
     if (delta > 0) {
-      // Scrolling down
       if (activeSection < TOTAL_SNAP_SECTIONS - 1) {
         isTransitioning.current = true
         setActiveSection((prev) => prev + 1)
         setTimeout(() => { isTransitioning.current = false }, 800)
       } else {
-        // Last snap section — transition to normal scroll
         setSnapPhase(false)
       }
     } else {
-      // Scrolling up
       if (activeSection > 0) {
         isTransitioning.current = true
         setActiveSection((prev) => prev - 1)
@@ -84,7 +82,6 @@ export default function App() {
     if (Math.abs(delta) < threshold) return
 
     if (delta > 0) {
-      // Swiped up (scrolling down)
       if (activeSection < TOTAL_SNAP_SECTIONS - 1) {
         isTransitioning.current = true
         setActiveSection((prev) => prev + 1)
@@ -93,7 +90,6 @@ export default function App() {
         setSnapPhase(false)
       }
     } else {
-      // Swiped down (scrolling up)
       if (activeSection > 0) {
         isTransitioning.current = true
         setActiveSection((prev) => prev - 1)
@@ -119,7 +115,7 @@ export default function App() {
     }
   }, [handleWheel, handleNormalScroll, handleTouchStart, handleTouchEnd])
 
-  // When exiting snap phase, scroll the normal container to the top of Phase 2
+  // When exiting snap phase, scroll the normal container to the top
   useEffect(() => {
     if (!snapPhase && containerRef.current) {
       containerRef.current.scrollTop = 0
@@ -132,7 +128,15 @@ export default function App() {
       className={snapPhase ? 'app-root snap-active' : 'app-root scroll-active'}
     >
       <Header />
-      <ScrollNav snapPhase={snapPhase} setSnapPhase={setSnapPhase} activeSection={activeSection} setActiveSection={setActiveSection} />
+      <ScrollNav
+        snapPhase={snapPhase}
+        activeSection={activeSection}
+        totalSnapSections={TOTAL_SNAP_SECTIONS}
+        setActiveSection={setActiveSection}
+        setSnapPhase={setSnapPhase}
+        containerRef={containerRef}
+        footerRef={footerRef}
+      />
 
       {/* PHASE 1: Full-screen snap sections */}
       {snapPhase && (
@@ -149,7 +153,7 @@ export default function App() {
         </div>
       )}
 
-      {/* PHASE 2: Normal scrollable sections — generous spacing */}
+      {/* PHASE 2: Normal scrollable sections */}
       {!snapPhase && (
         <div className="normal-sections">
           <Comparison />
@@ -161,7 +165,7 @@ export default function App() {
           <Pricing />
           <div className="section-divider" />
           <FAQ />
-          <Footer />
+          <Footer ref={footerRef} />
         </div>
       )}
     </div>

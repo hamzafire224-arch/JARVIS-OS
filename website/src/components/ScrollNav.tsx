@@ -1,49 +1,106 @@
-import React from 'react';
-import './ScrollNav.css';
+import { useEffect, useState, useCallback, RefObject } from 'react'
+import './ScrollNav.css'
 
 interface ScrollNavProps {
-  snapPhase: boolean;
-  activeSection: number;
-  setActiveSection: (val: number | ((prev: number) => number)) => void;
-  setSnapPhase: (val: boolean) => void;
+  snapPhase: boolean
+  activeSection: number
+  totalSnapSections: number
+  setActiveSection: (val: number | ((prev: number) => number)) => void
+  setSnapPhase: (val: boolean) => void
+  containerRef: RefObject<HTMLDivElement | null>
+  footerRef: RefObject<HTMLElement | null>
 }
 
-export default function ScrollNav({ snapPhase, activeSection, setActiveSection, setSnapPhase }: ScrollNavProps) {
-  const isUp = !snapPhase; // When we are in the normal website, arrow turns upwards
+export default function ScrollNav({
+  snapPhase,
+  activeSection,
+  totalSnapSections,
+  setActiveSection,
+  setSnapPhase,
+  containerRef,
+  footerRef,
+}: ScrollNavProps) {
+  const [footerVisible, setFooterVisible] = useState(false)
 
-  const handleClick = () => {
+  // Detect if footer is visible via IntersectionObserver
+  useEffect(() => {
+    if (!footerRef.current) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setFooterVisible(entry.isIntersecting),
+      { threshold: 0.15 }
+    )
+    observer.observe(footerRef.current)
+    return () => observer.disconnect()
+  }, [footerRef])
+
+  // In normal scroll: arrow is UP when at footer, DOWN otherwise
+  // In snap phase: always DOWN
+  const isUp = !snapPhase && footerVisible
+
+  const handleClick = useCallback(() => {
     if (snapPhase) {
-      if (activeSection < 3) {
-        setActiveSection(prev => prev + 1);
+      // During snap phase: advance to next section
+      if (activeSection < totalSnapSections - 1) {
+        setActiveSection((prev) => prev + 1)
       } else {
-        setSnapPhase(false);
+        // Exit snap phase → enter normal scroll
+        setSnapPhase(false)
+      }
+    } else if (footerVisible) {
+      // At the bottom → scroll back up, then re-enter snap
+      const el = containerRef.current
+      if (el) {
+        el.scrollTo({ top: 0, behavior: 'smooth' })
+        // Wait for scroll to finish, then re-enter snap
+        const checkScroll = () => {
+          if (el.scrollTop <= 5) {
+            setSnapPhase(true)
+            setActiveSection(totalSnapSections - 1)
+          } else {
+            requestAnimationFrame(checkScroll)
+          }
+        }
+        requestAnimationFrame(checkScroll)
       }
     } else {
-      // In normal website, scroll up smoothly to top of normal section
-      // and re-engage snapPhase
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      // We rely on handleNormalScroll in App.tsx to switch back to snapPhase automatically when top is reached
-      // Alternatively, we force it right now if they click:
-      setSnapPhase(true);
-      setActiveSection(3);
+      // Normal scroll phase, not at footer → scroll down one viewport
+      const el = containerRef.current
+      if (el) {
+        el.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })
+      }
     }
-  };
+  }, [snapPhase, activeSection, totalSnapSections, footerVisible, setActiveSection, setSnapPhase, containerRef])
 
   return (
-    <div className="fixed left-6 top-1/2 -translate-y-1/2 z-50 mix-blend-difference">
-      <button 
+    <div className="scroll-nav-container">
+      {/* Dot indicators — only during snap phase */}
+      {snapPhase && (
+        <div className="scroll-nav-dots">
+          {Array.from({ length: totalSnapSections }).map((_, i) => (
+            <button
+              key={i}
+              className={`scroll-nav-dot ${i === activeSection ? 'active' : ''}`}
+              onClick={() => setActiveSection(i)}
+              aria-label={`Go to section ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Main button */}
+      <button
         onClick={handleClick}
-        className="scroll-nav-btn group"
-        aria-label={isUp ? "Scroll Up" : "Scroll Down"}
+        className="scroll-nav-btn"
+        aria-label={isUp ? 'Scroll Up' : 'Scroll Down'}
       >
-        <div className="scroll-nav-water" />
+        <div className={`scroll-nav-water ${isUp ? 'drain' : ''}`} />
         <div className={`scroll-nav-arrow ${isUp ? 'is-up' : 'is-down'}`}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 5v14" />
-            <path d="M19 12l-7 7-7-7" className="arrow-head" />
+            <path d="M19 12l-7 7-7-7" />
           </svg>
         </div>
       </button>
     </div>
-  );
+  )
 }

@@ -1,15 +1,18 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Link, useLocation } from 'react-router-dom'
 
 const navLinks = [
-  { label: 'Features', href: '#features' },
-  { label: 'Compare', href: '#compare' },
-  { label: 'FAQ', href: '#faq' },
+  { label: 'Features', href: '/features' },
+  { label: 'Compare', href: '/compare' },
+  { label: 'Pricing', href: '/pricing' },
+  { label: 'About', href: '/about' },
   { label: 'Docs', href: 'https://docs.letjarvis.com', external: true },
 ]
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const location = useLocation()
 
   return (
     <motion.header
@@ -20,7 +23,7 @@ export default function Header() {
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2.5 group">
+        <Link to="/" className="flex items-center gap-2.5 group">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent-bright flex items-center justify-center">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2L2 7l10 5 10-5-10-5z" />
@@ -31,20 +34,35 @@ export default function Header() {
           <span className="text-lg font-bold tracking-tight text-text-primary group-hover:text-accent transition-colors">
             JARVIS
           </span>
-        </a>
+        </Link>
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-              className="text-sm text-text-secondary hover:text-text-primary transition-colors"
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map((link) =>
+            link.external ? (
+              <a
+                key={link.label}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-text-secondary hover:text-text-primary transition-colors"
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                key={link.label}
+                to={link.href}
+                className={`text-sm transition-colors ${
+                  location.pathname === link.href
+                    ? 'text-accent font-medium'
+                    : 'text-text-secondary hover:text-text-primary'
+                }`}
+              >
+                {link.label}
+              </Link>
+            )
+          )}
         </nav>
 
         {/* Desktop CTA */}
@@ -86,16 +104,29 @@ export default function Header() {
             className="md:hidden border-t border-border overflow-hidden bg-surface"
           >
             <div className="px-6 py-6 flex flex-col gap-4">
-              {navLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="text-base text-text-secondary hover:text-text-primary transition-colors"
-                >
-                  {link.label}
-                </a>
-              ))}
+              {navLinks.map((link) =>
+                link.external ? (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileOpen(false)}
+                    className="text-base text-text-secondary hover:text-text-primary transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={link.label}
+                    to={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="text-base text-text-secondary hover:text-text-primary transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                )
+              )}
               <hr className="border-border" />
               <a href="https://app.letjarvis.com/login" className="text-base text-text-secondary">Log In</a>
               <a href="https://app.letjarvis.com/signup" className="text-base font-semibold bg-accent text-white px-5 py-3 rounded-lg text-center">
