@@ -78,7 +78,7 @@ export default function Comparison() {
 
   return (
     <section id="compare" ref={ref} className="pt-32 md:pt-44 pb-32 md:pb-44 px-6">
-      <div className="max-w-6xl mx-auto">
+      <div className="w-full lg:max-w-[85vw] mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}

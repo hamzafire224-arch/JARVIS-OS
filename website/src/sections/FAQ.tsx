@@ -78,7 +78,7 @@ export default function FAQ() {
 
   return (
     <section id="faq" ref={ref} className="py-32 md:py-44 px-6">
-      <div className="max-w-3xl mx-auto">
+      <div className="w-full lg:max-w-[75vw] mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}

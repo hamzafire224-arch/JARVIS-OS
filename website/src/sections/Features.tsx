@@ -55,7 +55,7 @@ export default function Features() {
 
   return (
     <section id="features" ref={ref} className="py-32 md:py-44 px-6">
-      <div className="max-w-6xl mx-auto">
+      <div className="w-full px-4 lg:px-16 mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -70,8 +70,8 @@ export default function Features() {
           </p>
         </motion.div>
 
-        {/* Even 3-column grid — NO force-fitting, NO col-span-2 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {/* 4-column grid for extra large screens, 3 for lg, 2 for sm */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
           {features.map((feature, i) => (
             <motion.div
               key={feature.title}

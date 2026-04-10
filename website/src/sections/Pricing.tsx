@@ -44,7 +44,7 @@ const plans = [
 export default function Pricing() {
   return (
     <section style={{ padding: '5rem 2rem' }}>
-      <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
+      <div style={{ width: '100%', maxWidth: '85vw', margin: '0 auto', textAlign: 'center' }}>
         <p style={{
           fontSize: '0.8rem',
           fontWeight: 600,
@@ -77,8 +77,8 @@ export default function Pricing() {
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: '1.5rem',
-          maxWidth: 780,
+          gap: '3rem',
+          maxWidth: 1200,
           margin: '0 auto',
         }}>
           {plans.map((plan, i) => (

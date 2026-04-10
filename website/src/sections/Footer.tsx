@@ -44,9 +44,8 @@ export default function Footer() {
 
   return (
     <footer ref={ref} className="border-t border-border bg-surface-2">
-      {/* Giant CTA Section */}
       <div className="py-24 md:py-32 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-start justify-between gap-16">
+        <div className="w-full lg:max-w-[85vw] mx-auto flex flex-col lg:flex-row items-start justify-between gap-16">
           {/* Left — CTA */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -112,7 +111,7 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className="border-t border-border px-6 py-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="w-full lg:max-w-[85vw] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
             <div className="w-6 h-6 rounded-md bg-gradient-to-br from-accent to-accent-bright flex items-center justify-center">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

@@ -1,0 +1,76 @@
+.scroll-nav-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  background: transparent;
+  backdrop-filter: blur(8px);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: white;
+}
+
+.scroll-nav-btn:hover {
+  transform: scale(1.1);
+  border-color: #00a8ff;
+  box-shadow: 0 0 20px rgba(0, 168, 255, 0.4);
+}
+
+.scroll-nav-water {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0%;
+  background: #00a8ff;
+  transition: height 0.4s ease-out;
+  z-index: 0;
+  opacity: 0.8;
+}
+
+/* Water wave effect using pseudo elements */
+.scroll-nav-water::before,
+.scroll-nav-water::after {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -100%;
+  left: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 40%;
+  transform: translateX(-50%);
+  animation: wave 4s linear infinite;
+}
+.scroll-nav-water::after {
+  background: rgba(0, 168, 255, 0.4);
+  border-radius: 45%;
+  animation: wave 5s linear infinite;
+}
+
+@keyframes wave {
+  0% { transform: translateX(-50%) rotate(0deg); }
+  100% { transform: translateX(-50%) rotate(360deg); }
+}
+
+.scroll-nav-btn:hover .scroll-nav-water {
+  height: 100%;
+}
+
+.scroll-nav-arrow {
+  position: relative;
+  z-index: 1;
+  transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.scroll-nav-arrow.is-up {
+  transform: rotate(180deg);
+}
+
+/* The path arrow-head should adapt so it always points 'forward', 
+   but rotating the whole svg 180deg handles it beautifully */

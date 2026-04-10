@@ -10,6 +10,7 @@ import Features from './sections/Features'
 import Pricing from './sections/Pricing'
 import FAQ from './sections/FAQ'
 import Footer from './sections/Footer'
+import ScrollNav from './components/ScrollNav'
 
 const TOTAL_SNAP_SECTIONS = 4
 
@@ -131,6 +132,7 @@ export default function App() {
       className={snapPhase ? 'app-root snap-active' : 'app-root scroll-active'}
     >
       <Header />
+      <ScrollNav snapPhase={snapPhase} setSnapPhase={setSnapPhase} activeSection={activeSection} setActiveSection={setActiveSection} />
 
       {/* PHASE 1: Full-screen snap sections */}
       {snapPhase && (
