@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useEffect } from 'react'
 import Features from '../sections/Features'
 
 const detailedFeatures = [
@@ -47,6 +48,8 @@ const detailedFeatures = [
 ]
 
 export default function FeaturesPage() {
+  useEffect(() => { document.title = 'JARVIS — Features' }, [])
+
   return (
     <>
       {/* Hero */}

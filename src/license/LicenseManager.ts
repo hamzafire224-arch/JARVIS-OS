@@ -211,7 +211,7 @@ export class LicenseManager {
         // Free period ended
         if (status.status === 'trial_expired' || status.trialExpired) {
             console.log(`${yellow}⏸ Free Productivity access has ended. Balanced mode active.${reset}`);
-            console.log(`${dim}   Your preferences are saved. Subscribe for $20/mo to restore Productivity → ${billingUrl}${reset}`);
+            console.log(`${dim}   Your preferences are saved. Visit ${billingUrl} to restore Productivity features.${reset}`);
         }
 
         // Payment/subscription warnings

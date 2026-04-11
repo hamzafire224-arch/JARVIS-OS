@@ -1,8 +1,11 @@
 import { motion } from 'framer-motion'
+import { useEffect } from 'react'
 import Pricing from '../sections/Pricing'
 import FAQ from '../sections/FAQ'
 
 export default function PricingPage() {
+  useEffect(() => { document.title = 'JARVIS — Pricing' }, [])
+
   return (
     <>
       {/* Hero */}

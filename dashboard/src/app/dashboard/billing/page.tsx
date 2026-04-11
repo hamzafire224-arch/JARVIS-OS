@@ -61,8 +61,7 @@ export default async function BillingPage() {
                                     every Productivity feature. No credit card required during the launch period.
                                 </p>
                                 <p style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>
-                                    After the launch period, Productivity will cost $20/month. We&apos;ll notify you well in advance.
-                                    The Balanced plan stays free forever.
+                                    JARVIS is free and open source. Enjoy full access to every feature.
                                 </p>
                             </div>
 
@@ -124,7 +123,7 @@ export default async function BillingPage() {
                                     padding: '1.25rem',
                                     background: 'var(--accent-bg)',
                                 }}>
-                                    <div style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'var(--accent-1)' }}>Productivity — $20/mo</div>
+                                    <div style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'var(--accent-1)' }}>Productivity — Free</div>
                                     <ul style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 2, listStyle: 'none', padding: 0 }}>
                                         <li>✓ Everything in Balanced</li>
                                         <li>✓ Cloud AI providers</li>
@@ -136,7 +135,7 @@ export default async function BillingPage() {
 
                             <a href={checkoutUrl}>
                                 <button className="btn-primary" style={{ maxWidth: 260 }}>
-                                    Upgrade to Productivity — $20/mo
+                                    Upgrade to Productivity — Free
                                 </button>
                             </a>
                         </div>
@@ -155,7 +154,7 @@ export default async function BillingPage() {
                                 </div>
                                 <div>
                                     <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>Amount</div>
-                                    <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>$20.00 / month</div>
+                                    <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Free</div>
                                 </div>
                                 {periodEnd && (
                                     <div>
@@ -184,8 +183,8 @@ export default async function BillingPage() {
                             You are charged monthly on the day you subscribed. You can cancel anytime from the customer portal.</p>
                         <br />
                         <p><strong style={{ color: 'var(--text-primary)' }}>What happens after the free period?</strong><br />
-                            Productivity transitions to $20/month. You&apos;ll be notified in advance. If you don&apos;t subscribe, JARVIS
-                            gracefully downgrades to Balanced (free forever). 7-day grace period on payment issues.</p>
+                            JARVIS is free and open source. Both Balanced and Productivity plans are available at no cost.
+                            Enjoy full access to every feature with no usage limits.</p>
                         <br />
                         <p><strong style={{ color: 'var(--text-primary)' }}>What payment methods are accepted?</strong><br />
                             Credit/debit cards and PayPal, processed securely through LemonSqueezy.</p>

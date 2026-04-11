@@ -98,7 +98,7 @@ export async function POST(request: Request) {
                 status: 'trial_expired',
                 trial_days_left: 0,
                 trial_expired: true,
-                warning: 'Free Productivity access has ended. Subscribe for $20/mo to restore all features.',
+                warning: 'Free Productivity access has ended. Visit letjarvis.com to restore all features.',
             }));
         }
 

@@ -27,7 +27,7 @@ export default function TermsOfService() {
 
                     <h2 style={{ color: 'var(--text-primary)', fontSize: '1.15rem', fontWeight: 600, marginTop: '1.5rem', marginBottom: '0.75rem' }}>4. Subscription Plans</h2>
                     <p><strong>Balanced (Free):</strong> Includes local AI models via Ollama, working + semantic memory, core skills, and basic security. Free forever.</p>
-                    <p><strong>Productivity ($20/month):</strong> Includes everything in Balanced plus cloud AI providers, full 4-layer memory, advanced security, all marketplace skills, and priority support.</p>
+                    <p><strong>Productivity (Free):</strong> Includes everything in Balanced plus cloud AI providers, full 4-layer memory, advanced security, all marketplace skills, and priority support.</p>
                     <p>During the launch period, Productivity features are available to all users at no cost. We will provide advance notice before any billing begins.</p>
 
                     <h2 style={{ color: 'var(--text-primary)', fontSize: '1.15rem', fontWeight: 600, marginTop: '1.5rem', marginBottom: '0.75rem' }}>5. Billing and Payments</h2>

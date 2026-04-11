@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useEffect } from 'react'
 
 const timeline = [
   { year: 'The Problem', text: 'Developers spend 40% of their time on repetitive tasks — boilerplate, testing, deployment, documentation. AI copilots suggest code but still require you to do the thinking.' },
@@ -16,6 +17,8 @@ const architecture = [
 ]
 
 export default function AboutPage() {
+  useEffect(() => { document.title = 'JARVIS — About' }, [])
+
   return (
     <>
       {/* Hero */}

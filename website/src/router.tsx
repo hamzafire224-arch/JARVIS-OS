@@ -5,6 +5,8 @@ import PricingPage from './pages/PricingPage'
 import ComparePage from './pages/ComparePage'
 import AboutPage from './pages/AboutPage'
 import FeaturesPage from './pages/FeaturesPage'
+import PrivacyPage from './pages/PrivacyPage'
+import TermsPage from './pages/TermsPage'
 
 export const router = createBrowserRouter([
   {
@@ -18,6 +20,8 @@ export const router = createBrowserRouter([
       { path: '/compare', element: <ComparePage /> },
       { path: '/about', element: <AboutPage /> },
       { path: '/features', element: <FeaturesPage /> },
+      { path: '/privacy', element: <PrivacyPage /> },
+      { path: '/terms', element: <TermsPage /> },
     ],
   },
 ])

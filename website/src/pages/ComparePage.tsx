@@ -1,7 +1,10 @@
 import { motion } from 'framer-motion'
+import { useEffect } from 'react'
 import Comparison from '../sections/Comparison'
 
 export default function ComparePage() {
+  useEffect(() => { document.title = 'JARVIS — Compare' }, [])
+
   return (
     <>
       {/* Hero */}

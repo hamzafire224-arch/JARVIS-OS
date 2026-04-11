@@ -1,5 +1,6 @@
 import { motion, useInView } from 'framer-motion'
 import { useRef, forwardRef } from 'react'
+import { Link } from 'react-router-dom'
 
 const footerLinks = [
   {
@@ -146,22 +147,41 @@ const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
                 {col.title}
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {col.links.map((link) => (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    style={{
-                      fontSize: '0.875rem',
-                      color: '#55556a',
-                      textDecoration: 'none',
-                      transition: 'color 0.2s',
-                    }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#f0f0f5' }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#55556a' }}
-                  >
-                    {link.label}
-                  </a>
-                ))}
+                {col.links.map((link) => {
+                  const isExternal = link.href.startsWith('http') || link.href === '#'
+                  const linkStyle = {
+                    fontSize: '0.875rem',
+                    color: '#55556a',
+                    textDecoration: 'none',
+                    transition: 'color 0.2s',
+                  }
+                  const enter = (e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.color = '#f0f0f5' }
+                  const leave = (e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.color = '#55556a' }
+
+                  return isExternal ? (
+                    <a
+                      key={link.label}
+                      href={link.href}
+                      target={link.href.startsWith('http') ? '_blank' : undefined}
+                      rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                      style={linkStyle}
+                      onMouseEnter={enter}
+                      onMouseLeave={leave}
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      key={link.label}
+                      to={link.href}
+                      style={linkStyle}
+                      onMouseEnter={enter}
+                      onMouseLeave={leave}
+                    >
+                      {link.label}
+                    </Link>
+                  )
+                })}
               </div>
             </div>
           ))}
