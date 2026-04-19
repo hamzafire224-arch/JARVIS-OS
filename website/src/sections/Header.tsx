@@ -21,23 +21,10 @@ export default function Header() {
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
       className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-surface/80 border-b border-border/50 overflow-visible"
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent-bright flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2L2 7l10 5 10-5-10-5z" />
-              <path d="M2 17l10 5 10-5" />
-              <path d="M2 12l10 5 10-5" />
-            </svg>
-          </div>
-          <span className="text-lg font-bold tracking-tight text-text-primary group-hover:text-accent transition-colors">
-            JARVIS
-          </span>
-        </Link>
-
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-8">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 relative flex items-center justify-between">
+        
+        {/* Left: Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-8 z-10 w-1/3">
           {navLinks.map((link) =>
             link.external ? (
               <a
@@ -65,19 +52,42 @@ export default function Header() {
           )}
         </nav>
 
-        {/* Desktop CTA */}
-        <div className="hidden md:flex items-center gap-4 flex-shrink-0">
+        {/* Center: Logo */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex justify-center">
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="w-10 h-10 rounded-full border-2 border-accent/60 flex items-center justify-center relative overflow-hidden bg-surface group-hover:scale-105 transition-all duration-300" style={{ 
+              boxShadow: 'inset 0 0 12px rgba(0,168,255,0.2), 0 0 15px rgba(0,168,255,0.4)',
+              backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M10,50 Q40,10 60,80 T90,50\' stroke=\'rgba(0,168,255,0.4)\' fill=\'none\' stroke-width=\'3\'/%3E%3Cpath d=\'M20,20 Q80,20 50,90\' stroke=\'rgba(0,168,255,0.3)\' fill=\'none\' stroke-width=\'2.5\'/%3E%3Cpath d=\'M0,50 Q50,0 100,50\' stroke=\'rgba(0,168,255,0.2)\' fill=\'none\' stroke-width=\'4\' stroke-dasharray=\'4 4\'/%3E%3C/svg%3E")'
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-accent relative z-10" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 0 5px rgba(0,168,255,0.9))' }}>
+                <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                <path d="M2 17l10 5 10-5" />
+                <path d="M2 12l10 5 10-5" />
+              </svg>
+            </div>
+            <span className="text-xl font-bold tracking-widest text-text-primary group-hover:text-accent transition-colors" style={{ textShadow: '0 0 15px rgba(0,168,255,0.4)' }}>
+              JARVIS
+            </span>
+          </Link>
+        </div>
+
+        {/* Right: Desktop CTA */}
+        <div className="hidden md:flex items-center justify-end gap-6 z-10 w-1/3">
           <a
             href="https://app.letjarvis.com/login"
-            className="text-sm text-text-secondary hover:text-text-primary transition-colors px-4 py-2"
+            className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
           >
             Log In
           </a>
           <a
             href="https://app.letjarvis.com/signup"
-            className="text-sm font-semibold bg-accent hover:bg-accent-bright text-white px-7 py-3 rounded-full transition-all hover:shadow-lg hover:shadow-accent-glow whitespace-nowrap border-none outline-none ring-0 inline-flex items-center justify-center"
+            className="group relative overflow-hidden text-sm font-bold text-white px-8 py-3 rounded flex items-center justify-center transition-all duration-300 bg-accent hover:bg-accent-bright border border-accent-bright/50 shadow-[0_0_20px_rgba(0,168,255,0.35)] hover:shadow-[0_0_35px_rgba(0,168,255,0.6)] transform hover:-translate-y-0.5"
           >
-            Get Started Free
+            <span className="relative z-10 tracking-wider">Get Started Free</span>
+            {/* Glossy/Glass Reflection Sweep Effect */}
+            <div className="absolute inset-0 w-full h-full flex justify-center">
+              <div className="h-full w-12 absolute top-0 -left-12 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-25deg] shadow-[0_0_20px_rgba(255,255,255,0.5)] transition-all duration-700 ease-out group-hover:left-[120%]" />
+            </div>
           </a>
         </div>
 
