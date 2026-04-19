@@ -55,19 +55,11 @@ export default function Header() {
         {/* Center: Logo */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex justify-center">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="relative w-9 h-9 flex items-center justify-center">
-              {/* Crayon-like circular ring */}
-              <svg className="absolute inset-0 w-full h-full text-accent transition-transform duration-500 group-hover:rotate-180" viewBox="0 0 100 100" style={{ filter: 'drop-shadow(0 0 8px rgba(0,168,255,0.7))' }}>
-                <path d="M 50 8 Q 85 12 92 50 Q 88 88 50 92 Q 12 85 8 50 Q 15 12 50 8" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className="opacity-90"/>
-              </svg>
-              {/* The three stack icon */}
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" className="relative z-10" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5" />
-                <path d="M2 12l10 5 10-5" />
-              </svg>
+            {/* The textured blue circle logo */}
+            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-[#3f7de8] transition-transform duration-300 group-hover:scale-105" style={{ boxShadow: '0 0 15px rgba(63,125,232,0.3)' }}>
+              <div className="absolute inset-0 opacity-[0.35] mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E")' }}></div>
             </div>
-            <span className="text-xl font-bold tracking-widest text-white group-hover:text-accent transition-colors" style={{ textShadow: '0 0 15px rgba(0,168,255,0.3)' }}>
+            <span className="text-xl font-bold tracking-widest text-white group-hover:text-[#3f7de8] transition-colors" style={{ textShadow: '0 0 15px rgba(63,125,232,0.3)' }}>
               JARVIS
             </span>
           </Link>
