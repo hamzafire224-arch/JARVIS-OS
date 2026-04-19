@@ -166,7 +166,7 @@ export default function ExecutionAnimation() {
                       key={file}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className={\`flex items-center gap-2 cursor-default \${(file === 'schema.sql' && activeTab === 'sql') || (file === 'Dashboard.tsx' && activeTab === 'tsx') ? 'text-accent' : 'text-white/60'}\`}
+                      className={`flex items-center gap-2 cursor-default ${(file === 'schema.sql' && activeTab === 'sql') || (file === 'Dashboard.tsx' && activeTab === 'tsx') ? 'text-accent' : 'text-white/60'}`}
                     >
                       <span className="w-4 h-4 text-[10px] flex items-center justify-center bg-white/[0.05] rounded">
                          {file.endsWith('.sql') ? '🐘' : '⚛'}
