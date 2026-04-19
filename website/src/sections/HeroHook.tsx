@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion'
 import GlitchText from '../components/GlitchText'
 import GlowOrb from '../components/GlowOrb'
-import MultiAgentHero from '../components/MultiAgentHero'
+import ExecutionAnimation from '../components/ExecutionAnimation'
+
 export default function HeroHook({ isActive }: { isActive: boolean }) {
   return (
     <section className="snap-section bg-surface relative">
@@ -35,12 +36,13 @@ export default function HeroHook({ isActive }: { isActive: boolean }) {
           initial={{ scale: 0.5, opacity: 0 }}
           animate={isActive ? { scale: 1, opacity: 1 } : {}}
           transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
-          className="mt-10"
+          className="mt-6"
         >
-          <GlowOrb scale={0.8} />
+          <GlowOrb scale={0.7} />
         </motion.div>
 
-        <MultiAgentHero />
+        {/* Prompt Execution Animation */}
+        <ExecutionAnimation />
 
         {/* Removed Scroll Indicator per user request */}
       </div>

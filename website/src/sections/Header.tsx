@@ -19,12 +19,12 @@ export default function Header() {
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-surface/80 border-b border-border/50 overflow-visible"
+      className="fixed top-0 left-0 right-0 z-50 bg-[#050505] border-b border-white/[0.05] overflow-visible"
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 relative flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-8 lg:px-12 h-16 relative flex items-center">
         
         {/* Left: Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-8 z-10 w-1/3">
+        <nav className="hidden md:flex items-center gap-8 flex-1 pl-2">
           {navLinks.map((link) =>
             link.external ? (
               <a
@@ -54,25 +54,27 @@ export default function Header() {
 
         {/* Center: Logo */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex justify-center">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-full border-2 border-accent/60 flex items-center justify-center relative overflow-hidden bg-surface group-hover:scale-105 transition-all duration-300" style={{ 
-              boxShadow: 'inset 0 0 12px rgba(0,168,255,0.2), 0 0 15px rgba(0,168,255,0.4)',
-              backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M10,50 Q40,10 60,80 T90,50\' stroke=\'rgba(0,168,255,0.4)\' fill=\'none\' stroke-width=\'3\'/%3E%3Cpath d=\'M20,20 Q80,20 50,90\' stroke=\'rgba(0,168,255,0.3)\' fill=\'none\' stroke-width=\'2.5\'/%3E%3Cpath d=\'M0,50 Q50,0 100,50\' stroke=\'rgba(0,168,255,0.2)\' fill=\'none\' stroke-width=\'4\' stroke-dasharray=\'4 4\'/%3E%3C/svg%3E")'
-            }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-accent relative z-10" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 0 5px rgba(0,168,255,0.9))' }}>
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="relative w-9 h-9 flex items-center justify-center">
+              {/* Crayon-like circular ring */}
+              <svg className="absolute inset-0 w-full h-full text-accent transition-transform duration-500 group-hover:rotate-180" viewBox="0 0 100 100" style={{ filter: 'drop-shadow(0 0 8px rgba(0,168,255,0.7))' }}>
+                <path d="M 50 8 Q 85 12 92 50 Q 88 88 50 92 Q 12 85 8 50 Q 15 12 50 8" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className="opacity-90"/>
+              </svg>
+              {/* The three stack icon */}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" className="relative z-10" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2L2 7l10 5 10-5-10-5z" />
                 <path d="M2 17l10 5 10-5" />
                 <path d="M2 12l10 5 10-5" />
               </svg>
             </div>
-            <span className="text-xl font-bold tracking-widest text-text-primary group-hover:text-accent transition-colors" style={{ textShadow: '0 0 15px rgba(0,168,255,0.4)' }}>
+            <span className="text-xl font-bold tracking-widest text-white group-hover:text-accent transition-colors" style={{ textShadow: '0 0 15px rgba(0,168,255,0.3)' }}>
               JARVIS
             </span>
           </Link>
         </div>
 
         {/* Right: Desktop CTA */}
-        <div className="hidden md:flex items-center justify-end gap-6 z-10 w-1/3">
+        <div className="hidden md:flex items-center justify-end gap-6 flex-1 pr-2">
           <a
             href="https://app.letjarvis.com/login"
             className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
@@ -81,11 +83,11 @@ export default function Header() {
           </a>
           <a
             href="https://app.letjarvis.com/signup"
-            className="group relative overflow-hidden text-sm font-bold text-white px-8 py-3 rounded flex items-center justify-center transition-all duration-300 bg-accent hover:bg-accent-bright border border-accent-bright/50 shadow-[0_0_20px_rgba(0,168,255,0.35)] hover:shadow-[0_0_35px_rgba(0,168,255,0.6)] transform hover:-translate-y-0.5"
+            className="group relative overflow-hidden text-sm font-bold text-white px-8 py-2.5 rounded flex items-center justify-center transition-all duration-300 bg-accent hover:bg-accent-bright border border-accent-bright/50 shadow-[0_0_20px_rgba(0,168,255,0.35)] hover:shadow-[0_0_35px_rgba(0,168,255,0.6)] transform hover:-translate-y-0.5"
           >
             <span className="relative z-10 tracking-wider">Get Started Free</span>
-            {/* Glossy/Glass Reflection Sweep Effect */}
-            <div className="absolute inset-0 w-full h-full flex justify-center">
+            {/* Glass Reflection Sweep Effect */}
+            <div className="absolute inset-0 w-full h-full flex justify-center overflow-hidden">
               <div className="h-full w-12 absolute top-0 -left-12 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-25deg] shadow-[0_0_20px_rgba(255,255,255,0.5)] transition-all duration-700 ease-out group-hover:left-[120%]" />
             </div>
           </a>
