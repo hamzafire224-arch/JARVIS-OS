@@ -53,8 +53,8 @@ export default function Home() {
     });
 
     // Sticky Split Screen Scroll Sequence
-    const panels = gsap.utils.toArray('.demo-panel');
-    const uis = gsap.utils.toArray('.mock-ui');
+    const panels = gsap.utils.toArray<HTMLElement>('.demo-panel');
+    const uis = gsap.utils.toArray<HTMLElement>('.mock-ui');
     
     ScrollTrigger.create({
       trigger: '.split-sequence',
