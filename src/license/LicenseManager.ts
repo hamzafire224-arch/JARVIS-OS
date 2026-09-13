@@ -1,0 +1,269 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * PersonalJARVIS — License Manager
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * 
+ * Manages license validation, caching, and feature gating for the CLI.
+ * 
+ * Behavior:
+ * - On startup, reads cached license from ~/.jarvis/license.json
+ * - If cache is fresh (< 24h), uses cached variant immediately
+ * - If stale, validates online (3s timeout, non-blocking fallback)
+ * - If no license key, defaults to 'balanced' (free tier always works)
+ * - Displays warnings for past_due/cancelled/expired statuses
+ */
+
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
+import * as crypto from 'crypto';
+import { LicenseValidator, LicenseValidationResult } from './LicenseValidator.js';
+
+export interface CachedLicense {
+    license_key: string;
+    variant: 'balanced' | 'productivity';
+    status: string;
+    validated_at: string;      // ISO timestamp
+    expires?: string;
+    warning?: string;
+    trial_days_left?: number;
+    trial_expired?: boolean;
+}
+
+export interface LicenseStatus {
+    variant: 'balanced' | 'productivity';
+    status: string;
+    warning?: string;
+    isProductivity: boolean;
+    trialDaysLeft?: number;
+    trialExpired?: boolean;
+}
+
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+// HMAC key derived from machine-specific data to prevent trivial cache tampering
+const CACHE_HMAC_KEY = crypto
+    .createHash('sha256')
+    .update(`jarvis-license-${os.hostname()}-${os.homedir()}`)
+    .digest();
+
+export class LicenseManager {
+    private cacheDir: string;
+    private cachePath: string;
+    private validator: LicenseValidator;
+    private cached: CachedLicense | null = null;
+
+    constructor(apiUrl?: string) {
+        this.cacheDir = path.join(os.homedir(), '.jarvis');
+        this.cachePath = path.join(this.cacheDir, 'license.json');
+        this.validator = new LicenseValidator(apiUrl);
+    }
+
+    /**
+     * Initialize and validate the license.
+     * Called once on CLI startup. Returns the current license status.
+     */
+    async initialize(): Promise<LicenseStatus> {
+        const licenseKey = this.getLicenseKey();
+
+        // No license key → free tier
+        if (!licenseKey) {
+            return {
+                variant: 'balanced',
+                status: 'free',
+                isProductivity: false,
+            };
+        }
+
+        // Try cached first
+        const cached = this.readCache();
+        if (cached && cached.license_key === licenseKey && this.isCacheFresh(cached)) {
+            return this.toStatus(cached);
+        }
+
+        // Validate online
+        const result = await this.validator.validate(licenseKey);
+
+        if (result) {
+            // Save fresh validation result
+            const newCache: CachedLicense = {
+                license_key: licenseKey,
+                variant: result.variant,
+                status: result.status,
+                validated_at: new Date().toISOString(),
+                expires: result.expires,
+                warning: result.warning,
+                trial_days_left: result.trial_days_left,
+                trial_expired: result.trial_expired,
+            };
+            this.writeCache(newCache);
+            return this.toStatus(newCache);
+        }
+
+        // Validation failed (network error/timeout) — use stale cache if available
+        if (cached && cached.license_key === licenseKey) {
+            return this.toStatus(cached);
+        }
+
+        // No cache, no network — default to balanced
+        return {
+            variant: 'balanced',
+            status: 'offline',
+            warning: 'Could not validate license. Using free tier.',
+            isProductivity: false,
+        };
+    }
+
+    /**
+     * Get the license key from environment or config.
+     */
+    private getLicenseKey(): string | null {
+        // Check env var first
+        if (process.env.JARVIS_LICENSE_KEY) {
+            return process.env.JARVIS_LICENSE_KEY;
+        }
+
+        // Check config file
+        try {
+            const configPath = path.join(this.cacheDir, 'config.json');
+            if (fs.existsSync(configPath)) {
+                const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+                return config.license_key || null;
+            }
+        } catch {
+            // Ignore config read errors
+        }
+
+        return null;
+    }
+
+    /**
+     * Compute HMAC signature for cache data to prevent tampering.
+     */
+    private signCache(data: CachedLicense): string {
+        const payload = JSON.stringify(data);
+        return crypto.createHmac('sha256', CACHE_HMAC_KEY).update(payload).digest('hex');
+    }
+
+    /**
+     * Verify HMAC signature on cached license data.
+     */
+    private verifyCacheSignature(data: CachedLicense, signature: string): boolean {
+        const expected = this.signCache(data);
+        try {
+            return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(signature, 'hex'));
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * Read cached license from disk.
+     */
+    private readCache(): CachedLicense | null {
+        try {
+            if (fs.existsSync(this.cachePath)) {
+                const raw = JSON.parse(fs.readFileSync(this.cachePath, 'utf-8'));
+                const { _sig, ...data } = raw;
+
+                // SECURITY: Verify HMAC signature to prevent cache tampering/piracy
+                if (!_sig || !this.verifyCacheSignature(data as CachedLicense, _sig)) {
+                    console.warn('[License] Cache signature invalid — ignoring tampered cache');
+                    return null;
+                }
+
+                this.cached = data as CachedLicense;
+                return data as CachedLicense;
+            }
+        } catch {
+            // Ignore corrupt cache
+        }
+        return null;
+    }
+
+    /**
+     * Write license cache to disk.
+     */
+    private writeCache(cache: CachedLicense): void {
+        try {
+            if (!fs.existsSync(this.cacheDir)) {
+                fs.mkdirSync(this.cacheDir, { recursive: true });
+            }
+            // SECURITY: Sign cache with HMAC to prevent manual editing/piracy
+            const signature = this.signCache(cache);
+            const signedData = { ...cache, _sig: signature };
+            fs.writeFileSync(this.cachePath, JSON.stringify(signedData, null, 2));
+            this.cached = cache;
+        } catch (err) {
+            console.warn('[License] Failed to write cache:', (err as Error).message);
+        }
+    }
+
+    /**
+     * Check if cached license is within the TTL.
+     */
+    private isCacheFresh(cache: CachedLicense): boolean {
+        const validatedAt = new Date(cache.validated_at).getTime();
+        return (Date.now() - validatedAt) < CACHE_TTL_MS;
+    }
+
+    /**
+     * Convert cached license to status object.
+     */
+    private toStatus(cache: CachedLicense): LicenseStatus {
+        return {
+            variant: cache.variant,
+            status: cache.status,
+            warning: cache.warning,
+            isProductivity: cache.variant === 'productivity',
+            trialDaysLeft: cache.trial_days_left,
+            trialExpired: cache.trial_expired,
+        };
+    }
+
+    /**
+     * Print license status to console with appropriate formatting.
+     */
+    static printStatus(status: LicenseStatus): void {
+        const reset = '\x1b[0m';
+        const yellow = '\x1b[33m';
+        const red = '\x1b[31m';
+        const magenta = '\x1b[35m';
+        const cyan = '\x1b[36m';
+        const dim = '\x1b[2m';
+        const billingUrl = 'https://app.letjarvis.com/dashboard/billing';
+
+        // Free Productivity period notifications
+        if (status.status === 'trial' && status.trialDaysLeft != null) {
+            if (status.trialDaysLeft <= 3) {
+                console.log(`${red}⚠ Your free Productivity access ends in ${status.trialDaysLeft} day${status.trialDaysLeft !== 1 ? 's' : ''}. Subscribe to keep all features.${reset}`);
+                console.log(`${dim}   → ${billingUrl}${reset}`);
+            } else if (status.trialDaysLeft <= 7) {
+                console.log(`${yellow}⚠ Free Productivity access ends in ${status.trialDaysLeft} days. Subscribe to continue:${reset}`);
+                console.log(`${dim}   → ${billingUrl}${reset}`);
+            } else {
+                console.log(`${cyan}⚡ Productivity plan active (free)${reset}`);
+            }
+        }
+
+        // Free period ended
+        if (status.status === 'trial_expired' || status.trialExpired) {
+            console.log(`${yellow}⏸ Free Productivity access has ended. Balanced mode active.${reset}`);
+            console.log(`${dim}   Your preferences are saved. Visit ${billingUrl} to restore Productivity features.${reset}`);
+        }
+
+        // Payment/subscription warnings
+        if (status.warning && status.status !== 'trial' && !status.trialExpired) {
+            const isError = status.status === 'degraded' || status.status === 'expired';
+            const color = isError ? red : yellow;
+            console.log(`${color}⚠ ${status.warning}${reset}`);
+            if (status.status === 'past_due') {
+                console.log(`${dim}   Fix payment → ${billingUrl}${reset}`);
+            }
+        }
+
+        if (status.isProductivity && status.status !== 'trial') {
+            console.log(`${magenta}⚡ Productivity${reset} plan active`);
+        }
+    }
+}

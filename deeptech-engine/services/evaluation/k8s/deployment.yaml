@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tensor-synthesizer-moe
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tensor-synthesizer
+  template:
+    metadata:
+      labels:
+        app: tensor-synthesizer
+    spec:
+      containers:
+      - name: moe-evaluator
+        image: letjarvis/tensor-synthesizer:latest
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+        ports:
+        - containerPort: 50051

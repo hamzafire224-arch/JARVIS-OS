@@ -1,0 +1,31 @@
+{
+  "name": "Test & Auto-Fix",
+  "description": "Runs the test suite. In a fully implemented workflow agent, this would loop back and fix failures. For now, it executes standard checks.",
+  "version": "1.0.0",
+  "steps": [
+    {
+      "name": "Lint",
+      "tool": "run_command",
+      "args": {
+        "command": "npm run lint || npm run lint:fix"
+      },
+      "safeToAutoRun": true
+    },
+    {
+      "name": "Typecheck",
+      "tool": "run_command",
+      "args": {
+        "command": "npm run typecheck"
+      },
+      "safeToAutoRun": true
+    },
+    {
+      "name": "Run Tests",
+      "tool": "run_command",
+      "args": {
+        "command": "vitest run"
+      },
+      "safeToAutoRun": true
+    }
+  ]
+}
