@@ -63,10 +63,10 @@ export default function Home() {
       pin: true,
       scrub: true,
       animation: gsap.timeline()
-        .to(uis[0], { opacity: 0, duration: 1 })
-        .to(uis[1], { opacity: 1, duration: 1 }, "<")
-        .to(uis[1], { opacity: 0, duration: 1 }, "+=1")
-        .to(uis[2], { opacity: 1, duration: 1 }, "<")
+        .to(uis[0] as HTMLElement, { opacity: 0, duration: 1 })
+        .to(uis[1] as HTMLElement, { opacity: 1, duration: 1 }, "<")
+        .to(uis[1] as HTMLElement, { opacity: 0, duration: 1 }, "+=1")
+        .to(uis[2] as HTMLElement, { opacity: 1, duration: 1 }, "<")
     });
 
   }, { dependencies: [loading], scope: container });
@@ -87,9 +87,24 @@ export default function Home() {
     <div ref={container} className="relative w-full min-h-screen text-white bg-[#05050A] selection:bg-[#00F0FF] selection:text-black">
       
       {/* Navbar */}
-      <nav className={`fixed top-0 w-full z-40 px-8 py-4 flex justify-between items-center glass-nav ${scrolled ? 'scrolled' : 'bg-transparent'}`}>
-        <div className="font-bold text-xl tracking-widest text-[#00F0FF]">SYNAPSE</div>
-        <button className="px-6 py-2 rounded-full border border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.1)] transition-all text-sm font-medium">Sign In</button>
+      <nav className="fixed w-full top-0 z-50 bg-[#05050A]/80 backdrop-blur-md border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex gap-8 text-sm font-medium text-gray-300">
+            <a href="#" className="hover:text-white transition-colors">Features</a>
+            <a href="#" className="hover:text-white transition-colors">Compare</a>
+            <a href="#" className="hover:text-white transition-colors">Pricing</a>
+            <a href="#" className="hover:text-white transition-colors">About</a>
+            <a href="#" className="hover:text-white transition-colors">Docs</a>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#00F0FF] to-[#0047FF] shadow-[0_0_15px_rgba(0,240,255,0.5)]"></div>
+            <div className="font-bold text-xl tracking-widest text-white">SYNAPSE</div>
+          </div>
+          <div className="flex gap-4 items-center">
+            <button className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Log In</button>
+            <button className="px-6 py-2 rounded-full bg-white text-black hover:bg-gray-200 transition-all text-sm font-medium">Get Started Free</button>
+          </div>
+        </div>
       </nav>
 
       {/* 2. Hero Section */}
