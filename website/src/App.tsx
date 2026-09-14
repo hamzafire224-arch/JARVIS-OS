@@ -1,4 +1,4 @@
-import React, { useState, useRef, useLayoutEffect } from "react";
+import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -7,239 +7,303 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
+// Reusable SVG Icons to avoid external dependencies
+const Icons = {
+  Terminal: () => (
+    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 17l6-6-6-6m12 14h-6" />
+    </svg>
+  ),
+  Network: () => (
+    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+    </svg>
+  ),
+  Shield: () => (
+    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+    </svg>
+  ),
+  Database: () => (
+    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+    </svg>
+  ),
+  CheckCircle: () => (
+    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  ArrowRight: () => (
+    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+    </svg>
+  )
+};
+
 export default function App() {
-  const [isReady, setIsReady] = useState(false);
-  const [showLoader, setShowLoader] = useState(true);
   const mainRef = useRef<HTMLDivElement>(null);
   const visualsRef = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    // 1. Initial Loader Fade Out
-    const timer = setTimeout(() => {
-      gsap.to(".fast-loader", {
-        opacity: 0,
-        duration: 0.8,
-        ease: "power2.inOut",
-        onComplete: () => {
-          setShowLoader(false); // Fully unmount to fix clickability
-          setIsReady(true);
-        }
-      });
-    }, 1800);
-
-    return () => clearTimeout(timer);
+  const [terminalText, setTerminalText] = useState("");
+  
+  // Terminal typing effect logic
+  const fullText = "synapse deploy --swarm=revenue-cycle --strict --zkp-verify";
+  useEffect(() => {
+    let currentText = "";
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < fullText.length) {
+        currentText += fullText[i];
+        setTerminalText(currentText);
+        i++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 50);
+    return () => clearInterval(interval);
   }, []);
 
   useLayoutEffect(() => {
-    if (!isReady) return;
-
-    // 2. Hero Entrance Animation
-    gsap.fromTo(
-      ".hero-anim",
-      { y: 40, opacity: 0 },
-      { y: 0, opacity: 1, duration: 1, stagger: 0.15, delay: 0.1, ease: "power3.out" }
-    );
-
-    // 3. Pinned Scroll Sequence Context
     const ctx = gsap.context(() => {
-      // Pin the right-side visual container
+      // Hero Entrance
+      gsap.fromTo(
+        ".hero-element",
+        { y: 30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 1.2, stagger: 0.15, ease: "power3.out" }
+      );
+
+      // Pinned Scroll Sequence for the Product Tour
       ScrollTrigger.create({
-        trigger: "#scroll-sequence",
+        trigger: "#product-tour",
         start: "top top",
-        end: "+=2400", // Matches the height of the 3 text steps
+        end: "+=2400",
         pin: visualsRef.current,
         scrub: true,
       });
 
-      // Animate mockups in and out based on which text step is active
-      const steps = gsap.utils.toArray(".text-step") as HTMLElement[];
+      const steps = gsap.utils.toArray(".tour-step") as HTMLElement[];
       steps.forEach((step, i) => {
         ScrollTrigger.create({
           trigger: step,
           start: "top center",
           end: "bottom center",
-          onEnter: () => gsap.to(`.mockup-${i}`, { opacity: 1, scale: 1, duration: 0.5 }),
-          onLeave: () => gsap.to(`.mockup-${i}`, { opacity: 0, scale: 0.95, duration: 0.5 }),
-          onEnterBack: () => gsap.to(`.mockup-${i}`, { opacity: 1, scale: 1, duration: 0.5 }),
-          onLeaveBack: () => gsap.to(`.mockup-${i}`, { opacity: 0, scale: 0.95, duration: 0.5 }),
+          onEnter: () => gsap.to(`.ui-mockup-${i}`, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }),
+          onLeave: () => gsap.to(`.ui-mockup-${i}`, { opacity: 0, y: -20, duration: 0.4 }),
+          onEnterBack: () => gsap.to(`.ui-mockup-${i}`, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }),
+          onLeaveBack: () => gsap.to(`.ui-mockup-${i}`, { opacity: 0, y: 20, duration: 0.4 }),
         });
       });
+
+      // Fade up elements on scroll
+      const fadeElements = gsap.utils.toArray(".fade-up");
+      fadeElements.forEach((el: any) => {
+        gsap.fromTo(el,
+          { opacity: 0, y: 40 },
+          {
+            opacity: 1, y: 0, duration: 1, ease: "power2.out",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 85%",
+            }
+          }
+        );
+      });
+
     }, mainRef);
 
     return () => ctx.revert();
-  }, [isReady]);
+  }, []);
 
   return (
-    <div ref={mainRef} className="bg-[#05050A] text-white font-sans overflow-x-hidden selection:bg-[#00F0FF] selection:text-black">
+    <div ref={mainRef} className="bg-[#050505] text-[#EDEDED] font-sans overflow-x-hidden selection:bg-[#EDEDED] selection:text-[#050505]">
       
       {/* 
-        FAST LOADER 
-        Uses conditional rendering to guarantee it is removed from the DOM,
-        preventing the "ghost shield" bug that makes buttons unclickable.
+        HEADER
+        Clean, minimalist, strictly structured. No messy gradients.
       */}
-      {showLoader && (
-        <div className="fast-loader fixed inset-0 z-[100] bg-[#05050A] flex flex-col items-center justify-center">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#00F0FF] to-[#001A88] animate-pulse shadow-[0_0_50px_rgba(0,240,255,0.6)] mb-8"></div>
-          <div className="text-[#00F0FF] font-mono text-sm tracking-[0.4em]">INITIALIZING SYNAPSE...</div>
-        </div>
-      )}
-
-      {}
-      <nav className="fixed top-0 w-full z-50 bg-[#05050A]/70 backdrop-blur-xl border-b border-white/5 transition-all">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <nav className="fixed top-0 w-full z-50 bg-[#050505]/80 backdrop-blur-lg border-b border-[#27272A] transition-all">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           
-          {/* Left: Navigation Links */}
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
-            <a href="#platform" className="hover:text-white transition-colors cursor-pointer">Platform</a>
-            <a href="#features" className="hover:text-white transition-colors cursor-pointer">Features</a>
-            <a href="#enterprise" className="hover:text-white transition-colors cursor-pointer">Enterprise</a>
-            <a href="#docs" className="hover:text-white transition-colors cursor-pointer">Docs</a>
+          <div className="flex items-center gap-12">
+            {/* Brand */}
+            <div className="flex items-center gap-2 cursor-pointer">
+              <div className="w-5 h-5 bg-[#EDEDED] rounded-sm"></div>
+              <span className="text-lg font-bold tracking-wide text-[#EDEDED] uppercase">Synapse</span>
+            </div>
+
+            {/* Links */}
+            <div className="hidden md:flex items-center gap-8 text-sm font-medium text-[#A1A1AA]">
+              <a href="#platform" className="hover:text-[#EDEDED] transition-colors">Platform</a>
+              <a href="#solutions" className="hover:text-[#EDEDED] transition-colors">Solutions</a>
+              <a href="#security" className="hover:text-[#EDEDED] transition-colors">Security</a>
+              <a href="#customers" className="hover:text-[#EDEDED] transition-colors">Customers</a>
+            </div>
           </div>
 
-          {/* Center: Brand Logo (Deep Cyan to Dark Blue) */}
-          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#00F0FF] to-[#001A88] shadow-[0_0_20px_rgba(0,240,255,0.5)]"></div>
-            <span className="text-xl font-bold tracking-widest text-white uppercase">Synapse</span>
-          </div>
-
-          {/* Right: Actions */}
+          {/* Actions */}
           <div className="flex items-center gap-6">
-            <a href="/login" className="text-sm font-medium text-gray-400 hover:text-white transition-colors hidden sm:block cursor-pointer">Log In</a>
-            <a href="/dashboard" className="text-sm font-semibold bg-white text-black px-6 py-2.5 rounded-full hover:bg-gray-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] cursor-pointer">
-              Launch Console
+            <a href="/login" className="text-sm font-medium text-[#A1A1AA] hover:text-[#EDEDED] transition-colors hidden sm:block cursor-pointer">Sign In</a>
+            <a href="/contact" className="text-sm font-medium bg-[#EDEDED] text-[#050505] px-5 py-2 rounded-md hover:bg-white transition-all cursor-pointer">
+              Book Demo
             </a>
           </div>
         </div>
       </nav>
 
-      {}
-      <main className="relative pt-40 pb-20 min-h-screen flex flex-col items-center justify-center overflow-hidden">
-        {/* Massive Background Glowing Orb */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-gradient-to-tr from-[#00F0FF]/20 to-[#001A88]/40 blur-[150px] animate-[spin_20s_linear_infinite] pointer-events-none"></div>
-
-        <div className="max-w-5xl mx-auto px-6 text-center relative z-10 flex-1 flex flex-col justify-center">
-          <div className="hero-anim inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#00F0FF]/30 bg-[#00F0FF]/10 text-[#00F0FF] text-xs font-mono uppercase tracking-wider mb-8 mx-auto">
-            <span className="w-2 h-2 rounded-full bg-[#00F0FF] animate-pulse"></span>
-            V1.0 Deployed & Live
-          </div>
-          
-          <h1 className="hero-anim text-5xl md:text-8xl font-extrabold tracking-tighter leading-[1.05] mb-8">
-            The Deterministic <br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">Multi-Agent OS.</span>
-          </h1>
-          
-          <p className="hero-anim text-lg md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12 font-light leading-relaxed">
-            Design, deploy, and scale infinite autonomous swarms. No hallucinations. Absolute cryptographic certainty. Replace legacy software with intelligent infrastructure.
-          </p>
-          
-          <div className="hero-anim flex flex-col sm:flex-row items-center justify-center gap-6">
-            <a href="/dashboard" className="bg-[#00F0FF] text-black px-10 py-4 rounded-full font-bold text-lg hover:bg-[#00d0dd] transition-all shadow-[0_0_30px_rgba(0,240,255,0.4)] hover:shadow-[0_0_50px_rgba(0,240,255,0.6)] cursor-pointer">
-              Enter Workspace
-            </a>
-            <a href="#scroll-sequence" className="text-white px-10 py-4 rounded-full font-semibold text-lg border border-white/20 hover:bg-white/5 transition-all flex items-center gap-2 cursor-pointer">
-              Watch Demo
-            </a>
-          </div>
+      {/* 
+        HERO SECTION
+        Outcome-focused. Enterprise-grade typography. No "AI" glowing orbs.
+      */}
+      <main className="relative pt-48 pb-32 flex flex-col items-center text-center px-6">
+        <div className="hero-element inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#27272A] bg-[#111111] text-[#A1A1AA] text-xs font-mono tracking-wide mb-8">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+          Synapse Core V1.0 is now generally available
+        </div>
+        
+        <h1 className="hero-element text-5xl md:text-7xl font-semibold tracking-tight leading-[1.05] max-w-5xl mb-6">
+          Intelligent infrastructure <br className="hidden md:block" />
+          <span className="text-[#A1A1AA]">for the modern enterprise.</span>
+        </h1>
+        
+        <p className="hero-element text-lg md:text-xl text-[#A1A1AA] max-w-2xl mb-12 leading-relaxed">
+          Design, deploy, and scale deterministic multi-agent swarms. Cryptographically verifiable outputs. Built for engineering teams who demand mathematical certainty.
+        </p>
+        
+        <div className="hero-element flex flex-col sm:flex-row items-center gap-4">
+          <a href="/start" className="bg-[#EDEDED] text-[#050505] px-8 py-3.5 rounded-md font-medium text-base hover:bg-white transition-colors flex items-center gap-2">
+            Start Building Free <Icons.ArrowRight />
+          </a>
+          <a href="#tour" className="bg-[#111111] text-[#EDEDED] border border-[#27272A] px-8 py-3.5 rounded-md font-medium text-base hover:bg-[#1A1A1A] transition-colors">
+            Read the Whitepaper
+          </a>
         </div>
       </main>
 
-      {}
-      <section id="scroll-sequence" className="relative w-full bg-[#020204] border-t border-white/5 py-24">
+      {/* TRUST LOGOS */}
+      <section className="py-12 border-y border-[#27272A] bg-[#0A0A0A]">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <p className="text-xs font-mono text-[#71717A] uppercase tracking-widest mb-8">Powering mission-critical infrastructure at</p>
+          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-50 grayscale">
+            {/* Minimalist typographic logo placeholders */}
+            <span className="text-xl font-bold tracking-tighter">ACME Corp</span>
+            <span className="text-xl font-serif italic">GlobalBank</span>
+            <span className="text-xl font-black uppercase tracking-widest">Nexus</span>
+            <span className="text-xl font-medium tracking-tight">HealthGroup</span>
+            <span className="text-xl font-bold">Stark Ind.</span>
+          </div>
+        </div>
+      </section>
+
+      {/* 
+        TERMINAL TO CANVAS DEMO (Scroll Sequence)
+        A high-fidelity representation of the actual product workflow.
+      */}
+      <section id="product-tour" className="relative w-full bg-[#050505] py-32 border-b border-[#27272A]">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row gap-16 relative">
           
-          {/* Left Side: Scrolling Text Blocks */}
-          <div className="w-full md:w-1/2 z-10 pb-[50vh]">
-            <div className="text-step h-[80vh] flex flex-col justify-center">
-              <div className="w-12 h-12 rounded-xl bg-[#00F0FF]/10 flex items-center justify-center border border-[#00F0FF]/30 mb-6">
-                <svg className="w-6 h-6 text-[#00F0FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
+          {/* Left: Sticky Text Blocks */}
+          <div className="w-full md:w-5/12 z-10 pb-[40vh]">
+            
+            <div className="tour-step h-[80vh] flex flex-col justify-center">
+              <div className="w-10 h-10 rounded-lg bg-[#111111] border border-[#27272A] flex items-center justify-center mb-6 text-[#EDEDED]">
+                <Icons.Terminal />
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">Infinite Swarm Workspace</h2>
-              <p className="text-xl text-gray-400 leading-relaxed">
-                Drag and drop intelligent agents onto a spatial HTML5 canvas. Visually wire ingestion nodes directly into specialized Mixture-of-Expert (MoE) models to orchestrate complex tasks simultaneously.
+              <h2 className="text-3xl font-semibold mb-4">CLI-First Deployment</h2>
+              <p className="text-[#A1A1AA] leading-relaxed text-lg">
+                Engineers shouldn't have to point and click. Define your entire multi-agent swarm architecture using strict YAML configurations and deploy instantly via the Synapse CLI.
               </p>
             </div>
 
-            <div className="text-step h-[80vh] flex flex-col justify-center">
-              <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/30 mb-6">
-                <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            <div className="tour-step h-[80vh] flex flex-col justify-center">
+              <div className="w-10 h-10 rounded-lg bg-[#111111] border border-[#27272A] flex items-center justify-center mb-6 text-[#EDEDED]">
+                <Icons.Network />
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">Forensic Audit Lineage</h2>
-              <p className="text-xl text-gray-400 leading-relaxed">
-                Cryptographic transparency. Click any agent output to trace its exact lineage back to vector memories, source URLs, or specific prompt constraints that drove the decision.
+              <h2 className="text-3xl font-semibold mb-4">Spatial State Visualization</h2>
+              <p className="text-[#A1A1AA] leading-relaxed text-lg">
+                Once deployed, monitor your swarms in real-time. Synapse automatically maps your declarative configurations into an interactive, spatial DAG for forensic observability.
               </p>
             </div>
 
-            <div className="text-step h-[80vh] flex flex-col justify-center">
-              <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center border border-green-500/30 mb-6">
-                <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <div className="tour-step h-[80vh] flex flex-col justify-center">
+              <div className="w-10 h-10 rounded-lg bg-[#111111] border border-[#27272A] flex items-center justify-center mb-6 text-[#EDEDED]">
+                <Icons.Shield />
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">Durable Execution</h2>
-              <p className="text-xl text-gray-400 leading-relaxed">
-                Powered by Inngest. Tasks survive serverless timeouts. Fan-out execution across thousands of agents with automatic retries, guardrails, and pause/resume logic.
+              <h2 className="text-3xl font-semibold mb-4">Cryptographic Audit Trails</h2>
+              <p className="text-[#A1A1AA] leading-relaxed text-lg">
+                Every decision made by the swarm is signed with a Zero-Knowledge Proof. Trace any output exactly back to the source vector, context, and reasoning step. Total deterministic safety.
               </p>
             </div>
           </div>
 
-          {/* Right Side: Pinned UI Frame */}
-          <div className="hidden md:block w-1/2 relative">
+          {/* Right: Pinned Realistic UI Mockups */}
+          <div className="hidden md:block w-7/12 relative">
             <div 
               ref={visualsRef} 
-              className="sticky top-32 w-full h-[600px] rounded-2xl border border-white/10 bg-[#0A0A0F] shadow-[0_30px_60px_rgba(0,0,0,0.6)] overflow-hidden"
+              className="sticky top-40 w-full h-[550px] rounded-xl border border-[#27272A] bg-[#0A0A0A] shadow-2xl overflow-hidden"
             >
-              {/* Mac Window Header */}
-              <div className="h-10 bg-white/5 border-b border-white/5 flex items-center px-4 gap-2 z-50 relative">
-                <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-                <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
-                <div className="mx-auto text-xs text-gray-500 font-mono">synapse-workspace-v1</div>
+              {/* Window Header */}
+              <div className="h-10 border-b border-[#27272A] bg-[#111111] flex items-center px-4 gap-2">
+                <div className="w-3 h-3 rounded-full bg-[#3F3F46]"></div>
+                <div className="w-3 h-3 rounded-full bg-[#3F3F46]"></div>
+                <div className="w-3 h-3 rounded-full bg-[#3F3F46]"></div>
               </div>
 
-              {}
-              {/* UI 1: React Flow Canvas Mockup */}
-              <div className="mockup-0 absolute inset-0 top-10 p-6 opacity-0" style={{ backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
-                <div className="absolute top-20 left-10 w-48 p-3 rounded-xl border border-green-500/30 bg-green-500/10 backdrop-blur-md">
-                   <div className="flex items-center gap-2 mb-2"><div className="w-2 h-2 rounded-full bg-green-500"></div><span className="text-xs font-bold text-white">WhatsApp Ingest</span></div>
-                   <div className="text-[10px] text-gray-400 font-mono">Status: Listening</div>
-                </div>
-                {/* SVG Curve Connection */}
-                <svg className="absolute top-24 left-56 w-32 h-20" fill="none" stroke="#3b82f6" strokeWidth="2" strokeOpacity="0.5"><path d="M0,10 C50,10 50,60 100,60"></path></svg>
-                <div className="absolute top-32 left-80 w-56 p-4 rounded-xl border border-[#00F0FF]/50 bg-[#00F0FF]/10 backdrop-blur-md shadow-[0_0_20px_rgba(0,240,255,0.15)]">
-                   <div className="flex items-center gap-2 mb-2"><div className="w-2 h-2 rounded-full bg-[#00F0FF] animate-pulse"></div><span className="text-sm font-bold text-white">Main Routing Agent</span></div>
-                   <div className="flex gap-1"><span className="px-2 py-0.5 rounded text-[9px] bg-white/10 text-[#00F0FF]">MoE Active</span><span className="px-2 py-0.5 rounded text-[9px] bg-white/10 text-[#00F0FF]">Running</span></div>
+              {/* Step 0: Terminal */}
+              <div className="ui-mockup-0 absolute inset-0 top-10 p-6 bg-[#050505] font-mono text-sm opacity-100">
+                <div className="text-[#A1A1AA] mb-4">~/<span className="text-[#EDEDED]">enterprise-stack</span>$ {terminalText}</div>
+                {terminalText.length === fullText.length && (
+                  <div className="animate-fade-in mt-4 space-y-2 text-[#A1A1AA]">
+                    <div>&gt; Validating strict schemas... <span className="text-green-500">OK</span></div>
+                    <div>&gt; Compiling Rust ZKP modules... <span className="text-green-500">OK</span></div>
+                    <div>&gt; Provisioning MoE nodes... <span className="text-green-500">OK</span></div>
+                    <div className="text-[#EDEDED] mt-4 font-bold border-l-2 border-green-500 pl-3">
+                      Swarm deployed successfully. <br/>
+                      Live Dashboard: https://synapse.local/ui/revenue-cycle
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Step 1: Canvas UI */}
+              <div className="ui-mockup-1 absolute inset-0 top-10 bg-[#0A0A0A] opacity-0" style={{ backgroundImage: 'radial-gradient(#27272A 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full p-8">
+                  {/* Mock Node 1 */}
+                  <div className="absolute top-16 left-12 w-48 bg-[#111111] border border-[#27272A] rounded-lg p-3 shadow-lg">
+                    <div className="text-xs font-mono text-[#A1A1AA] mb-2 flex justify-between">Ingestion <span>✓</span></div>
+                    <div className="font-medium text-sm">Kafka Stream A</div>
+                  </div>
+                  {/* Connection Line */}
+                  <svg className="absolute top-24 left-[240px] w-24 h-20" fill="none" stroke="#3F3F46" strokeWidth="2"><path d="M0,0 C40,0 40,60 100,60"></path></svg>
+                  {/* Mock Node 2 */}
+                  <div className="absolute top-36 left-80 w-56 bg-[#111111] border border-blue-500/30 rounded-lg p-3 shadow-lg ring-1 ring-blue-500/20">
+                    <div className="text-xs font-mono text-blue-400 mb-2 flex justify-between">MoE Router <span className="animate-pulse">●</span></div>
+                    <div className="font-medium text-sm">Decision Engine</div>
+                    <div className="mt-2 h-1 w-full bg-[#27272A] rounded-full overflow-hidden"><div className="h-full bg-blue-500 w-[60%]"></div></div>
+                  </div>
                 </div>
               </div>
 
-              {/* UI 2: Forensic Lineage Mockup */}
-              <div className="mockup-1 absolute inset-0 top-10 bg-[#0A0A0F] p-8 opacity-0">
-                <div className="text-sm font-bold text-white mb-6 border-b border-white/10 pb-4">Audit Trail: Output Generation</div>
-                <div className="relative pl-6 border-l border-white/10 space-y-8">
-                   <div className="relative">
-                      <div className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-purple-500/20 border border-purple-500 flex items-center justify-center"><div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div></div>
-                      <div className="text-xs font-mono text-purple-400 mb-1">Source: Vector Memory</div>
-                      <div className="text-sm text-gray-300">"Competitor X raised Series B at $45M..."</div>
-                      <div className="mt-2 h-1 w-full bg-white/5 rounded-full overflow-hidden"><div className="h-full bg-purple-500 w-[94%]"></div></div>
-                   </div>
-                   <div className="relative">
-                      <div className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-blue-500/20 border border-blue-500 flex items-center justify-center"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div></div>
-                      <div className="text-xs font-mono text-blue-400 mb-1">Source: Web Scraper Skill</div>
-                      <div className="text-sm text-gray-300">Extracted from techcrunch.com/2026/09...</div>
-                      <div className="mt-2 h-1 w-full bg-white/5 rounded-full overflow-hidden"><div className="h-full bg-blue-500 w-[82%]"></div></div>
-                   </div>
+              {/* Step 2: Audit Logs */}
+              <div className="ui-mockup-2 absolute inset-0 top-10 bg-[#050505] p-6 opacity-0 flex flex-col">
+                <div className="border-b border-[#27272A] pb-4 mb-4 flex justify-between text-sm">
+                  <span className="font-medium">Forensic Lineage Inspector</span>
+                  <span className="text-[#A1A1AA] font-mono">Tx: 0x9f8a...3b2c</span>
                 </div>
-              </div>
-
-              {/* UI 3: Terminal Console Mockup */}
-              <div className="mockup-2 absolute inset-0 top-10 bg-[#05050A] p-6 opacity-0 font-mono text-xs text-gray-400">
-                 <div className="flex items-center gap-2 mb-4 text-[#00F0FF]"><span className="animate-pulse">▶</span> <span>Executing Fan-out Protocol</span></div>
-                 <div className="space-y-2">
-                    <div className="flex justify-between"><span className="text-gray-500">[14:02:01]</span> <span className="text-white">Agent_A_Task_Init</span> <span className="text-green-400">SUCCESS</span></div>
-                    <div className="flex justify-between"><span className="text-gray-500">[14:02:02]</span> <span className="text-white">Agent_B_Task_Init</span> <span className="text-green-400">SUCCESS</span></div>
-                    <div className="flex justify-between"><span className="text-gray-500">[14:02:05]</span> <span className="text-white">Supervisor_Recheck_Gate</span> <span className="text-amber-400">PENDING</span></div>
-                 </div>
-                 <div className="mt-8 p-4 border border-white/10 rounded-lg bg-white/5">
-                    <div className="text-white font-bold mb-2">Durable State Guard:</div>
-                    <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-green-500 w-full animate-pulse"></div></div>
-                 </div>
+                <div className="flex-1 space-y-4">
+                  <div className="p-3 bg-[#111111] border border-[#27272A] rounded-md">
+                    <div className="text-xs text-[#A1A1AA] mb-1 font-mono">Source Input</div>
+                    <div className="text-sm">"Process patient claim #49281"</div>
+                  </div>
+                  <div className="flex justify-center"><svg width="16" height="16" fill="none" stroke="#3F3F46" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m0 0l-4-4m4 4l4-4" /></svg></div>
+                  <div className="p-3 bg-[#111111] border border-green-500/20 rounded-md">
+                    <div className="text-xs text-green-500 mb-1 font-mono flex items-center gap-2"><Icons.Shield /> ZKP Verified Output</div>
+                    <div className="text-sm font-mono text-[#A1A1AA]">
+                      CPT Code: 99214<br/>
+                      Confidence: 99.9%<br/>
+                      Proof Hash: a8f7...c19d
+                    </div>
+                  </div>
+                </div>
               </div>
 
             </div>
@@ -247,55 +311,124 @@ export default function App() {
         </div>
       </section>
 
-      {}
-      <section id="features" className="py-24 bg-[#05050A]">
+      {/* 
+        FEATURE GRID
+        Clean, structural bento-box design.
+      */}
+      <section className="py-32 bg-[#050505]">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">The DeepTech Moat</h2>
-            <p className="text-gray-400">Enterprise-grade architecture built natively.</p>
+          <div className="fade-up mb-16 text-center">
+            <h2 className="text-3xl md:text-4xl font-semibold mb-4">Architecture without compromise</h2>
+            <p className="text-[#A1A1AA] text-lg max-w-2xl mx-auto">Synapse is built from the ground up for scale, security, and strict data governance. No wrappers. No black boxes.</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-[#00F0FF]/30 transition-colors">
-              <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-6 text-2xl">⚡</div>
-              <h3 className="text-xl font-bold mb-3 text-white">Realtime CDC</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">Supabase PostgreSQL logical replication streams canvas updates instantly to your browser without WebSocket servers.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="fade-up p-8 rounded-xl bg-[#0A0A0A] border border-[#27272A] hover:border-[#3F3F46] transition-colors">
+              <div className="mb-6 text-[#EDEDED]"><Icons.Database /></div>
+              <h3 className="text-xl font-medium mb-3">Real-time CDC Sync</h3>
+              <p className="text-[#A1A1AA] text-sm leading-relaxed">Native PostgreSQL logical replication. State changes sync across your fleet in milliseconds without heavy WebSocket overhead.</p>
             </div>
-            <div className="p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-purple-500/30 transition-colors">
-              <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-6 text-2xl">🔐</div>
-              <h3 className="text-xl font-bold mb-3 text-white">Zero-Knowledge Proofs</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">Deterministic outputs verified mathematically. The rust-based gRPC server ensures strict protocol adherence.</p>
+            <div className="fade-up p-8 rounded-xl bg-[#0A0A0A] border border-[#27272A] hover:border-[#3F3F46] transition-colors delay-100">
+              <div className="mb-6 text-[#EDEDED]"><Icons.Network /></div>
+              <h3 className="text-xl font-medium mb-3">Durable Execution</h3>
+              <p className="text-[#A1A1AA] text-sm leading-relaxed">Powered by a robust state machine. Long-running tasks survive serverless limits with automatic retries and exponential backoff.</p>
             </div>
-            <div className="p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-green-500/30 transition-colors">
-              <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-6 text-2xl">🌐</div>
-              <h3 className="text-xl font-bold mb-3 text-white">Omnichannel Mesh</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">Natively intercept and route payloads from WhatsApp, Instagram, and custom webhooks directly into the MoE.</p>
+            <div className="fade-up p-8 rounded-xl bg-[#0A0A0A] border border-[#27272A] hover:border-[#3F3F46] transition-colors delay-200">
+              <div className="mb-6 text-[#EDEDED]"><Icons.Shield /></div>
+              <h3 className="text-xl font-medium mb-3">Enterprise Security</h3>
+              <p className="text-[#A1A1AA] text-sm leading-relaxed">SOC 2 Type II and HIPAA compliant. Row-Level Security (RLS) ensures absolute data isolation between multi-tenant swarms.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {}
-      <footer className="border-t border-white/10 bg-[#020204] pt-24 pb-12 relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[400px] bg-[#00F0FF]/5 blur-[150px] rounded-full pointer-events-none"></div>
-        
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-end border-b border-white/10 pb-16 mb-12">
+      {/* 
+        FINAL CTA 
+      */}
+      <section className="py-32 bg-[#0A0A0A] border-t border-[#27272A]">
+        <div className="max-w-4xl mx-auto px-6 text-center fade-up">
+          <h2 className="text-4xl md:text-5xl font-semibold mb-6">Ready to upgrade your infrastructure?</h2>
+          <p className="text-[#A1A1AA] text-lg mb-10">Join the engineering teams building the next generation of autonomous software.</p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="/signup" className="bg-[#EDEDED] text-[#050505] px-8 py-3.5 rounded-md font-medium hover:bg-white transition-colors">
+              Deploy Synapse Free
+            </a>
+            <a href="/contact" className="bg-transparent text-[#EDEDED] border border-[#27272A] px-8 py-3.5 rounded-md font-medium hover:bg-[#111111] transition-colors">
+              Contact Sales
+            </a>
+          </div>
+          <div className="mt-8 flex items-center justify-center gap-6 text-sm text-[#71717A] font-mono">
+             <span className="flex items-center gap-2"><Icons.CheckCircle /> No credit card required</span>
+             <span className="flex items-center gap-2"><Icons.CheckCircle /> Open Source Core</span>
+          </div>
+        </div>
+      </section>
+
+      {/* 
+        FAT FOOTER
+        Highly structured, enterprise standard.
+      */}
+      <footer className="bg-[#050505] border-t border-[#27272A] pt-20 pb-10">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-16">
+            <div className="col-span-2">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-5 h-5 bg-[#EDEDED] rounded-sm"></div>
+                <span className="text-lg font-bold tracking-wide text-[#EDEDED] uppercase">Synapse</span>
+              </div>
+              <p className="text-[#A1A1AA] text-sm leading-relaxed max-w-xs mb-6">
+                The deterministic multi-agent operating system. Built for engineering teams demanding mathematical certainty.
+              </p>
+              <div className="flex gap-4">
+                {/* Social icons placeholders */}
+                <div className="w-8 h-8 rounded bg-[#111111] border border-[#27272A] flex items-center justify-center text-[#A1A1AA] hover:text-[#EDEDED] cursor-pointer">X</div>
+                <div className="w-8 h-8 rounded bg-[#111111] border border-[#27272A] flex items-center justify-center text-[#A1A1AA] hover:text-[#EDEDED] cursor-pointer">In</div>
+                <div className="w-8 h-8 rounded bg-[#111111] border border-[#27272A] flex items-center justify-center text-[#A1A1AA] hover:text-[#EDEDED] cursor-pointer">Gh</div>
+              </div>
+            </div>
+            
             <div>
-              <h2 className="text-4xl md:text-6xl font-bold mb-6">Ready to deploy<br/>your swarm?</h2>
-              <a href="/dashboard" className="inline-block bg-white text-black px-8 py-4 rounded-full font-bold hover:bg-gray-200 transition-colors">
-                Launch Console Today
-              </a>
+              <h4 className="font-semibold mb-4">Platform</h4>
+              <ul className="space-y-3 text-sm text-[#A1A1AA]">
+                <li><a href="#" className="hover:text-[#EDEDED] transition-colors">Architecture</a></li>
+                <li><a href="#" className="hover:text-[#EDEDED] transition-colors">Deterministic Engine</a></li>
+                <li><a href="#" className="hover:text-[#EDEDED] transition-colors">Observability</a></li>
+                <li><a href="#" className="hover:text-[#EDEDED] transition-colors">Security</a></li>
+                <li><a href="#" className="hover:text-[#EDEDED] transition-colors">Pricing</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-4">Developers</h4>
+              <ul className="space-y-3 text-sm text-[#A1A1AA]">
+                <li><a href="#" className="hover:text-[#EDEDED] transition-colors">Documentation</a></li>
+                <li><a href="#" className="hover:text-[#EDEDED] transition-colors">API Reference</a></li>
+                <li><a href="#" className="hover:text-[#EDEDED] transition-colors">GitHub Repository</a></li>
+                <li><a href="#" className="hover:text-[#EDEDED] transition-colors">Community Forum</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-4">Company</h4>
+              <ul className="space-y-3 text-sm text-[#A1A1AA]">
+                <li><a href="#" className="hover:text-[#EDEDED] transition-colors">About Us</a></li>
+                <li><a href="#" className="hover:text-[#EDEDED] transition-colors">Careers</a></li>
+                <li><a href="#" className="hover:text-[#EDEDED] transition-colors">Blog</a></li>
+                <li><a href="#" className="hover:text-[#EDEDED] transition-colors">Contact</a></li>
+              </ul>
             </div>
           </div>
           
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#00F0FF] to-[#001A88]"></div>
-              <span className="text-xl font-bold tracking-widest text-white uppercase">Synapse</span>
+          <div className="border-t border-[#27272A] pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="text-sm text-[#71717A]">
+              &copy; {new Date().getFullYear()} Synapse Systems Inc. All rights reserved.
             </div>
-            <div className="text-sm font-mono text-gray-500 uppercase tracking-wider">
-              Engineered for the Enterprise. &copy; {new Date().getFullYear()}
+            <div className="flex gap-6 text-sm text-[#71717A]">
+              <a href="#" className="hover:text-[#A1A1AA] transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-[#A1A1AA] transition-colors">Terms of Service</a>
+              <a href="#" className="hover:text-[#A1A1AA] transition-colors flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-500"></span> All systems operational
+              </a>
             </div>
           </div>
         </div>
