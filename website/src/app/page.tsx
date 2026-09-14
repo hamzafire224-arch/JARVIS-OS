@@ -89,7 +89,7 @@ export default function Home() {
       {/* Navbar */}
       <nav className="fixed w-full top-0 z-50 bg-[#05050A]/80 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex gap-8 text-sm font-medium text-gray-300">
+          <div className="flex items-center gap-8 text-sm font-medium text-gray-300">
             <a href="#" className="hover:text-white transition-colors">Features</a>
             <a href="#" className="hover:text-white transition-colors">Compare</a>
             <a href="#" className="hover:text-white transition-colors">Pricing</a>
@@ -100,7 +100,7 @@ export default function Home() {
             <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#00F0FF] to-[#0047FF] shadow-[0_0_15px_rgba(0,240,255,0.5)]"></div>
             <div className="font-bold text-xl tracking-widest text-white">SYNAPSE</div>
           </div>
-          <div className="flex gap-4 items-center">
+          <div className="flex items-center gap-4">
             <button className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Log In</button>
             <button className="px-6 py-2 rounded-full bg-white text-black hover:bg-gray-200 transition-all text-sm font-medium">Get Started Free</button>
           </div>
@@ -117,7 +117,7 @@ export default function Home() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00F0FF] to-[#0047FF]">Multi-Agent OS.</span>
           </h1>
           <p className="hero-text text-xl md:text-2xl text-gray-400 mb-12 font-light max-w-2xl mx-auto">
-            Design, deploy, and scale infinite autonomous swarms. No hallucinations. Absolute cryptographic certainty.
+            Design, deploy, and scale infinite autonomous swarms.
           </p>
           <div className="hero-text">
             <button className="px-8 py-4 bg-white text-black font-semibold rounded-full text-lg hover:shadow-[0_0_30px_rgba(0,240,255,0.6)] transition-all duration-300">
